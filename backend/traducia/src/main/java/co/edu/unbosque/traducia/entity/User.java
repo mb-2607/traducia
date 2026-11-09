@@ -1,5 +1,10 @@
 package co.edu.unbosque.traducia.entity;
 
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,7 +22,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails{
 	
 	/**
 	 * Número de versión para la serialización.
@@ -105,7 +110,8 @@ public class User {
 		this.password = password;
 		this.role = role;
 	}
-
+	
+	@Override
 	public String getUsername() {
 		return username;
 	}
@@ -121,7 +127,8 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-
+	
+	@Override
 	public String getPassword() {
 		return password;
 	}
@@ -145,7 +152,8 @@ public class User {
 	public void setPlanType(PlanType planType) {
 		this.planType = planType;
 	}
-
+	
+	@Override
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -153,11 +161,12 @@ public class User {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-
+	
+	@Override
 	public boolean isAccountNonLocked() {
 		return accountNonLocked;
 	}
-
+	
 	public void setAccountNonLocked(boolean accountNonLocked) {
 		this.accountNonLocked = accountNonLocked;
 	}
@@ -172,6 +181,12 @@ public class User {
 
 	public long getId() {
 		return id;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
