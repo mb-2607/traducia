@@ -1,0 +1,322 @@
+<section class="suscripciones container" aria-labelledby="titulo-planes">
+  <header class="planes-cabecera">
+    <p class="etiqueta-superior">Suscripciones TraducIA</p>
+    <h1 id="titulo-planes">Elige tu plan</h1>
+    <p>Compara los límites y elige cómo quieres traducir.</p>
+
+    <span class="plan-actual">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      Plan activo: <strong>{{ nombrePlanActivo }}</strong>
+    </span>
+  </header>
+
+  <div class="row g-4 justify-content-center">
+    @for (plan of planes; track plan.id) {
+      <div class="col-12 col-md-6 col-lg-4 d-flex">
+        <article
+          class="plan-card"
+          [class.plan-free]="plan.id === 'gratuito'"
+          [class.plan-oro]="plan.id === 'oria'"
+          [class.plan-galaxia]="plan.id === 'infinitia'"
+          [class.plan-seleccionado]="planSeleccionado()?.id === plan.id"
+          [attr.aria-labelledby]="'titulo-' + plan.id"
+        >
+          <span class="card-borde" aria-hidden="true"></span>
+
+          <div class="plan-cabecera">
+            <span class="plan-icono">
+              <i [class]="'fa-solid ' + plan.icono" aria-hidden="true"></i>
+            </span>
+
+            @if (plan.id === planActivo()) {
+              <span class="distintivo">Plan activo</span>
+            } @else if (planSeleccionado()?.id === plan.id) {
+              <span class="distintivo">Seleccionado</span>
+            }
+          </div>
+
+          <div>
+            <h2 [id]="'titulo-' + plan.id">{{ plan.nombre }}</h2>
+            <p class="plan-descripcion">{{ plan.descripcion }}</p>
+          </div>
+
+          <p class="plan-precio">
+            <strong>{{ precioFormateado(plan.precio) }}</strong>
+            <span>COP{{ plan.precio > 0 ? ' / mes' : '' }}</span>
+          </p>
+
+          <hr class="plan-linea" />
+
+          <ul class="plan-beneficios">
+            <li>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              <span>
+                {{ plan.ias }} {{ plan.ias === 1 ? 'IA disponible' : 'IAs disponibles' }}
+              </span>
+            </li>
+
+            <li>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              <span>{{ limitePalabras(plan) }}</span>
+            </li>
+
+            <li>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              <span>{{ limiteArchivos(plan) }}</span>
+            </li>
+          </ul>
+
+          <button
+            #botonPlan
+            type="button"
+            class="boton-plan"
+            [disabled]="plan.id === planActivo()"
+            [attr.aria-expanded]="planSeleccionado()?.id === plan.id"
+            (click)="seleccionarPlan(plan, botonPlan)"
+          >
+            {{ plan.id === planActivo() ? 'Tu plan actual' : 'Elegir ' + plan.nombre }}
+          </button>
+        </article>
+      </div>
+    }
+  </div>
+
+  @if (planSeleccionado(); as elegido) {
+    <section
+      class="checkout"
+      [class.plan-oro]="elegido.id === 'oria'"
+      [class.plan-galaxia]="elegido.id === 'infinitia'"
+      aria-labelledby="titulo-checkout"
+    >
+      <h2 id="titulo-checkout" #destinoFoco tabindex="-1">
+        {{ elegido.id === 'gratuito' ? 'Cambiar a Free Pass' : 'Configura tu membresía' }}
+      </h2>
+
+      <form
+        [formGroup]="pago"
+        (ngSubmit)="confirmarSuscripcion()"
+        autocomplete="off"
+        novalidate
+      >
+        <div class="row g-4 align-items-start">
+          <div class="col-12 col-lg-7">
+            <div class="panel-pago">
+              @if (elegido.id === 'gratuito') {
+                <h3>Activa Free Pass</h3>
+                <p class="texto-secundario mb-0">
+                  Incluye {{ limitePalabras(elegido) }} y
+                  {{ limiteArchivos(elegido) }}.
+                </p>
+              } @else {
+                <fieldset class="campos-pago mt-0">
+                  <legend class="h5">Información de facturación</legend>
+
+                  <label class="campo-pago">
+                    <span>Nombre completo</span>
+                    <input
+                      type="text"
+                      formControlName="titular"
+                      maxlength="60"
+                      placeholder="Ingresa tu nombre completo"
+                      [attr.aria-invalid]="campoInvalido(pago.controls.titular)"
+                      aria-describedby="error-titular"
+                    />
+                  </label>
+
+                  <small id="error-titular" class="error-campo">
+                    @if (campoInvalido(pago.controls.titular)) {
+                      Ingresa un nombre de 3 a 60 caracteres.
+                    }
+                  </small>
+
+                  <label class="campo-pago">
+                    <span>País o región</span>
+                    <select class="form-select" formControlName="pais">
+                      @for (pais of paises; track pais.codigo) {
+                        <option [value]="pais.codigo">{{ pais.nombre }}</option>
+                      }
+                    </select>
+                  </label>
+
+                  <label class="campo-pago">
+                    <span>Dirección de facturación</span>
+                    <input
+                      type="text"
+                      formControlName="direccion"
+                      maxlength="120"
+                      placeholder="Calle, número y apartamento"
+                      [attr.aria-invalid]="campoInvalido(pago.controls.direccion)"
+                      aria-describedby="error-direccion"
+                    />
+                  </label>
+
+                  <small id="error-direccion" class="error-campo">
+                    @if (campoInvalido(pago.controls.direccion)) {
+                      Ingresa una dirección de 5 a 120 caracteres.
+                    }
+                  </small>
+
+                  <label class="campo-pago">
+                    <span>Nombre de la empresa (opcional)</span>
+                    <input
+                      type="text"
+                      formControlName="empresa"
+                      maxlength="80"
+                      placeholder="Nombre de la empresa"
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset class="campos-pago mt-4">
+                  <legend class="h5">
+                    <i class="fa-solid fa-credit-card me-1" aria-hidden="true"></i>
+                    Pago con tarjeta
+                  </legend>
+
+                  <label class="campo-pago">
+                    <span>Número de tarjeta</span>
+                    <input
+                      type="text"
+                      inputmode="numeric"
+                      formControlName="tarjeta"
+                      maxlength="37"
+                      placeholder="Ingresa el número de tarjeta"
+                      [attr.aria-invalid]="campoInvalido(pago.controls.tarjeta)"
+                      aria-describedby="error-tarjeta"
+                    />
+                  </label>
+
+                  <small id="error-tarjeta" class="error-campo">
+                    @if (campoInvalido(pago.controls.tarjeta)) {
+                      El número de tarjeta debe tener entre 13 y 19 dígitos.
+                    }
+                  </small>
+
+                  <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                      <label class="campo-pago">
+                        <span>Fecha de vencimiento</span>
+                        <input
+                          type="text"
+                          formControlName="vencimiento"
+                          maxlength="5"
+                          placeholder="MM/AA"
+                          [attr.aria-invalid]="campoInvalido(pago.controls.vencimiento)"
+                          aria-describedby="error-vencimiento"
+                        />
+                      </label>
+
+                      <small id="error-vencimiento" class="error-campo">
+                        @if (campoInvalido(pago.controls.vencimiento)) {
+                          Ingresa una fecha vigente en formato MM/AA.
+                        }
+                      </small>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                      <label class="campo-pago">
+                        <span>Código de seguridad</span>
+                        <input
+                          type="text"
+                          inputmode="numeric"
+                          formControlName="cvc"
+                          maxlength="4"
+                          placeholder="CVC"
+                          [attr.aria-invalid]="campoInvalido(pago.controls.cvc)"
+                          aria-describedby="error-cvc"
+                        />
+                      </label>
+
+                      <small id="error-cvc" class="error-campo">
+                        @if (campoInvalido(pago.controls.cvc)) {
+                          Ingresa un código de 3 o 4 dígitos.
+                        }
+                      </small>
+                    </div>
+                  </div>
+                </fieldset>
+              }
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="panel-pago resumen-pago">
+              <h3>Resumen de la membresía</h3>
+
+              <dl>
+                <div>
+                  <dt>Plan seleccionado</dt>
+                  <dd>{{ elegido.nombre }}</dd>
+                </div>
+
+                <div>
+                  <dt>Mensualidad</dt>
+                  <dd>{{ precioFormateado(elegido.precio) }} COP</dd>
+                </div>
+
+                <div class="resumen-total">
+                  <dt>Cargo hoy</dt>
+                  <dd>{{ precioFormateado(0) }} COP</dd>
+                </div>
+              </dl>
+
+              @if (elegido.id !== 'gratuito') {
+                <p class="texto-secundario">
+                  <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+                  Modo demostración. No se realizará ningún cargo.
+                </p>
+
+                <label class="confirmar-pago mb-3">
+                  <input
+                    type="checkbox"
+                    formControlName="confirmar"
+                    [attr.aria-invalid]="campoInvalido(pago.controls.confirmar)"
+                    aria-describedby="error-confirmar"
+                  />
+                  <span>Confirmo que quiero activar el plan {{ elegido.nombre }}.</span>
+                </label>
+
+                <small id="error-confirmar" class="error-campo mb-2">
+                  @if (campoInvalido(pago.controls.confirmar)) {
+                    Confirma el plan para continuar.
+                  }
+                </small>
+              }
+
+              @if (mensajeFormulario()) {
+                <p class="error-campo" role="alert">{{ mensajeFormulario() }}</p>
+              }
+
+              <button type="submit" class="boton-confirmar">
+                {{ elegido.id === 'gratuito' ? 'Activar Free Pass' : 'Iniciar membresía' }}
+              </button>
+
+              <button type="button" class="boton-secundario" (click)="cancelar()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (planConfirmado(); as confirmado) {
+    <section class="panel-pago confirmacion" aria-labelledby="titulo-confirmacion">
+      <i class="fa-solid fa-circle-check confirmacion-icono" aria-hidden="true"></i>
+
+      <h2 id="titulo-confirmacion" #destinoFoco tabindex="-1">
+        {{ confirmado.id === 'gratuito' ? 'Free Pass activado' : 'Suscripción realizada' }}
+      </h2>
+
+      <p>
+        <strong>{{ confirmado.nombre }}</strong> es tu plan activo.
+        Ya puedes usar sus beneficios en el traductor.
+      </p>
+
+      <a class="boton-secundario" routerLink="/">
+        Volver al traductor
+      </a>
+    </section>
+  }
+</section>
