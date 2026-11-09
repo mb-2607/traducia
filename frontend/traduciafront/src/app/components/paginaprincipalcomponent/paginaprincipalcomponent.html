@@ -1,0 +1,314 @@
+<div class="traductor" [class.panel-plegado]="!panelAbierto">
+  <aside class="glass lateral" aria-label="Panel de traducciones">
+    <div class="lateral-cabecera">
+      <button
+        type="button"
+        class="boton-icono"
+        [attr.aria-label]="panelAbierto ? 'Plegar panel' : 'Expandir panel'"
+        [attr.aria-expanded]="panelAbierto"
+        aria-controls="traductor-navegacion"
+        (click)="panelAbierto = !panelAbierto"
+      >
+        <i
+          class="fa-solid"
+          [class.fa-angles-left]="panelAbierto"
+          [class.fa-angles-right]="!panelAbierto"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+      @if (panelAbierto) {
+        <span class="lateral-titulo">Traducciones</span>
+
+        <button
+          type="button"
+          class="boton-icono"
+          [class.activo]="vista === 'buscar'"
+          [attr.aria-pressed]="vista === 'buscar'"
+          aria-label="Buscar traducciones"
+          (click)="cambiarVista('buscar')"
+        >
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+
+    <nav
+      id="traductor-navegacion"
+      class="lateral-navegacion"
+      aria-label="Secciones de traducción"
+      [hidden]="!panelAbierto"
+    >
+      <button
+        type="button"
+        class="opcion"
+        [class.activo]="vista === 'nueva'"
+        (click)="nuevaTraduccion()"
+      >
+        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+        Nueva traducción
+      </button>
+
+      <details open>
+        <summary class="opcion">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          Biblioteca de traducciones
+          <i class="fa-solid fa-chevron-down flecha" aria-hidden="true"></i>
+        </summary>
+
+        <div class="subopciones">
+          <button
+            type="button"
+            class="opcion"
+            [class.activo]="vista === 'archivos'"
+            [attr.aria-pressed]="vista === 'archivos'"
+            (click)="cambiarVista('archivos')"
+          >
+            <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+            Archivos
+          </button>
+
+          <button
+            type="button"
+            class="opcion"
+            [class.activo]="vista === 'texto'"
+            [attr.aria-pressed]="vista === 'texto'"
+            (click)="cambiarVista('texto')"
+          >
+            <i class="fa-solid fa-align-left" aria-hidden="true"></i>
+            Texto
+          </button>
+        </div>
+      </details>
+
+      <button
+        type="button"
+        class="opcion"
+        [class.activo]="vista === 'historial'"
+        [attr.aria-pressed]="vista === 'historial'"
+        (click)="cambiarVista('historial')"
+      >
+        <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+        Historial
+      </button>
+
+      @if (traducciones.length === 0) {
+        <p class="lateral-vacio">Aún no hay traducciones.</p>
+      }
+    </nav>
+
+    <div class="lateral-pie">
+      <button
+        type="button"
+        class="opcion boton-tema"
+        [attr.aria-label]="temaOscuro ? 'Activar tema claro' : 'Activar tema oscuro'"
+        [title]="temaOscuro ? 'Activar tema claro' : 'Activar tema oscuro'"
+        (click)="alternarTema()"
+      >
+        <i
+          class="fa-solid"
+          [class.fa-sun]="temaOscuro"
+          [class.fa-moon]="!temaOscuro"
+          aria-hidden="true"
+        ></i>
+
+        @if (panelAbierto) {
+          <span>{{ temaOscuro ? 'Tema claro' : 'Tema oscuro' }}</span>
+        }
+      </button>
+    </div>
+
+  </aside>
+
+  <section class="contenido" aria-label="Área de traducción">
+    @if (vista === 'nueva') {
+      <header class="encabezado">
+        <div>
+          <h1>Traductor</h1>
+          <p>Escribe, dicta o adjunta lo que quieras traducir.</p>
+        </div>
+      </header>
+
+      <form class="glass editor" (ngSubmit)="traducir()">
+        <div class="idiomas">
+          <label class="campo">
+            <span>Idioma de origen</span>
+            <select name="origen" [(ngModel)]="origen" [disabled]="escuchando() || procesando">
+              @for (idioma of idiomas; track idioma.id) {
+                <option [value]="idioma.id">{{ idioma.nombre }}</option>
+              }
+            </select>
+          </label>
+
+          <i class="fa-solid fa-arrow-right idiomas-flecha" aria-hidden="true"></i>
+
+          <label class="campo">
+            <span>Idioma de destino</span>
+            <select name="destino" [(ngModel)]="destino" [disabled]="procesando">
+              @for (idioma of idiomas; track idioma.id) {
+                <option [value]="idioma.id">{{ idioma.nombre }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <label class="campo">
+          <span>Texto original</span>
+          <textarea
+            name="textoOriginal"
+            [ngModel]="texto()"
+            (ngModelChange)="texto.set($event)"
+            [disabled]="archivo !== null || procesando"
+            aria-describedby="contador-palabras"
+            [placeholder]="archivo ? 'Quita el archivo para traducir texto.' : 'Escribe o pega tu texto aquí…'"
+            rows="7"
+          ></textarea>
+        </label>
+
+        <div class="herramientas">
+          <div class="acciones">
+            <input
+              #selectorArchivo
+              type="file"
+              hidden
+              (change)="seleccionarArchivo(selectorArchivo)"
+            />
+
+            <button
+              type="button"
+              class="boton-icono"
+              aria-label="Adjuntar archivo"
+              title="Adjuntar archivo"
+              [disabled]="escuchando() || procesando"
+              (click)="selectorArchivo.click()"
+            >
+              <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+            </button>
+
+            <button
+              type="button"
+              class="boton-icono"
+              [class.grabando]="escuchando()"
+              [attr.aria-pressed]="escuchando()"
+              [attr.aria-label]="escuchando() ? 'Detener dictado' : 'Iniciar dictado'"
+              [title]="escuchando() ? 'Detener dictado' : 'Iniciar dictado'"
+              [disabled]="archivo !== null || procesando"
+              (click)="alternarDictado()"
+            >
+              <i
+                class="fa-solid"
+                [class.fa-microphone]="!escuchando()"
+                [class.fa-stop]="escuchando()"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
+
+          <span id="contador-palabras" class="contador">
+            @if (archivo) {
+              Traducción de archivo
+            } @else if (planActual.palabras === null) {
+              {{ cantidadPalabras() }} palabras · Sin límite
+            } @else {
+              {{ cantidadPalabras() }} / {{ planActual.palabras }} palabras
+            }
+          </span>
+        </div>
+
+        @if (archivo; as adjunto) {
+          <div class="adjunto">
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+            <span>{{ adjunto.name }}</span>
+            <button
+              type="button"
+              class="boton-icono"
+              aria-label="Quitar archivo"
+              [disabled]="procesando"
+              (click)="archivo = null"
+            >
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        }
+
+        <div class="estado" aria-live="polite">
+          @if (errorValidacion; as error) {
+            <p class="error">{{ error }}</p>
+          }
+          @if (errorDictado()) {
+            <p class="error">{{ errorDictado() }}</p>
+          }
+          @if (escuchando()) {
+            <p>Escuchando… Pulsa el micrófono para detener el dictado.</p>
+          }
+          @if (aviso) {
+            <p>{{ aviso }}</p>
+          }
+        </div>
+
+        <footer class="editor-pie">
+          <div class="plan-info">
+            <strong>{{ planActual.nombre }} · {{ planActual.ias }} IA</strong>
+            @if (planActual.archivosPorDia === null) {
+              <span>Archivos diarios ilimitados</span>
+            } @else {
+              <span>{{ archivosUsadosHoy }} / {{ planActual.archivosPorDia }} archivos usados hoy</span>
+            }
+          </div>
+
+          <button
+            type="submit"
+            class="boton-traducir"
+            [disabled]="!puedeTraducir"
+          >
+            <i class="fa-solid fa-language" aria-hidden="true"></i>
+            {{ procesando ? 'Procesando…' : 'Traducir' }}
+          </button>
+        </footer>
+      </form>
+    } @else {
+      <section class="glass biblioteca">
+        <h1>{{ tituloVista }}</h1>
+
+        @if (vista === 'buscar') {
+          <label class="campo">
+            <span>Buscar por título</span>
+            <input
+              type="search"
+              [(ngModel)]="busqueda"
+              placeholder="Escribe el nombre de una traducción"
+            />
+          </label>
+        }
+
+        <ul class="lista">
+          @for (item of traduccionesVisibles; track item.id) {
+            <li>
+              <button
+                type="button"
+                class="opcion"
+                (click)="abrirTraduccion.emit(item.id)"
+              >
+                <i
+                  class="fa-solid"
+                  [class.fa-file-lines]="item.tipo === 'archivo'"
+                  [class.fa-align-left]="item.tipo === 'texto'"
+                  aria-hidden="true"
+                ></i>
+                {{ item.titulo }}
+              </button>
+            </li>
+          } @empty {
+            <li class="mensaje-vacio">
+              {{
+                vista === 'buscar' && busqueda.trim()
+                  ? 'No se encontraron traducciones con ese título.'
+                  : 'Aún no hay traducciones en esta sección.'
+              }}
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </section>
+</div>
