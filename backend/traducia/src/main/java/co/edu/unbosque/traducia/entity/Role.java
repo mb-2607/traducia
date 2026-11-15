@@ -7,6 +7,8 @@ package co.edu.unbosque.traducia.entity;
  * ADMIN: Administrador con permisos completos.
  */
 public enum Role {
-	ADMIN,
-	USER
+    /** Administrador con acceso a la gestión del sistema. */
+    ADMIN,
+    /** Usuario estándar del sistema. */
+    USER
 }
