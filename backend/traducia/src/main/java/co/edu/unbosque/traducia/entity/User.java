@@ -37,7 +37,9 @@ public class User implements UserDetails{
 	 * Identificador único del usuario.
 	 * Se genera automáticamente con estrategia de identidad.
 	 */
-	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
 	/**
 	 * Nombre de usuario que es único en el sistema.
