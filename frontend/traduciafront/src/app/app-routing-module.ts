@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
 import {Userpagecomponent} from './components/userpagecomponent/userpagecomponent';
 import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
 
 /**
  * Configuración de las rutas principales de la aplicación.
@@ -11,11 +12,15 @@ import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nu
  * correspondientes al dashboard.
  */
 const routes: Routes = [
-  //{TODO: Esto es lo de caballo
-    //path: '',
-    //pathMatch: 'full',
-    //component: Landingpagecomponent
-  //},
+  {
+    path: '',
+    pathMatch: 'full',
+    component: Landingpagecomponent
+  },
+  {
+    path: 'landing',
+    component: Landingpagecomponent
+  },
   {
     path: 'planes',
     component: Suscripcioncomponent
@@ -39,7 +44,6 @@ const routes: Routes = [
 
 /**
  * Módulo de enrutamiento principal de la aplicación.
- *
  * Define las rutas disponibles y establece qué componentes deben
  * mostrarse según la URL solicitada. También configura las rutas
  * anidadas del dashboard y exporta RouterModule para permitir
