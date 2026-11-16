@@ -10,7 +10,6 @@ import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
-import { Microfonocomponent } from './components/microfonocomponent/microfonocomponent';
 
 @NgModule({
   declarations: [
@@ -20,13 +19,12 @@ import { Microfonocomponent } from './components/microfonocomponent/microfonocom
     Nuevatraduccioncomponent,
     Idiomaselectorcomponent,
     Archivoselectorcomponent,
-    Microfonocomponent,
+    Navbarcomponent,
+    Suscripcioncomponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    Navbarcomponent,
-    Suscripcioncomponent,
     FormsModule,
     ReactiveFormsModule,
   ],
