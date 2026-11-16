@@ -7,11 +7,14 @@ import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripc
 import { AsideUserComponent } from './components/asideusercomponent/asideusercomponent';
 import { Userpagecomponent } from './components/userpagecomponent/userpagecomponent';
 import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [App, AsideUserComponent, Userpagecomponent, Nuevatraduccioncomponent],
-  imports: [BrowserModule, AppRoutingModule, Navbarcomponent, Suscripcioncomponent],
+  imports: [BrowserModule, AppRoutingModule, Navbarcomponent, Suscripcioncomponent, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
-export class AppModule {}
+export class AppModule {
+
+}

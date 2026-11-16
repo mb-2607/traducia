@@ -6,4 +6,8 @@ import { Component } from '@angular/core';
   styleUrl: './nuevatraduccioncomponent.css',
   templateUrl: './nuevatraduccioncomponent.html',
 })
-export class Nuevatraduccioncomponent {}
+export class Nuevatraduccioncomponent {
+  traducir(){
+    console.log('Traducir');
+  }
+}
