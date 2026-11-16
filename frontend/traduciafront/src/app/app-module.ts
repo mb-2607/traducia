@@ -11,6 +11,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
 
+/**
+ * Módulo principal de la aplicación.
+ *
+ * Se encarga de declarar los componentes que forman parte de la aplicación,
+ * importar los módulos necesarios para su funcionamiento, registrar los
+ * proveedores globales e indicar el componente raíz desde el que se inicia
+ * la aplicación.
+ */
 @NgModule({
   declarations: [
     App,

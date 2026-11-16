@@ -37,7 +37,7 @@ export class AsideUserComponent implements OnInit {
    * Indica si el panel lateral está abierto.
    * Inicialmente, permanece cerrado en pantallas móviles y abierto en las demás.
    */
-  panelAbierto: boolean = !(this.documento.defaultView?.matchMedia?.('(max-width: 44rem)').matches ?? false);
+  panelAbierto= !(this.documento.defaultView?.matchMedia?.('(max-width: 44rem)').matches ?? false);
 
   /** Indica si actualmente se encuentra activo el tema oscuro. */
   temaOscuro = false;

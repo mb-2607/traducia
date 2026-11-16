@@ -94,7 +94,7 @@ export class Nuevatraduccioncomponent implements OnInit {
   listaIdioma: Idioma[] = [];
 
   /** Indica si la lista de idiomas todavía se encuentra en proceso de carga. */
-  cargandoListaIdioma: boolean = true;
+  cargandoListaIdioma = true;
 
   /**
    * Inicializa la carga de los idiomas disponibles mediante IdiomaService.
@@ -116,7 +116,7 @@ export class Nuevatraduccioncomponent implements OnInit {
    * con el servicio encargado de realizar las traducciones.
    */
   traducir() {
-    console.log('Traducir');
+    this.agregarTexto("Traduciendo")
     // TODO: Implementar la integración con el servicio de traducción.
   }
 
