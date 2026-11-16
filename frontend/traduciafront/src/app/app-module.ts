@@ -7,14 +7,30 @@ import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripc
 import { AsideUserComponent } from './components/asideusercomponent/asideusercomponent';
 import { Userpagecomponent } from './components/userpagecomponent/userpagecomponent';
 import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
+import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
+import { Microfonocomponent } from './components/microfonocomponent/microfonocomponent';
 
 @NgModule({
-  declarations: [App, AsideUserComponent, Userpagecomponent, Nuevatraduccioncomponent],
-  imports: [BrowserModule, AppRoutingModule, Navbarcomponent, Suscripcioncomponent, FormsModule, ReactiveFormsModule],
+  declarations: [
+    App,
+    AsideUserComponent,
+    Userpagecomponent,
+    Nuevatraduccioncomponent,
+    Idiomaselectorcomponent,
+    Archivoselectorcomponent,
+    Microfonocomponent,
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    Navbarcomponent,
+    Suscripcioncomponent,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
-export class AppModule {
-
-}
+export class AppModule {}

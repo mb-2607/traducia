@@ -1,16 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { Paginaprincipalcomponent } from './components/paginaprincipalcomponent/paginaprincipalcomponent';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
 import {Userpagecomponent} from './components/userpagecomponent/userpagecomponent';
 import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    component: Paginaprincipalcomponent
-  },
+  //{TODO: Esto es lo de caballo
+    //path: '',
+    //pathMatch: 'full',
+    //component: Landingpagecomponent
+  //},
   {
     path: 'planes',
     component: Suscripcioncomponent

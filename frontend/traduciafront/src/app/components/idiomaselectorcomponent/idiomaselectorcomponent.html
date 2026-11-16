@@ -1,0 +1,18 @@
+<label class="campo">
+  <span>{{ titulo }}</span>
+
+  @if(control){
+    <select
+      [formControl]="control"
+      [attr.aria-invalid]="control.invalid && control.touched"
+    >
+      <option value="" disabled>
+        {{ cargando ? 'Cargando idiomas…' : 'Elige un idioma' }}
+      </option>
+
+      @for (idioma of listaIdioma; track idioma.id) {
+        <option [value]="idioma.id">{{ idioma.nombre }}</option>
+      }
+    </select>
+  }
+</label>
