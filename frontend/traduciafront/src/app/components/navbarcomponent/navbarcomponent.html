@@ -1,0 +1,31 @@
+<nav class="navbar-glass" aria-label="Navegación principal de TraducIA">
+  <img
+    class="navbar-logo"
+    [src]="logoSrc"
+    alt="TraducIA"
+    decoding="async"
+  />
+
+  <div class="navbar-actions">
+    <a
+      class="navbar-action"
+      [routerLink]="planRoute"
+      routerLinkActive="is-active"
+      ariaCurrentWhenActive="page"
+      aria-label="Cambiar plan"
+    >
+      <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
+      <span class="navbar-plan-label"><span class="navbar-plan-prefix">Cambiar </span>plan</span>
+    </a>
+
+    <a
+      class="navbar-action"
+      [routerLink]="profileRoute"
+      routerLinkActive="is-active"
+      ariaCurrentWhenActive="page"
+    >
+      <i class="fa-solid fa-user" aria-hidden="true"></i>
+      <span>Perfil</span>
+    </a>
+  </div>
+</nav>

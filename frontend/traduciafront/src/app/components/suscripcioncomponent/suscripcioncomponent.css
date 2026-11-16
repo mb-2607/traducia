@@ -1,0 +1,448 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  color: var(--td-texto, #f5f5f5);
+}
+
+.suscripciones {
+  padding-block: clamp(2rem, 6vw, 4rem);
+}
+
+.planes-cabecera {
+  max-inline-size: 42rem;
+  margin: 0 auto 2.25rem;
+  text-align: center;
+}
+
+.planes-cabecera h1 {
+  margin: 0.3rem 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.etiqueta-superior,
+.texto-secundario,
+.planes-cabecera > p {
+  color: var(--td-secundario, #b3b3b3);
+}
+
+.etiqueta-superior {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.plan-actual,
+.distintivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.plan-actual {
+  border-color: var(--td-borde, #515151);
+}
+
+.plan-card {
+  --acento: #d9e2ee;
+  --boton-inicio: #edf3fb;
+  --boton-fin: #aebdd3;
+  --boton-texto: #111823;
+  --fondo-card: radial-gradient(ellipse at 5% 95%, #34495d, transparent 70%), #121a23;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  inline-size: 100%;
+  padding: clamp(1.15rem, 2.5vw, 1.6rem);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 1.35rem;
+  background: var(--fondo-card);
+  color: #f8f8fc;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
+  0 16px 36px rgb(0 0 0 / 18%);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.plan-oro {
+  --acento: #ffdc8a;
+  --boton-inicio: #ffe4a0;
+  --boton-fin: #d9a340;
+  --boton-texto: #251602;
+  --fondo-card: radial-gradient(ellipse at 100% 100%, #674418, transparent 73%),
+  radial-gradient(ellipse at 0 0, #3d2b13, transparent 55%),
+  #19130e;
+}
+
+.plan-galaxia {
+  --acento: #e1c9ff;
+  --boton-inicio: #d5b8ff;
+  --boton-fin: #9bb9ff;
+  --boton-texto: #18102c;
+  --fondo-card: radial-gradient(circle at 9% 19%, #ffffffab 0 1px, transparent 1.6px),
+  radial-gradient(circle at 71% 9%, #c7cfff 0 1px, transparent 1.8px),
+  radial-gradient(circle at 90% 29%, #fff 0 1px, transparent 1.8px),
+  radial-gradient(circle at 81% 63%, #f1ccff 0 1px, transparent 1.8px),
+  radial-gradient(circle at 30% 94%, #ffffffab 0 1px, transparent 1.8px),
+  radial-gradient(ellipse at 93% 100%, #53266b, transparent 66%),
+  radial-gradient(ellipse at 0 85%, #203e70, transparent 61%),
+  #151023;
+}
+
+.card-borde {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.card-borde::before {
+  position: absolute;
+  inset: -70%;
+  background: conic-gradient(transparent 65%, var(--acento) 83%, transparent 96%);
+  content: '';
+  animation: girar-borde 8s linear infinite;
+}
+
+@keyframes girar-borde {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.plan-seleccionado {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.plan-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plan-icono {
+  display: grid;
+  place-items: center;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 10%);
+  color: var(--acento);
+  font-size: 1.45rem;
+}
+
+.distintivo {
+  color: var(--acento);
+}
+
+.plan-card h2 {
+  margin: 0;
+  font-size: 1.65rem;
+}
+
+.plan-descripcion {
+  margin: 0.45rem 0 0;
+  color: #e0dce9;
+}
+
+.plan-precio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.plan-precio strong {
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  line-height: 1.1;
+}
+
+.plan-precio span {
+  color: #e0dce9;
+  font-size: 0.8rem;
+}
+
+.plan-linea {
+  margin: 0;
+  border: 0;
+  border-block-start: 1px solid rgb(255 255 255 / 21%);
+  opacity: 1;
+}
+
+.plan-beneficios {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-beneficios li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+}
+
+.plan-beneficios i {
+  margin-block-start: 0.25em;
+  color: var(--acento);
+}
+
+.boton-plan,
+.boton-confirmar,
+.boton-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.75rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton-plan {
+  inline-size: 100%;
+  margin-block-start: auto;
+  background: linear-gradient(145deg, var(--boton-inicio), var(--boton-fin));
+  color: var(--boton-texto);
+}
+
+.boton-plan:disabled {
+  border-color: rgb(255 255 255 / 23%);
+  background: rgb(255 255 255 / 8%);
+  color: #f1edf6;
+  cursor: default;
+}
+
+.checkout,
+.confirmacion {
+  margin-block-start: 2.5rem;
+}
+
+.checkout > h2 {
+  margin-block-end: 1rem;
+}
+
+.panel-pago {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--td-borde, #515151);
+  border-radius: 1.2rem;
+  background: var(--td-vidrio, rgb(255 255 255 / 6%));
+  box-shadow: inset 0 1px 0 var(--td-reflejo, rgb(255 255 255 / 14%));
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.panel-pago h3 {
+  font-size: 1.2rem;
+}
+
+.campos-pago {
+  margin-block-start: 1rem;
+}
+
+.campo-pago {
+  display: grid;
+  gap: 0.3rem;
+  margin-block-start: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.campo-pago input {
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--td-borde, #515151);
+  border-radius: 0.65rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+}
+
+.campo-pago input::placeholder {
+  color: var(--td-secundario, #b3b3b3);
+}
+
+.campo-pago input[aria-invalid='true'] {
+  border-color: var(--td-error, #ffb5b5);
+}
+
+.confirmar-pago {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-block-start: 1rem;
+}
+
+.error-campo {
+  display: block;
+  color: var(--td-error, #ffb5b5);
+}
+
+.error-campo:empty {
+  display: none;
+}
+
+.resumen-pago dl {
+  display: grid;
+  gap: 0.65rem;
+  margin-block: 1rem;
+}
+
+.resumen-pago dl div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.3rem 0.75rem;
+}
+
+.resumen-pago dd {
+  margin: 0;
+}
+
+.resumen-total {
+  padding-block-start: 0.8rem;
+  border-block-start: 1px solid var(--td-borde, #515151);
+  font-weight: 700;
+}
+
+.boton-confirmar {
+  inline-size: 100%;
+  background: var(--td-accion, #f5f5f5);
+  color: var(--td-accion-texto, #111);
+}
+
+.boton-secundario {
+  border-color: var(--td-borde, #515151);
+  background: transparent;
+  color: inherit;
+}
+
+.resumen-pago .boton-secundario {
+  inline-size: 100%;
+  margin-block-start: 0.6rem;
+}
+
+.confirmacion {
+  max-inline-size: 38rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.confirmacion-icono {
+  margin-block-end: 0.5rem;
+  font-size: 1.75rem;
+}
+
+:is(button, a, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--td-foco, #fff);
+  outline-offset: 3px;
+}
+
+.plan-card :focus-visible {
+  outline-color: var(--acento);
+}
+
+#titulo-checkout,
+#titulo-confirmacion {
+  scroll-margin-block-start: 1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plan-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .boton-secundario:hover {
+    background: var(--td-hover, rgb(255 255 255 / 10%));
+    color: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-borde::before {
+    animation: none;
+  }
+
+  .plan-card,
+  .plan-card:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+.boton-plan,
+.boton-confirmar {
+  transition: background-color 180ms ease,
+  border-color 180ms ease,
+  color 180ms ease,
+  box-shadow 180ms ease;
+}
+
+:is(.boton-plan, .boton-confirmar):focus-visible:not(:disabled) {
+  background: #000;
+  border-color: var(--acento, #d9e2ee);
+  color: var(--acento, #d9e2ee);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.boton-plan, .boton-confirmar):hover:not(:disabled) {
+    background: #000;
+    border-color: var(--acento, #d9e2ee);
+    color: var(--acento, #d9e2ee);
+    box-shadow: 0 0 12px color-mix(
+      in srgb,
+      var(--acento, #d9e2ee) 28%,
+      transparent
+    );
+  }
+}
+
+.boton-confirmar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton-plan,
+  .boton-confirmar {
+    transition: none;
+  }
+}
+
+.campo-pago select.form-select {
+  min-block-size: 2.75rem;
+  border-color: var(--td-borde, #515151);
+  border-radius: 0.65rem;
+  background-color: var(--td-fondo, #111);
+  color: var(--td-texto, #f5f5f5);
+  color-scheme: inherit;
+}

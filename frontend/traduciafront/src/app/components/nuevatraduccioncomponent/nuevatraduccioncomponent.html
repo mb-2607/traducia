@@ -1,0 +1,71 @@
+<header class="encabezado">
+  <div>
+    <h1>Traductor</h1>
+    <p>Escribe, dicta o adjunta lo que quieras traducir.</p>
+  </div>
+</header>
+
+<form class="glass editor" [formGroup]="form" (ngSubmit)="traducir()">
+  <div class="idiomas">
+    <app-idiomaselectorcomponent
+      titulo="Idioma de origen"
+      [control]="form.controls.origen"
+      [listaIdioma]="listaIdioma"
+      [cargando]="cargandoListaIdioma" ></app-idiomaselectorcomponent>
+
+    <i class="fa-solid fa-arrow-right idiomas-flecha" aria-hidden="true"></i>
+
+    <app-idiomaselectorcomponent
+      titulo="Idioma de destino"
+      [control]="form.controls.destino"
+      [listaIdioma]="listaIdioma"
+      [cargando]="cargandoListaIdioma" ></app-idiomaselectorcomponent>
+
+  </div>
+
+  <label class="campo">
+    <span>Texto original</span>
+    <textarea
+      formControlName="texto"
+      rows="7"
+      aria-describedby="contador"
+      placeholder="Escribe o pega tu texto aquí…"></textarea>
+  </label>
+
+  <div class="herramientas">
+    <div class="acciones">
+      <app-archivoselectorcomponent
+        [deshabilitado]="ocupado || escuchando"
+        (archivoSeleccionado)="alSeleccionarArchivo($event)" />
+    </div>
+
+    <span id="contador" class="contador">
+      {{ form.controls.texto.value.length }} caracteres
+    </span>
+  </div>
+
+  <div class="estado" aria-live="polite">
+    @if (form.hasError('mismosIdiomas')) {
+      <p class="error">Elige idiomas de origen y destino diferentes.</p>
+    }
+    @if (error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+    @if (escuchando) {
+      <p>Escuchando… Pulsa el micrófono para detener el dictado.</p>
+    }
+    @if (estado === 'extrayendo') {
+      <p>Extrayendo el texto del archivo…</p>
+    }
+  </div>
+
+  <footer class="editor-pie">
+    <button
+      type="submit"
+      class="boton-traducir"
+      [disabled]="form.invalid || escuchando">
+      <i class="fa-solid fa-language" aria-hidden="true"></i>
+      {{ estado === 'traduciendo' ? 'Traduciendo…' : 'Traducir' }}
+    </button>
+  </footer>
+</form>

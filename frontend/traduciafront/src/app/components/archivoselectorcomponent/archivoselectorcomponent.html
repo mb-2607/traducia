@@ -1,0 +1,18 @@
+<input
+  #selector
+  type="file"
+  hidden
+  [accept]="tiposPermitidos"
+  (change)="seleccionar(selector)"
+/>
+
+<button
+  type="button"
+  class="boton-icono"
+  aria-label="Adjuntar archivo"
+  title="Adjuntar archivo"
+  [disabled]="deshabilitado"
+  (click)="selector.click()"
+>
+  <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+</button>

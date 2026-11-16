@@ -1,0 +1,119 @@
+<aside class="glass lateral" aria-label="Panel de traducciones">
+  <div class="lateral-cabecera">
+    <button
+      type="button"
+      class="boton-icono"
+      [attr.aria-label]="panelAbierto ? 'Plegar panel' : 'Expandir panel'"
+      [attr.aria-expanded]="panelAbierto"
+      aria-controls="traductor-navegacion"
+      (click)="panelAbierto = !panelAbierto"
+    >
+      <i
+        class="fa-solid"
+        [class.fa-angles-left]="panelAbierto"
+        [class.fa-angles-right]="!panelAbierto"
+        aria-hidden="true"
+      ></i>
+    </button>
+
+    @if (panelAbierto) {
+      <span class="lateral-titulo">Traducciones</span>
+
+      <a
+        class="boton-icono"
+        routerLink="/traductor/buscar"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+        aria-label="Buscar traducciones"
+      >
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      </a>
+    }
+  </div>
+
+  <nav
+    id="traductor-navegacion"
+    class="lateral-navegacion"
+    aria-label="Secciones de traducción"
+    [hidden]="!panelAbierto"
+  >
+    <a
+      class="opcion"
+      routerLink="/traductor/nueva"
+      routerLinkActive="activo"
+      ariaCurrentWhenActive="page"
+    >
+      <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+      Nueva traducción
+    </a>
+
+    <details open>
+      <summary class="opcion">
+        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+        Biblioteca de traducciones
+        <i class="fa-solid fa-chevron-down flecha" aria-hidden="true"></i>
+      </summary>
+
+      <div class="subopciones">
+        <a
+          class="opcion"
+          routerLink="/traductor/biblioteca/archivos"
+          routerLinkActive="activo"
+          ariaCurrentWhenActive="page"
+        >
+          <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+          Archivos
+        </a>
+
+        <a
+          class="opcion"
+          routerLink="/traductor/biblioteca/texto"
+          routerLinkActive="activo"
+          ariaCurrentWhenActive="page"
+        >
+          <i class="fa-solid fa-align-left" aria-hidden="true"></i>
+          Texto
+        </a>
+      </div>
+    </details>
+
+    <a
+      class="opcion"
+      routerLink="/traductor/historial"
+      routerLinkActive="activo"
+      ariaCurrentWhenActive="page"
+    >
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+      Historial
+    </a>
+
+
+    <!--
+    @if (traducciones.length === 0) {
+      <p class="lateral-vacio">Aún no hay traducciones.</p>
+    }
+    -->
+  </nav>
+
+  <div class="lateral-pie">
+    <button
+      type="button"
+      class="opcion boton-tema"
+      [attr.aria-label]="temaOscuro ? 'Activar tema claro' : 'Activar tema oscuro'"
+      [title]="temaOscuro ? 'Activar tema claro' : 'Activar tema oscuro'"
+      (click)="alternarTema()"
+    >
+      <i
+        class="fa-solid"
+        [class.fa-sun]="temaOscuro"
+        [class.fa-moon]="!temaOscuro"
+        aria-hidden="true"
+      ></i>
+
+      @if (panelAbierto) {
+        <span>{{ temaOscuro ? 'Tema claro' : 'Tema oscuro' }}</span>
+      }
+    </button>
+  </div>
+
+</aside>
