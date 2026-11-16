@@ -42,6 +42,8 @@ body {
   color: var(--td-texto);
 }
 
+
+
 .app-shell {
   --lateral-ancho: 0rem;
   --lateral-abierto: 17rem;
@@ -55,11 +57,12 @@ body {
   color: var(--td-texto);
 }
 
-.app-shell:has(.traductor) {
+
+.app-shell:has(app-asideusercomponent) {
   --lateral-ancho: var(--lateral-abierto);
 }
 
-.app-shell:has(.traductor.panel-plegado) {
+.app-shell:has(app-asideusercomponent.plegado) {
   --lateral-ancho: var(--lateral-plegado);
 }
 
@@ -77,14 +80,99 @@ body {
 }
 
 @media (max-width: 44rem) {
-  .app-shell:has(.traductor) {
+  .app-shell:has(app-asideusercomponent) {
     --lateral-ancho: var(--lateral-plegado);
   }
 }
 
+
+
+.glass {
+  border: 1px solid var(--td-borde);
+  background: var(--td-vidrio);
+  box-shadow: inset 0 1px 0 var(--td-reflejo),
+  0 8px 28px var(--td-sombra);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.boton-icono,
+.opcion {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-block-size: 2.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease,
+  box-shadow 160ms ease,
+  transform 180ms ease;
+}
+
+.boton-icono {
+  flex: 0 0 2.625rem;
+  inline-size: 2.625rem;
+  border-color: var(--td-borde);
+  border-radius: 50%;
+}
+
+.opcion {
+  justify-content: flex-start;
+  inline-size: 100%;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.7rem;
+  text-align: start;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.opcion i {
+  flex: 0 0 1rem;
+  text-align: center;
+}
+
+.activo {
+  border-color: var(--td-borde);
+  background-color: var(--td-activo);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.boton-icono, .opcion):hover:not(:disabled) {
+    background-color: var(--td-hover);
+    box-shadow: inset 0 1px 0 var(--td-reflejo);
+    transform: translateY(-1px);
+  }
+}
+
+:is(.boton-icono, .opcion):active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+:is(button, a, summary, select, textarea, input):focus-visible {
+  outline: 2px solid var(--td-foco);
+  outline-offset: 2px;
+}
+
+:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-cabecera,
-  .app-main {
+  .app-main,
+  .boton-icono,
+  .opcion {
     transition: none;
+  }
+
+  :is(.boton-icono, .opcion):is(:hover, :active):not(:disabled) {
+    transform: none;
   }
 }

@@ -4,9 +4,10 @@ import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
+import {AsideUserComponent} from './components/asideusercomponent/asideusercomponent';
 
 @NgModule({
-  declarations: [App],
+  declarations: [App, AsideUserComponent],
   imports: [BrowserModule, AppRoutingModule, Navbarcomponent, Suscripcioncomponent],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

@@ -1,0 +1,102 @@
+.lateral {
+  position: fixed;
+  z-index: 30;
+  inset-block: 0;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--lateral-ancho);
+  overflow: hidden;
+  padding: 0.5rem;
+  padding-block-end: max(0.5rem, env(safe-area-inset-bottom));
+  border: 0;
+  border-inline-end: 1px solid var(--td-borde);
+  border-radius: 0;
+  box-shadow: none;
+  transition: inline-size 220ms ease;
+}
+
+.lateral-cabecera {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+}
+
+.lateral-titulo {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.lateral-navegacion {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: 0.3rem;
+  min-block-size: 0;
+  margin-block-start: 0.75rem;
+  padding: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.lateral-navegacion[hidden] {
+  display: none;
+}
+
+.lateral-pie {
+  flex-shrink: 0;
+  margin-block-start: auto;
+  padding-block-start: 0.5rem;
+  border-block-start: 1px solid var(--td-borde);
+}
+
+.subopciones {
+  margin-inline-start: 1rem;
+  padding-inline-start: 0.35rem;
+  border-inline-start: 1px solid var(--td-borde);
+}
+
+summary.opcion {
+  list-style: none;
+}
+
+summary.opcion::-webkit-details-marker {
+  display: none;
+}
+
+.flecha {
+  margin-inline-start: auto;
+  font-size: 0.7rem;
+}
+
+details[open] .flecha {
+  transform: rotate(180deg);
+}
+
+/* Estados según el host (la clase "plegado" la pone el .ts) */
+
+:host(.plegado) .boton-tema {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+@media (max-width: 44rem) {
+  :host(:not(.plegado)) .lateral {
+    inline-size: min(var(--lateral-abierto), calc(100vw - 2rem));
+    background: var(--td-fondo);
+    box-shadow: 12px 0 32px var(--td-sombra);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lateral {
+    transition: none;
+  }
+}
