@@ -10,8 +10,8 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PLANES } from '../../models/plan';
-import type { Plan, PlanId } from '../../models/plan';
+import { PLANES } from '../../models/planmodel';
+import type { Planmodel, PlanId } from '../../models/planmodel';
 import { SuscripcionService } from '../../services/suscripcionservice';
 type Vista = 'nueva' | 'archivos' | 'texto' | 'historial' | 'buscar';
 const IDIOMAS = [
@@ -107,7 +107,7 @@ export class Paginaprincipalcomponent implements OnDestroy {
   busqueda = '';
   aviso = '';
 
-  get planActual(): Plan {
+  get planActual(): Planmodel {
     return PLANES[this.plan ?? this.suscripcion.planActivo()];
   }
 

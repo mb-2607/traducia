@@ -10,8 +10,8 @@ import {
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { AbstractControl, ValidatorFn } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { PLANES } from '../../models/plan';
-import type { Plan } from '../../models/plan';
+import { PLANES } from '../../models/planmodel';
+import type { Planmodel } from '../../models/planmodel';
 import { SuscripcionService } from '../../services/suscripcionservice';
 const FORMATO_PESOS = new Intl.NumberFormat('es-CO', {
   style: 'currency',
@@ -69,8 +69,8 @@ export class Suscripcioncomponent {
   readonly planes = Object.values(PLANES);
   readonly paises = PAISES;
   readonly planActivo = this.suscripcion.planActivo;
-  readonly planSeleccionado = signal<Plan | null>(null);
-  readonly planConfirmado = signal<Plan | null>(null);
+  readonly planSeleccionado = signal<Planmodel | null>(null);
+  readonly planConfirmado = signal<Planmodel | null>(null);
   readonly mensajeFormulario = signal('');
   readonly vencimientoEjemplo = `12/${String(new Date().getFullYear() + 1).slice(-2)}`;
 
@@ -109,7 +109,7 @@ export class Suscripcioncomponent {
     return FORMATO_PESOS.format(precio);
   }
 
-  limitePalabras(plan: Plan): string {
+  limitePalabras(plan: Planmodel): string {
     if (plan.palabras === null) {
       return 'Palabras ilimitadas por traducción';
     }
@@ -117,7 +117,7 @@ export class Suscripcioncomponent {
     return `${FORMATO_NUMERO.format(plan.palabras)} palabras por traducción`;
   }
 
-  limiteArchivos(plan: Plan): string {
+  limiteArchivos(plan: Planmodel): string {
     if (plan.archivosPorDia === null) {
       return 'Traducciones de archivos ilimitadas al día';
     }
@@ -129,7 +129,7 @@ export class Suscripcioncomponent {
     return control.touched && control.invalid;
   }
 
-  seleccionarPlan(plan: Plan, boton: HTMLButtonElement): void {
+  seleccionarPlan(plan: Planmodel, boton: HTMLButtonElement): void {
     if (plan.id === this.planActivo()) {
       return;
     }

@@ -1,6 +1,6 @@
 export type PlanId = 'gratuito' | 'oria' | 'infinitia';
 
-export interface Plan {
+export interface Planmodel {
   readonly id: PlanId;
   readonly nombre: string;
   readonly descripcion: string;
@@ -11,7 +11,7 @@ export interface Plan {
   readonly icono: string;
 }
 
-export const PLANES: Readonly<Record<PlanId, Plan>> = {
+export const PLANES: Readonly<Record<PlanId, Planmodel>> = {
   gratuito: {
     id: 'gratuito',
     nombre: 'Free Pass',

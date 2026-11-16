@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
-import { PLANES } from '../models/plan';
-import type { PlanId } from '../models/plan';
+import { PLANES } from '../models/planmodel';
+import type { PlanId } from '../models/planmodel';
 const CLAVE_PLAN_DEMO = 'traducia.plan-demo';
 
 @Injectable({ providedIn: 'root' })

@@ -6,7 +6,7 @@
 
     <span class="plan-actual">
       <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-      Plan activo: <strong>{{ nombrePlanActivo }}</strong>
+      Planmodel activo: <strong>{{ nombrePlanActivo }}</strong>
     </span>
   </header>
 
@@ -29,7 +29,7 @@
             </span>
 
             @if (plan.id === planActivo()) {
-              <span class="distintivo">Plan activo</span>
+              <span class="distintivo">Planmodel activo</span>
             } @else if (planSeleccionado()?.id === plan.id) {
               <span class="distintivo">Seleccionado</span>
             }
@@ -245,7 +245,7 @@
 
               <dl>
                 <div>
-                  <dt>Plan seleccionado</dt>
+                  <dt>Planmodel seleccionado</dt>
                   <dd>{{ elegido.nombre }}</dd>
                 </div>
 
