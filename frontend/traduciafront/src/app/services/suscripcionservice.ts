@@ -22,7 +22,6 @@ const CLAVE_PLAN_DEMO = 'traducia.plan-demo';
  */
 @Injectable({ providedIn: 'root' })
 export class SuscripcionService {
-
   /** Acceso al `document`, usado para llegar a `localStorage` de forma segura. */
   private readonly documento = inject(DOCUMENT);
 
@@ -46,7 +45,9 @@ export class SuscripcionService {
 
     try {
       this.documento.defaultView?.localStorage.setItem(CLAVE_PLAN_DEMO, plan);
-    } catch {}
+    } catch {
+      // Bloque vacío a propósito: el plan ya se actualizó en memoria.
+    }
   }
 
   /**
@@ -65,7 +66,7 @@ export class SuscripcionService {
         return planGuardado as PlanId;
       }
     } catch {
-      return "oria";
+      return 'oria';
     }
 
     return 'gratuito';

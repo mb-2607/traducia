@@ -1,8 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
-import {Userpagecomponent} from './components/userpagecomponent/userpagecomponent';
-import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Userpagecomponent } from './components/userpagecomponent/userpagecomponent';
+import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Historialtraduccionescomponent } from './components/historialtraduccionescomponent/historialtraduccionescomponent';
+import { Bibliotecatraduccionescomponent } from './components/bibliotecatraduccionescomponent/bibliotecatraduccionescomponent';
+import { Loggincomponent } from './components/loggincomponent/loggincomponent';
 
 /**
  * Configuración de las rutas principales de la aplicación.
@@ -11,14 +14,18 @@ import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nu
  * correspondientes al dashboard.
  */
 const routes: Routes = [
-  //{TODO: Esto es lo de caballo
-    //path: '',
-    //pathMatch: 'full',
-    //component: Landingpagecomponent
-  //},
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'login',
+    component: Loggincomponent,
+  },
   {
     path: 'planes',
-    component: Suscripcioncomponent
+    component: Suscripcioncomponent,
   },
   {
     path: 'dashboard',
@@ -27,13 +34,32 @@ const routes: Routes = [
       {
         path: '',
         redirectTo: 'new',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'new',
-        component: Nuevatraduccioncomponent
-      }
-    ]
+        component: Nuevatraduccioncomponent,
+      },
+      {
+        path: 'historial',
+        component: Historialtraduccionescomponent,
+      },
+      {
+        path: 'biblioteca/archivos',
+        component: Bibliotecatraduccionescomponent,
+        data: { tipo: 'archivo' },
+      },
+      {
+        path: 'biblioteca/texto',
+        component: Bibliotecatraduccionescomponent,
+        data: { tipo: 'texto' },
+      },
+      {
+        path: 'biblioteca',
+        pathMatch: 'full',
+        component: Bibliotecatraduccionescomponent,
+      },
+    ],
   },
 ];
 
@@ -49,4 +75,6 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
+
+// skipcq: JS-0327
 export class AppRoutingModule {}

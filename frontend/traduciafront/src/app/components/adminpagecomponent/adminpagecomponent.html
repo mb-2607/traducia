@@ -1,0 +1,36 @@
+<section class="admin-inicio container" aria-labelledby="admin-titulo">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <header class="admin-cabecera">
+        <h1 id="admin-titulo">Hola, administrador</h1>
+        <p class="admin-total">
+          Usuarios:
+          @if (totalUsuarios() !== null) {
+            <strong>{{ totalUsuarios() }}</strong>
+          } @else {
+            <span aria-hidden="true">—</span>
+            <span class="visually-hidden">Total no disponible</span>
+          }
+        </p>
+      </header>
+
+      <nav aria-label="Accesos de administración">
+        <div class="row g-3 justify-content-center">
+          <div class="col-6 d-flex">
+            <a class="admin-acceso" routerLink="/admin/usuarios">
+              <i class="fa-solid fa-users admin-icono" aria-hidden="true"></i>
+              <span>Lista de usuarios</span>
+            </a>
+          </div>
+
+          <div class="col-6 d-flex">
+            <a class="admin-acceso" routerLink="/admin/auditoria">
+              <i class="fa-solid fa-clipboard-list admin-icono" aria-hidden="true"></i>
+              <span>Auditoría</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+</section>

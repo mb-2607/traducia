@@ -10,6 +10,10 @@ import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
+import { Historialtraduccionescomponent } from './components/historialtraduccionescomponent/historialtraduccionescomponent';
+import { Bibliotecatraduccionescomponent } from './components/bibliotecatraduccionescomponent/bibliotecatraduccionescomponent';
+import { Adminpagecomponent } from './components/adminpagecomponent/adminpagecomponent';
+import { Loggincomponent } from './components/loggincomponent/loggincomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -28,14 +32,13 @@ import { Archivoselectorcomponent } from './components/archivoselectorcomponent/
     Idiomaselectorcomponent,
     Archivoselectorcomponent,
     Navbarcomponent,
-    Suscripcioncomponent
+    Suscripcioncomponent,
+    Historialtraduccionescomponent,
+    Bibliotecatraduccionescomponent,
+    Adminpagecomponent,
+    Loggincomponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })

@@ -1,0 +1,231 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  background: var(--td-fondo, #000);
+  color: var(--td-texto, #f5f5f5);
+}
+
+.historial {
+  --historial-borde: var(--td-borde, #292929);
+  --historial-secundario: var(--td-secundario, #b3b3b3);
+  --historial-hover: var(--td-hover, rgb(255 255 255 / 7%));
+
+  box-sizing: border-box;
+  max-inline-size: 52rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 3rem) clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.historial-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.historial-cabecera h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.15rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.historial-cabecera p,
+.historial-aviso,
+.historial-contador,
+.historial-vacio p {
+  color: var(--historial-secundario);
+  font-size: 0.875rem;
+}
+
+.historial-cabecera p {
+  margin: 0.45rem 0 0;
+}
+
+.historial-nuevo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-block-size: 2.75rem;
+  padding-inline: 0.9rem;
+  border: 1px solid var(--historial-borde);
+  border-radius: 0.75rem;
+  background: var(--td-accion, #f5f5f5);
+  color: var(--td-accion-texto, #121212);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.historial-aviso {
+  margin: 1rem 0 0;
+}
+
+.historial-herramientas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7rem, auto);
+  gap: 0.75rem;
+  margin-block-start: 1.5rem;
+}
+
+.campo-busqueda,
+.campo-filtro {
+  display: grid;
+  gap: 0.35rem;
+  min-inline-size: 0;
+}
+
+.historial-herramientas label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.campo-icono {
+  position: relative;
+}
+
+.campo-icono i {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.8rem;
+  color: var(--historial-secundario);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.historial-herramientas :is(input, select) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--historial-borde);
+  border-radius: 0.75rem;
+  background: var(--td-fondo, #000);
+  color: inherit;
+  font: inherit;
+}
+
+.campo-icono input {
+  padding-inline-start: 2.25rem;
+}
+
+.campo-icono input::placeholder {
+  color: var(--historial-secundario);
+}
+
+.historial-contador {
+  margin: 1rem 0 0.4rem;
+}
+
+.historial-lista {
+  margin: 0;
+  padding: 0;
+  border-block-start: 1px solid var(--historial-borde);
+  list-style: none;
+}
+
+.traduccion {
+  border-block-end: 1px solid var(--historial-borde);
+}
+
+.traduccion-fila {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) auto 0.8rem;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: 4.25rem;
+  padding: 0.65rem 0.75rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.traduccion-fila::-webkit-details-marker {
+  display: none;
+}
+
+.traduccion-fila:hover,
+.traduccion[open] .traduccion-fila {
+  background: var(--historial-hover);
+}
+
+.traduccion-info {
+  display: grid;
+  gap: 0.2rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.traduccion-info strong {
+  font-weight: 600;
+}
+
+.traduccion-info > span,
+.traduccion-fila time,
+.traduccion-flecha,
+.traduccion-icono {
+  color: var(--historial-secundario);
+  font-size: 0.8125rem;
+}
+
+.traduccion[open] .traduccion-flecha {
+  transform: rotate(180deg);
+}
+
+.traduccion-detalle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 0.9rem 0.75rem 1rem;
+}
+
+.traduccion-detalle h2,
+.historial-vacio h2 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.traduccion-detalle p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.historial-vacio {
+  padding: 2rem 1rem;
+  border: 1px solid var(--historial-borde);
+  border-radius: 0.75rem;
+  text-align: center;
+}
+
+.historial-vacio p {
+  margin: 0;
+}
+
+:is(a, input, select, summary):focus-visible {
+  outline: 2px solid var(--td-foco, #fff);
+  outline-offset: 2px;
+}
+
+@media (max-width: 36rem) {
+  .historial-herramientas,
+  .traduccion-detalle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .traduccion-fila {
+    grid-template-columns: 1rem minmax(0, 1fr) 0.8rem;
+    column-gap: 0.5rem;
+    row-gap: 0.3rem;
+  }
+
+  .traduccion-fila time {
+    grid-column: 2;
+  }
+
+  .traduccion-flecha {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}

@@ -1,0 +1,288 @@
+<section class="acceso-pagina container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+      <div class="acceso-glass" aria-labelledby="acceso-titulo">
+        <header class="acceso-cabecera">
+          <span class="acceso-avatar">
+            <i class="fa-solid fa-user" aria-hidden="true"></i>
+          </span>
+
+          <h1 id="acceso-titulo">
+            {{ modoRegistro() ? 'Crea tu cuenta' : 'Bienvenido a TraducIA' }}
+          </h1>
+
+          <p>
+            {{
+              modoRegistro()
+                ? 'Completa tus datos para empezar a traducir.'
+                : 'Ingresa a tu cuenta para continuar.'
+            }}
+          </p>
+        </header>
+
+        <button
+          type="button"
+          class="boton-google"
+          (click)="continuarConGoogle()"
+        >
+          <i class="fa-brands fa-google" aria-hidden="true"></i>
+          Continuar con Google
+        </button>
+
+        <div class="acceso-separador" aria-hidden="true">
+          <span>o con tu correo</span>
+        </div>
+
+        @if (modoRegistro()) {
+          <form
+            [formGroup]="registro"
+            (ngSubmit)="registrarCuenta()"
+            novalidate
+          >
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="acceso-campo" for="registro-nombre">
+                  Nombre completo
+                </label>
+
+                <input
+                  id="registro-nombre"
+                  class="acceso-input"
+                  type="text"
+                  formControlName="nombre"
+                  autocomplete="name"
+                  maxlength="80"
+                  placeholder="Ingresa tu nombre"
+                  [attr.aria-invalid]="!!errorCampo(registro.controls.nombre)"
+                  aria-describedby="error-nombre"
+                />
+
+                <span id="error-nombre" class="acceso-error">
+                  {{ errorCampo(registro.controls.nombre) }}
+                </span>
+              </div>
+
+              <div class="col-12 col-sm-8">
+                <label class="acceso-campo" for="registro-ciudad">
+                  Ciudad
+                </label>
+
+                <input
+                  id="registro-ciudad"
+                  class="acceso-input"
+                  type="text"
+                  formControlName="ciudad"
+                  autocomplete="address-level2"
+                  maxlength="80"
+                  placeholder="Tu ciudad"
+                  [attr.aria-invalid]="!!errorCampo(registro.controls.ciudad)"
+                  aria-describedby="error-ciudad"
+                />
+
+                <span id="error-ciudad" class="acceso-error">
+                  {{ errorCampo(registro.controls.ciudad) }}
+                </span>
+              </div>
+
+              <div class="col-12 col-sm-4">
+                <label class="acceso-campo" for="registro-edad">
+                  Edad
+                </label>
+
+                <input
+                  id="registro-edad"
+                  class="acceso-input"
+                  type="text"
+                  inputmode="numeric"
+                  formControlName="edad"
+                  maxlength="3"
+                  placeholder="Años"
+                  [attr.aria-invalid]="!!errorCampo(registro.controls.edad)"
+                  aria-describedby="error-edad"
+                />
+
+                <span id="error-edad" class="acceso-error">
+                  {{ errorCampo(registro.controls.edad) }}
+                </span>
+              </div>
+
+              <div class="col-12">
+                <label class="acceso-campo" for="registro-correo">
+                  Correo electrónico
+                </label>
+
+                <input
+                  id="registro-correo"
+                  class="acceso-input"
+                  type="email"
+                  formControlName="correo"
+                  autocomplete="email"
+                  maxlength="254"
+                  placeholder="nombre@correo.com"
+                  [attr.aria-invalid]="!!errorCampo(registro.controls.correo)"
+                  aria-describedby="error-registro-correo"
+                />
+
+                <span id="error-registro-correo" class="acceso-error">
+                  {{ errorCampo(registro.controls.correo) }}
+                </span>
+              </div>
+
+              <div class="col-12">
+                <label class="acceso-campo" for="registro-password">
+                  Contraseña
+                </label>
+
+                <div class="password-contenedor">
+                  <input
+                    id="registro-password"
+                    class="acceso-input"
+                    [type]="passwordVisible() ? 'text' : 'password'"
+                    formControlName="password"
+                    autocomplete="new-password"
+                    maxlength="128"
+                    placeholder="Mínimo 8 caracteres"
+                    [attr.aria-invalid]="!!errorCampo(registro.controls.password)"
+                    aria-describedby="error-registro-password"
+                  />
+
+                  <button
+                    type="button"
+                    class="boton-ojo"
+                    [attr.aria-label]="passwordVisible() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+                    [attr.aria-pressed]="passwordVisible()"
+                    (click)="alternarPassword()"
+                  >
+                    <i
+                      class="fa-solid"
+                      [class.fa-eye]="!passwordVisible()"
+                      [class.fa-eye-slash]="passwordVisible()"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+
+                <span id="error-registro-password" class="acceso-error">
+                  {{ errorCampo(registro.controls.password) }}
+                </span>
+              </div>
+
+              <div class="col-12">
+                <label class="acceso-campo" for="registro-confirmacion">
+                  Confirmar contraseña
+                </label>
+
+                <input
+                  id="registro-confirmacion"
+                  class="acceso-input"
+                  [type]="passwordVisible() ? 'text' : 'password'"
+                  formControlName="confirmacion"
+                  autocomplete="new-password"
+                  maxlength="128"
+                  placeholder="Repite tu contraseña"
+                  [attr.aria-invalid]="registro.controls.confirmacion.touched &&
+                    (registro.controls.confirmacion.invalid || registro.hasError('contrasenasDistintas'))"
+                  aria-describedby="error-confirmacion"
+                />
+
+                <span id="error-confirmacion" class="acceso-error">
+                  @if (errorCampo(registro.controls.confirmacion)) {
+                    {{ errorCampo(registro.controls.confirmacion) }}
+                  } @else if (registro.controls.confirmacion.touched &&
+                  registro.hasError('contrasenasDistintas')) {
+                    Las contraseñas deben coincidir.
+                  }
+                </span>
+              </div>
+            </div>
+
+            <button type="submit" class="boton-acceso">
+              Crear cuenta
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+        } @else {
+          <form
+            [formGroup]="acceso"
+            (ngSubmit)="iniciarSesion()"
+            novalidate
+          >
+            <label class="acceso-campo" for="acceso-correo">
+              Correo electrónico
+            </label>
+
+            <input
+              id="acceso-correo"
+              class="acceso-input"
+              type="email"
+              formControlName="correo"
+              autocomplete="username"
+              maxlength="254"
+              placeholder="nombre@correo.com"
+              [attr.aria-invalid]="!!errorCampo(acceso.controls.correo)"
+              aria-describedby="error-acceso-correo"
+            />
+
+            <span id="error-acceso-correo" class="acceso-error">
+              {{ errorCampo(acceso.controls.correo) }}
+            </span>
+
+            <label class="acceso-campo campo-password" for="acceso-password">
+              Contraseña
+            </label>
+
+            <div class="password-contenedor">
+              <input
+                id="acceso-password"
+                class="acceso-input"
+                [type]="passwordVisible() ? 'text' : 'password'"
+                formControlName="password"
+                autocomplete="current-password"
+                maxlength="128"
+                placeholder="Ingresa tu contraseña"
+                [attr.aria-invalid]="!!errorCampo(acceso.controls.password)"
+                aria-describedby="error-acceso-password"
+              />
+
+              <button
+                type="button"
+                class="boton-ojo"
+                [attr.aria-label]="passwordVisible() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.aria-pressed]="passwordVisible()"
+                (click)="alternarPassword()"
+              >
+                <i
+                  class="fa-solid"
+                  [class.fa-eye]="!passwordVisible()"
+                  [class.fa-eye-slash]="passwordVisible()"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
+
+            <span id="error-acceso-password" class="acceso-error">
+              {{ errorCampo(acceso.controls.password) }}
+            </span>
+
+            <button type="submit" class="boton-acceso">
+              Iniciar sesión
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+        }
+
+        <p class="acceso-mensaje" role="status">{{ mensaje() }}</p>
+
+        <footer class="acceso-pie">
+          <span>
+            {{ modoRegistro() ? '¿Ya tienes una cuenta?' : '¿Aún no tienes cuenta?' }}
+          </span>
+
+          <button type="button" class="boton-cambiar" (click)="cambiarModo()">
+            {{ modoRegistro() ? 'Iniciar sesión' : 'Registrarme' }}
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+</section>
