@@ -2,14 +2,14 @@ package co.edu.unbosque.traducia.dto;
 
 public class LoginRequestDTO {
 	
-	private String correo;
+	private String nombre;
 	private String password;
 	
-	public String getCorreo() {
-		return correo;
+	public String getNombre() {
+		return nombre;
 	}
-	public void setCorreo(String correo) {
-		this.correo = correo;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 	public String getPassword() {
 		return password;
@@ -18,8 +18,8 @@ public class LoginRequestDTO {
 		this.password = password;
 	}
 	
-	public LoginRequestDTO(String correo, String password) {
-		this.correo = correo;
+	public LoginRequestDTO(String nombre, String password) {
+		this.nombre = nombre;
 		this.password = password;
 	}
 	

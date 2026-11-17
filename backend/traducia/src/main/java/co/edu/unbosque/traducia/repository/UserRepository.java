@@ -9,5 +9,6 @@ import co.edu.unbosque.springfirstapp.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	public Optional<User> findByUsername(String username);
 	public void deleteByUsername(String username); 
+	public boolean existByEmail(String email);
 
 }
