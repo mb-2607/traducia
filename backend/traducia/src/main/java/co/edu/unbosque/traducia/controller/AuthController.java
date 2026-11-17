@@ -1,6 +1,7 @@
 package co.edu.unbosque.traducia.controller;
 
 import org.springframework.security.core.AuthenticationException;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,10 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import co.edu.unbosque.traducia.entity.User;
+import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
+import co.edu.unbosque.traducia.exception.InvalidPasswordException;
+import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
 import co.edu.unbosque.traducia.security.JwtUtil;
 import co.edu.unbosque.traducia.service.UserService;
 import co.edu.unbosque.traducia.dto.LoginRequestDTO;
 import co.edu.unbosque.traducia.dto.LoginResponseDTO;
+import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
 
 @CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "https://sebastianmalagon.netlify.app",
@@ -31,17 +36,21 @@ public class AuthController {
 	private final JwtUtil jwtUtil;
 
 	private final UserService userService;
+	
+	private final ModelMapper modelMapper;
 
-	public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserService userService) {
+	public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+			UserService userService, ModelMapper modelMapper) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.userService = userService;
+		this.modelMapper = modelMapper;
 	}
 
 	@PostMapping(path = "login")
 	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getCorreo(), loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.getNombre(), loginRequest.getPassword()));
 
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		String jwt = jwtUtil.generateToken(userDetails);
@@ -49,20 +58,40 @@ public class AuthController {
 		UserResponseDTO userResponse = null;
 		if (userDetails instanceof User) {
 			User user = (User) userDetails;
-			userResponse = new UserResponseDTO();
-			userResponse.setNombre(user.getUsername());
-			userResponse.setCorreo(user.getEmail());
-			userResponse.setRol(user.getRole().name());
-			userResponse.setPlanId(user.getPlanType().name());
+			userResponse = modelMapper.map(user, UserResponseDTO.class);
 		}
 
-		return ResponseEntity.ok(new LoginResponseDTO(userResponse, jwt));
+		return new ResponseEntity<LoginResponseDTO>(new LoginResponseDTO(userResponse, jwt), HttpStatus.CREATED);
+	}
+	
+	@PostMapping(path = "register")
+	public ResponseEntity<UserResponseDTO> register(@RequestBody RegisterRequestDTO registerRequest) {
+		UserResponseDTO userResponse = userService.crear(registerRequest);
+		return ResponseEntity.ok(userResponse);
 	}
 
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<String> manejarAuthenticationException() {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-				.body("Correo o contraseña inválidos o usuario no encontrado");
+				.body("Contraseña inválido");
+	}
+	
+	@ExceptionHandler(EmailAlreadyExistsException.class)
+	public ResponseEntity<String> manejarEmailAlreadyExistsException() {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body("El correo ya existe");
+	}
+	
+	@ExceptionHandler(UsernameAlreadyExistsException.class)
+	public ResponseEntity<String> manejarUsernameAlreadyExistException() {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body("El usuario ya existe");
+	}
+	
+	@ExceptionHandler(InvalidPasswordException.class)
+	public ResponseEntity<String> manejarInvalidPasswordException(InvalidPasswordException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(e.getMessage());
 	}
 
 }

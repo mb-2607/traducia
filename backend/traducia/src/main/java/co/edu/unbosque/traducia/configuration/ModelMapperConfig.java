@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import co.edu.unbosque.traducia.dto.LoginRequestDTO;
+import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.entity.User;
 
@@ -27,6 +28,12 @@ public class ModelMapperConfig {
 		mapper.typeMap(LoginRequestDTO.class, User.class).addMappings(m -> {
 		    m.map(LoginRequestDTO::getNombre, User::setUsername);
 		    m.map(LoginRequestDTO::getPassword, User::setPassword);
+		});
+		
+		mapper.typeMap(RegisterRequestDTO.class, User.class).addMappings(m -> {
+			m.map(RegisterRequestDTO::getNombre, User::setUsername);
+			m.map(RegisterRequestDTO::getCorreo, User::setEmail);
+			m.map(RegisterRequestDTO::getPassword, User::setPassword);
 		});
 
 		return mapper;
