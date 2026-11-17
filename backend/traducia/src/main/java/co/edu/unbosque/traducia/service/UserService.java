@@ -1,5 +1,7 @@
 package co.edu.unbosque.traducia.service;
 
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,8 +12,10 @@ import co.edu.unbosque.traducia.entity.Role;
 import co.edu.unbosque.traducia.entity.User;
 import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
 import co.edu.unbosque.traducia.exception.InvalidPasswordException;
+import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
 import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
+import co.edu.unbosque.traducia.dto.UserAdminResponseDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.repository.UserRepository;
 
@@ -40,6 +44,16 @@ public class UserService {
 		usuario = userRepo.save(usuario);
 		
 		return modelMapper.map(usuario, UserResponseDTO.class);
+	}
+	
+	public UserAdminResponseDTO obtenerPorId(Long id) {
+		Optional<User> usuario = userRepo.findById(id);
+		if(usuario.isEmpty()) {
+			throw new UserNotFoundException();
+		}
+		
+		UserAdminResponseDTO respuesta = modelMapper.map(usuario.get(), UserAdminResponseDTO.class);
+		return respuesta;
 	}
 	
 	public void validarUsuario(RegisterRequestDTO register) {
