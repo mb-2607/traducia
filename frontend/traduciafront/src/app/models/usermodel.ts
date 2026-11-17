@@ -7,7 +7,6 @@ export interface User {
   correo: string;
   plan: PlanId;
   rol: Rol;
-  jwt: string;
 }
 export interface LoginRequest {
   correo: string;
