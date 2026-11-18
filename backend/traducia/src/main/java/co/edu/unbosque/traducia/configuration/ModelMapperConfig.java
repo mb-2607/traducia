@@ -5,6 +5,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import co.edu.unbosque.traducia.dto.AdminCreateUserRequestDTO;
 import co.edu.unbosque.traducia.dto.LoginRequestDTO;
 import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
@@ -34,6 +35,14 @@ public class ModelMapperConfig {
 			m.map(RegisterRequestDTO::getNombre, User::setUsername);
 			m.map(RegisterRequestDTO::getCorreo, User::setEmail);
 			m.map(RegisterRequestDTO::getPassword, User::setPassword);
+		});
+		
+		mapper.typeMap(AdminCreateUserRequestDTO.class, User.class).addMappings(m -> {
+			m.map(AdminCreateUserRequestDTO::getNombre, User::setUsername);
+			m.map(AdminCreateUserRequestDTO::getCorreo, User::setEmail);
+			m.map(AdminCreateUserRequestDTO::getPassword, User::setPassword);
+			m.map(AdminCreateUserRequestDTO::getRol, User::setRole);
+			m.map(AdminCreateUserRequestDTO::getPlanId, User::setPlanType);
 		});
 
 		return mapper;

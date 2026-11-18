@@ -25,7 +25,7 @@ import co.edu.unbosque.traducia.dto.LoginResponseDTO;
 import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
 
-@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "https://sebastianmalagon.netlify.app",
+@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "${front.url}",
 		"http://localhost:4200" })
 @RestController
 @RequestMapping("/auth")

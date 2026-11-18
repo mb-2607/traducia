@@ -1,6 +1,7 @@
 package co.edu.unbosque.traducia.dto;
 
-public class UserAdminResponseDTO {
+public class UpdateUserRequestDTO {
+
 	private String nombre;
 	private String correo;
 	private String rol;
@@ -38,14 +39,14 @@ public class UserAdminResponseDTO {
 		this.planId = planId;
 	}
 
-	public UserAdminResponseDTO(String nombre, String correo, String rol, String planId) {
+	public UpdateUserRequestDTO(String nombre, String correo, String rol, String planId) {
 		this.nombre = nombre;
 		this.correo = correo;
 		this.rol = rol;
 		this.planId = planId;
 	}
 
-	public UserAdminResponseDTO() {
+	public UpdateUserRequestDTO() {
 
 	}
 
