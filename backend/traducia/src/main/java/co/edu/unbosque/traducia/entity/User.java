@@ -111,10 +111,11 @@ public class User implements UserDetails{
 	 * @param username nombre de usuario único
 	 * @param password contraseña del usuario estando ya hasheada
 	 */
-	public User(String username, String password) {
+	public User(String username, String password, String email) {
 		this();
 		this.username = username;
 		this.password = password;
+		this.email = email;
 	}
 	
 	/**
@@ -124,11 +125,12 @@ public class User implements UserDetails{
 	 * @param password contraseña del usuario (ya hasheada)
 	 * @param role     rol asignado al usuario
 	 */
-	public User(String username, String password, Role role) {
+	public User(String username, String password, String email ,Role role) {
 		this();
 		this.username = username;
 		this.password = password;
 		this.role = role;
+		this.email = email;
 	}
 	
 	/**
