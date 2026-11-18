@@ -111,12 +111,12 @@ public class UserService {
 		
 		usuario.get().setUsername(register.getNombre());
 		usuario.get().setEmail(register.getCorreo());
-		usuario.get().setPlanType(PlanType.valueOf(register.getPlanId()));
-		usuario.get().setRole(Role.valueOf(register.getRol()));
+		usuario.get().setPlanType(register.getPlanId());
+		usuario.get().setRole(register.getRol());
 		
 		userRepo.save(usuario.get());
 		
-		return modelMapper.map(usuario, UserResponseDTO.class);
+		return modelMapper.map(usuario.get(), UserResponseDTO.class);
 	}
 	
 	public void validarUsuario(RegisterRequestDTO register) {

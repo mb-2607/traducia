@@ -22,8 +22,8 @@ public class ModelMapperConfig {
 		mapper.typeMap(User.class, UserResponseDTO.class).addMappings(m -> {
 			m.map(User::getUsername, UserResponseDTO::setNombre);
 			m.map(User::getEmail, UserResponseDTO::setCorreo);
-			m.map(src -> src.getRole().name(), UserResponseDTO::setRol);
-			m.map(src -> src.getPlanType().name(), UserResponseDTO::setPlanId);
+			m.map(User::getRole, UserResponseDTO::setRol);
+			m.map(User::getPlanType, UserResponseDTO::setPlanId);
 		});
 		
 		mapper.typeMap(LoginRequestDTO.class, User.class).addMappings(m -> {
