@@ -42,4 +42,6 @@ import { Loggincomponent } from './components/loggincomponent/loggincomponent';
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
+
+// skipcq: JS-0327
 export class AppModule {}
