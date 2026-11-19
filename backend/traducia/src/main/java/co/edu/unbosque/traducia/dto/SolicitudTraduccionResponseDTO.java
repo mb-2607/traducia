@@ -1,24 +1,28 @@
 package co.edu.unbosque.traducia.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class SolicitudTraduccionResponseDTO {
 
 	private long id;
-	private LocalDate fechaCreacion;
+	private LocalDateTime fechaCreacion;
 	private String textoOriginal;
+	private String origen;
+	private String destino;
 	private List<TraduccionResponseDTO> listaTraduccion;
 
 	public SolicitudTraduccionResponseDTO() {
 
 	}
 
-	public SolicitudTraduccionResponseDTO(long id, LocalDate fechaCreacion, String textoOriginal,
-			List<TraduccionResponseDTO> listaTraduccion) {
+	public SolicitudTraduccionResponseDTO(long id, LocalDateTime fechaCreacion, String textoOriginal, String origen,
+			String destino, List<TraduccionResponseDTO> listaTraduccion) {
 		this.id = id;
 		this.fechaCreacion = fechaCreacion;
 		this.textoOriginal = textoOriginal;
+		this.origen = origen;
+		this.destino = destino;
 		this.listaTraduccion = listaTraduccion;
 	}
 
@@ -30,11 +34,11 @@ public class SolicitudTraduccionResponseDTO {
 		this.id = id;
 	}
 
-	public LocalDate getFechaCreacion() {
+	public LocalDateTime getFechaCreacion() {
 		return fechaCreacion;
 	}
 
-	public void setFechaCreacion(LocalDate fechaCreacion) {
+	public void setFechaCreacion(LocalDateTime fechaCreacion) {
 		this.fechaCreacion = fechaCreacion;
 	}
 
@@ -54,6 +58,20 @@ public class SolicitudTraduccionResponseDTO {
 		this.listaTraduccion = listaTraduccion;
 	}
 
-	
+	public String getOrigen() {
+		return origen;
+	}
+
+	public void setOrigen(String origen) {
+		this.origen = origen;
+	}
+
+	public String getDestino() {
+		return destino;
+	}
+
+	public void setDestino(String destino) {
+		this.destino = destino;
+	}
 
 }

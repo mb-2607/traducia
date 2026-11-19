@@ -174,6 +174,21 @@ public class UserService {
     }
     
     /**
+     * Obtiene la entidad usuario a partir de su identificador.
+     *
+     * @param nombre del usuario que se desea consultar.
+     * @return entidad del usuario.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     */
+    public User obtenerEntidadPorNombre(String nombre) {
+        Optional<User> usuario = userRepo.findByUsername(nombre);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        return usuario.get();
+    }
+    
+    /**
      * Obtiene la información de un usuario a partir de su nombre.
      *
      * @param nombre del usuario que se desea consultar.

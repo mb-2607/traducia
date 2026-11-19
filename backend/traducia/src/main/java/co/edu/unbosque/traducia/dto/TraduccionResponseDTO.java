@@ -7,8 +7,6 @@ import co.edu.unbosque.traducia.entity.TipoProveedor;
 public class TraduccionResponseDTO {
 
 	private EstadoTraduccion estado;
-	private String origen;
-	private String destino;
 	private String textoTraducido;
 	private TipoProveedor tipoProveedor;
 	private ProveedorTraduccion proveedorTraduccion;
@@ -17,30 +15,12 @@ public class TraduccionResponseDTO {
 
 	}
 
-	public TraduccionResponseDTO(EstadoTraduccion estado, String origen, String destino, String textoTraducido,
-			TipoProveedor tipoProveedor, ProveedorTraduccion proveedorTraduccion) {
+	public TraduccionResponseDTO(EstadoTraduccion estado, String textoTraducido, TipoProveedor tipoProveedor,
+			ProveedorTraduccion proveedorTraduccion) {
 		this.estado = estado;
-		this.origen = origen;
-		this.destino = destino;
 		this.textoTraducido = textoTraducido;
 		this.tipoProveedor = tipoProveedor;
 		this.proveedorTraduccion = proveedorTraduccion;
-	}
-
-	public String getOrigen() {
-		return origen;
-	}
-
-	public void setOrigen(String origen) {
-		this.origen = origen;
-	}
-
-	public String getDestino() {
-		return destino;
-	}
-
-	public void setDestino(String destino) {
-		this.destino = destino;
 	}
 
 	public String getTextoTraducido() {
