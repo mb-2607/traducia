@@ -10,6 +10,7 @@ import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
 import co.edu.unbosque.traducia.dto.TraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
+import co.edu.unbosque.traducia.entity.EstadoTraduccion;
 import co.edu.unbosque.traducia.entity.PlanType;
 import co.edu.unbosque.traducia.entity.ProveedorTraduccion;
 import co.edu.unbosque.traducia.exception.PlanCharacterLimitExceededException;
@@ -34,13 +35,17 @@ public class TraduccionService {
 		List<TraduccionResponseDTO> listaTraduccion = new ArrayList<>();
 		
 		usuario.getPlanId().getListaProveedor().forEach((ProveedorTraduccion pt ) -> {
-			listaTraduccion.add(enviarSolicitud(traduccion, pt));
+			try {
+				listaTraduccion.add(enviarSolicitud(traduccion, pt));				
+			} catch (Exception e) {
+				listaTraduccion.add(crearSolicitudFallida(traduccion, pt));
+			}
 		});
 		
 		SolicitudTraduccionResponseDTO respuesta = new SolicitudTraduccionResponseDTO();
 		respuesta.setListaTraduccion(listaTraduccion);
 		respuesta.setTextoOriginal(traduccion.getTexto());
-		respuesta.setId(25);
+		respuesta.setId(25);//Esto está re quemado, obviamente la base de datos es la que lo crea
 		respuesta.setFechaCreacion(LocalDate.now());
 		
 		return respuesta;
@@ -59,6 +64,17 @@ public class TraduccionService {
 		respuesta.setDestino(traduccion.getDestino());
 		respuesta.setProveedorTraduccion(pt);
 		respuesta.setTipoProveedor(pt.getTipoProveedor());
+		respuesta.setEstado(EstadoTraduccion.EXITOSA);
+		return respuesta;
+	}
+	
+	private TraduccionResponseDTO crearSolicitudFallida(TraduccionRequestDTO traduccion, ProveedorTraduccion pt) {
+		TraduccionResponseDTO respuesta = new TraduccionResponseDTO();
+		respuesta.setOrigen(traduccion.getOrigen());
+		respuesta.setDestino(traduccion.getDestino());
+		respuesta.setProveedorTraduccion(pt);
+		respuesta.setTipoProveedor(pt.getTipoProveedor());
+		respuesta.setEstado(EstadoTraduccion.FALLIDA);
 		return respuesta;
 	}
 }

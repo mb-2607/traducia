@@ -14,7 +14,7 @@ public class SolicitudTraduccionResponseDTO {
 
 	}
 
-	public SolicitudTraduccionResponseDTO(long id, Date fechaCreacion, String textoOriginal,
+	public SolicitudTraduccionResponseDTO(long id, LocalDate fechaCreacion, String textoOriginal,
 			List<TraduccionResponseDTO> listaTraduccion) {
 		this.id = id;
 		this.fechaCreacion = fechaCreacion;
