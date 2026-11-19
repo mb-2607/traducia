@@ -172,6 +172,37 @@ public class UserService {
         UserResponseDTO respuesta = modelMapper.map(usuario.get(), UserResponseDTO.class);
         return respuesta;
     }
+    
+    /**
+     * Obtiene la entidad usuario a partir de su identificador.
+     *
+     * @param nombre del usuario que se desea consultar.
+     * @return entidad del usuario.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     */
+    public User obtenerEntidadPorNombre(String nombre) {
+        Optional<User> usuario = userRepo.findByUsername(nombre);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        return usuario.get();
+    }
+    
+    /**
+     * Obtiene la información de un usuario a partir de su nombre.
+     *
+     * @param nombre del usuario que se desea consultar.
+     * @return información del usuario encontrado, representada mediante un DTO.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     */
+    public UserResponseDTO obtenerPorNombre(String nombre) {
+    	Optional<User> usuario = userRepo.findByUsername(nombre);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        UserResponseDTO respuesta = modelMapper.map(usuario.get(), UserResponseDTO.class);
+        return respuesta;
+    }
 
     /**
      * Actualiza los datos de un usuario existente.
