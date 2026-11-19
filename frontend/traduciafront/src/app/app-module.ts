@@ -12,6 +12,7 @@ import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/id
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
 import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
+import { Terminocomponent } from './components/terminocomponent/terminocomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -33,6 +34,7 @@ import { Noencontradocomponent } from './components/noencontradocomponent/noenco
     Suscripcioncomponent,
     Landingpagecomponent,
     Noencontradocomponent,
+    Terminocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
