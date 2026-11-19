@@ -10,6 +10,7 @@ import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
+import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 /**
@@ -30,6 +31,7 @@ import { Noencontradocomponent } from './components/noencontradocomponent/noenco
     Archivoselectorcomponent,
     Navbarcomponent,
     Suscripcioncomponent,
+    Landingpagecomponent,
     Noencontradocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],

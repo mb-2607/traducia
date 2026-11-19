@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
-import {Userpagecomponent} from './components/userpagecomponent/userpagecomponent';
-import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Userpagecomponent } from './components/userpagecomponent/userpagecomponent';
+import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 /**
@@ -12,12 +13,15 @@ import { Noencontradocomponent } from './components/noencontradocomponent/noenco
  * correspondientes al dashboard.
  */
 const routes: Routes = [
-  //{TODO: Esto es lo de caballo
-    //path: '',
-    //pathMatch: 'full',
-    //component: Landingpagecomponent
-  //},
-  { path: ' ', component: Noencontradocomponent },
+  {
+    path: '',
+    pathMatch: 'full',
+    component: Landingpagecomponent
+  },
+  {
+    path: 'landing',
+    component: Landingpagecomponent
+  },
   {
     path: 'planes',
     component: Suscripcioncomponent
@@ -37,6 +41,10 @@ const routes: Routes = [
       }
     ]
   },
+  {
+    path: '**',
+    component: Noencontradocomponent
+  }
 ];
 
 /**
