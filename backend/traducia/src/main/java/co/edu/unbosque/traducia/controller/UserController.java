@@ -22,6 +22,7 @@ import co.edu.unbosque.traducia.dto.UpdateUserRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
 import co.edu.unbosque.traducia.exception.InvalidPasswordException;
+import co.edu.unbosque.traducia.exception.SelfActionNotAllowedException;
 import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
 import co.edu.unbosque.traducia.service.UserService;
@@ -80,6 +81,11 @@ public class UserController {
 		userService.eliminar(id);
 		return ResponseEntity.ok("Usuario eliminado");
 	}
+	@ExceptionHandler(SelfActionNotAllowedException.class)
+	public ResponseEntity<String> manejarSelfActionNotAllowedException(SelfActionNotAllowedException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(e.getMessage());
+	}
 
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<String> manejarUserNotFoundException() {
@@ -104,6 +110,7 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(e.getMessage());
 	}
+	
 }
 
 
