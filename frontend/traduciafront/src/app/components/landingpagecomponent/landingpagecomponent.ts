@@ -2,16 +2,6 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { PLANES, PlanId, Planmodel } from '../../models/planmodel';
 
-/**
- * Formatea un valor numerico como precio en pesos.
- */
-function formatearPrecioEnPesos(precio: number): string {
-  if (precio === 0) {
-    return '$0';
-  }
-  return `$${precio.toLocaleString('es-CO')}`;
-}
-
 @Component({
   selector: 'app-landingpagecomponent',
   templateUrl: './landingpagecomponent.html',
@@ -25,6 +15,7 @@ export class Landingpagecomponent {
   textoDemoOrigen = 'La inteligencia artificial transforma la comunicación global permitiendo traducir documentos técnicos sin perder el formato original.';
   textoDemoDestino = 'Artificial intelligence transforms global communication by allowing technical documents to be translated without losing their original format.';
   idiomaSeleccionado = 'EN';
+  readonly moneda = 'es-CO';
 
   planes: Planmodel[] = Object.values(PLANES);
 
@@ -45,10 +36,13 @@ export class Landingpagecomponent {
   }
 
   /**
-   * Formatea un precio usando la utilidad de moneda local.
+   * Formatea un valor numerico como precio en pesos.
    */
   formatearPrecio(precio: number): string {
-    return formatearPrecioEnPesos(precio);
+    if (precio === 0) {
+      return '$0';
+    }
+    return `$${precio.toLocaleString(this.moneda)}`;
   }
 
   /**
