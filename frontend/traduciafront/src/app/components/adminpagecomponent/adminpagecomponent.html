@@ -1,32 +1,91 @@
 <section class="admin-inicio container" aria-labelledby="admin-titulo">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 col-xl-8">
+    <div class="col-12 col-xl-10">
       <header class="admin-cabecera">
+        <p class="admin-antetitulo">Administracion</p>
+
         <h1 id="admin-titulo">Hola, administrador</h1>
-        <p class="admin-total">
-          Usuarios:
+
+        <p class="admin-introduccion">
+          Gestiona las cuentas de TraducIA y consulta la actividad de la
+          plataforma.
+        </p>
+
+        <p class="admin-total" aria-live="polite">
+          <i class="fa-solid fa-users" aria-hidden="true"></i>
+
+          <span>Usuarios registrados</span>
+
           @if (totalUsuarios() !== null) {
             <strong>{{ totalUsuarios() }}</strong>
           } @else {
-            <span aria-hidden="true">—</span>
+            <span class="admin-total-valor" aria-hidden="true">—</span>
             <span class="visually-hidden">Total no disponible</span>
           }
         </p>
       </header>
 
-      <nav aria-label="Accesos de administración">
-        <div class="row g-3 justify-content-center">
-          <div class="col-6 d-flex">
-            <a class="admin-acceso" routerLink="/admin/usuarios">
-              <i class="fa-solid fa-users admin-icono" aria-hidden="true"></i>
-              <span>Lista de usuarios</span>
+      <nav class="admin-opciones" aria-label="Accesos de administración">
+        <div class="row g-4 justify-content-center">
+          <div class="col-12 col-md-6 d-flex">
+            <a
+              class="admin-acceso"
+              routerLink="/admin/usuarios"
+              aria-labelledby="admin-usuarios-titulo"
+              aria-describedby="admin-usuarios-descripcion"
+            >
+              <span class="admin-icono-marco">
+                <i
+                  class="fa-solid fa-users admin-icono"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <h2 id="admin-usuarios-titulo">Lista de usuarios</h2>
+
+              <p
+                id="admin-usuarios-descripcion"
+                class="admin-descripcion"
+              >
+                Busca cuentas, consulta sus roles y planes, revisa su estado
+                y accede a las opciones de administración de cada usuario.
+              </p>
+
+              <span class="admin-enlace" aria-hidden="true">
+                Administrar usuarios
+                <i class="fa-solid fa-arrow-right"></i>
+              </span>
             </a>
           </div>
 
-          <div class="col-6 d-flex">
-            <a class="admin-acceso" routerLink="/admin/auditoria">
-              <i class="fa-solid fa-clipboard-list admin-icono" aria-hidden="true"></i>
-              <span>Auditoría</span>
+          <div class="col-12 col-md-6 d-flex">
+            <a
+              class="admin-acceso"
+              routerLink="/admin/auditoria"
+              aria-labelledby="admin-auditoria-titulo"
+              aria-describedby="admin-auditoria-descripcion"
+            >
+              <span class="admin-icono-marco">
+                <i
+                  class="fa-solid fa-clipboard-list admin-icono"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <h2 id="admin-auditoria-titulo">Auditoría</h2>
+
+              <p
+                id="admin-auditoria-descripcion"
+                class="admin-descripcion"
+              >
+                Consulta las acciones registradas en la plataforma,
+                identifica quién las realizó y revisa su fecha y resultado.
+              </p>
+
+              <span class="admin-enlace" aria-hidden="true">
+                Consultar actividad
+                <i class="fa-solid fa-arrow-right"></i>
+              </span>
             </a>
           </div>
         </div>
