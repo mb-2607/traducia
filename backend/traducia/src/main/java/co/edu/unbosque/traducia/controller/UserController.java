@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.edu.unbosque.traducia.dto.AdminChangePasswordRequestDTO;
 import co.edu.unbosque.traducia.dto.AdminCreateUserRequestDTO;
 import co.edu.unbosque.traducia.dto.UpdateUserRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
+import co.edu.unbosque.traducia.entity.User;
 import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
 import co.edu.unbosque.traducia.exception.InvalidPasswordException;
 import co.edu.unbosque.traducia.exception.SelfActionNotAllowedException;
@@ -32,13 +35,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 	    name = "Usuarios",
 	    description = "Endpoints para la gestión de usuarios por parte de los administradores."
 	)
-	@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "${front.url}",
-			"http://localhost:4200" })
-	@RestController
-	@RequestMapping("/user")
-
+@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "${front.url}",
+		"http://localhost:4200" })
+@RestController
+@RequestMapping("/user")
 public class UserController {
-	
+
 	private final UserService userService;
 
 	public UserController(UserService userService) {
@@ -71,16 +73,32 @@ public class UserController {
 
 	@PutMapping(path = "actualizar/{id}")
 	public ResponseEntity<UserResponseDTO> actualizar(@PathVariable Long id,
-			@RequestBody UpdateUserRequestDTO request) {
+			@RequestBody UpdateUserRequestDTO request, Authentication authentication) {
+		User adminActual = (User) authentication.getPrincipal();
+		if (adminActual.getId().equals(id)) {
+			throw new SelfActionNotAllowedException("Un administrador no puede actualizarse a sí mismo");
+		}
 		UserResponseDTO userResponse = userService.actualizar(id, request);
 		return ResponseEntity.ok(userResponse);
 	}
 
+	@PutMapping(path = "cambiar-password/{id}")
+	public ResponseEntity<UserResponseDTO> cambiarPassword(@PathVariable Long id,
+			@RequestBody AdminChangePasswordRequestDTO request) {
+		UserResponseDTO userResponse = userService.cambiarPassword(id, request);
+		return ResponseEntity.ok(userResponse);
+	}
+
 	@DeleteMapping(path = "eliminar/{id}")
-	public ResponseEntity<String> eliminar(@PathVariable Long id) {
+	public ResponseEntity<String> eliminar(@PathVariable Long id, Authentication authentication) {
+		User adminActual = (User) authentication.getPrincipal();
+		if (adminActual.getId().equals(id)) {
+			throw new SelfActionNotAllowedException("Un administrador no puede eliminarse a sí mismo");
+		}
 		userService.eliminar(id);
 		return ResponseEntity.ok("Usuario eliminado");
 	}
+
 	@ExceptionHandler(SelfActionNotAllowedException.class)
 	public ResponseEntity<String> manejarSelfActionNotAllowedException(SelfActionNotAllowedException e) {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -110,7 +128,4 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(e.getMessage());
 	}
-	
 }
-
-

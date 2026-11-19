@@ -18,7 +18,9 @@ import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
 import co.edu.unbosque.traducia.exception.InvalidPasswordException;
 import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
+import co.edu.unbosque.traducia.dto.AdminChangePasswordRequestDTO;
 import co.edu.unbosque.traducia.dto.AdminCreateUserRequestDTO;
+import co.edu.unbosque.traducia.dto.ChangePasswordRequestDTO;
 import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
 import co.edu.unbosque.traducia.dto.UpdateUserRequestDTO;
 import co.edu.unbosque.traducia.dto.UserResponseDTO;
@@ -208,6 +210,31 @@ public class UserService {
             throw new UserNotFoundException();
         }
         usuario.get().setPlanType(nuevoPlan);
+        userRepo.save(usuario.get());
+        return modelMapper.map(usuario.get(), UserResponseDTO.class);
+    }
+
+    public UserResponseDTO cambiarPassword(Long id, AdminChangePasswordRequestDTO request) {
+        Optional<User> usuario = userRepo.findById(id);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        validarPassword(request.getNuevaPassword());
+        usuario.get().setPassword(passwordEncoder.encode(request.getNuevaPassword()));
+        userRepo.save(usuario.get());
+        return modelMapper.map(usuario.get(), UserResponseDTO.class);
+    }
+
+    public UserResponseDTO cambiarPassword(Long id, ChangePasswordRequestDTO request) {
+        Optional<User> usuario = userRepo.findById(id);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        if(request.getPasswordActual() == null || !passwordEncoder.matches(request.getPasswordActual(), usuario.get().getPassword())) {
+            throw new InvalidPasswordException("La contraseña actual es incorrecta");
+        }
+        validarPassword(request.getNuevaPassword());
+        usuario.get().setPassword(passwordEncoder.encode(request.getNuevaPassword()));
         userRepo.save(usuario.get());
         return modelMapper.map(usuario.get(), UserResponseDTO.class);
     }
