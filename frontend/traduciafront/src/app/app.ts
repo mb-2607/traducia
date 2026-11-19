@@ -15,18 +15,21 @@ import { filter } from 'rxjs/operators';
 })
 export class App {
   protected readonly title = signal('traduciafront');
-  rutaActual: string = '';
+  rutaActual = '';
 
   constructor(private router: Router) {
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event) => {
       this.rutaActual = event.urlAfterRedirects;
     });
 
     this.rutaActual = this.router.url;
   }
 
+  /**
+   * Verifica si la ruta actual corresponde a la vista pública principal.
+   */
   esRutaPublica(): boolean {
     return this.rutaActual === '/' || this.rutaActual === '' || this.rutaActual.startsWith('/?');
   }

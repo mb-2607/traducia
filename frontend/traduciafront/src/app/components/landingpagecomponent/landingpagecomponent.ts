@@ -2,21 +2,37 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { PLANES, PlanId, Planmodel } from '../../models/planmodel';
 
+/**
+ * Formatea un valor numerico como precio en pesos.
+ */
+function formatearPrecioEnPesos(precio: number): string {
+  if (precio === 0) {
+    return '$0';
+  }
+  return `$${precio.toLocaleString('es-CO')}`;
+}
+
 @Component({
   selector: 'app-landingpagecomponent',
   templateUrl: './landingpagecomponent.html',
   styleUrls: ['./landingpagecomponent.css'],
   standalone: false
 })
+/**
+ * Componente de la pagina principal de TraducIA.
+ */
 export class Landingpagecomponent {
-  textoDemoOrigen: string = 'La inteligencia artificial transforma la comunicación global permitiendo traducir documentos técnicos sin perder el formato original.';
-  textoDemoDestino: string = 'Artificial intelligence transforms global communication by allowing technical documents to be translated without losing their original format.';
-  idiomaSeleccionado: string = 'EN';
+  textoDemoOrigen = 'La inteligencia artificial transforma la comunicación global permitiendo traducir documentos técnicos sin perder el formato original.';
+  textoDemoDestino = 'Artificial intelligence transforms global communication by allowing technical documents to be translated without losing their original format.';
+  idiomaSeleccionado = 'EN';
 
   planes: Planmodel[] = Object.values(PLANES);
 
   constructor(private router: Router) {}
 
+  /**
+   * Cambia el idioma de demostracion y actualiza el texto de ejemplo.
+   */
   cambiarIdiomaDemo(idioma: string): void {
     this.idiomaSeleccionado = idioma;
     if (idioma === 'EN') {
@@ -28,13 +44,16 @@ export class Landingpagecomponent {
     }
   }
 
+  /**
+   * Formatea un precio usando la utilidad de moneda local.
+   */
   formatearPrecio(precio: number): string {
-    if (precio === 0) {
-      return '$0';
-    }
-    return '$' + precio.toLocaleString('es-CO');
+    return formatearPrecioEnPesos(precio);
   }
 
+  /**
+   * Navega a la vista de registro llevando el plan seleccionado.
+   */
   seleccionarPlan(planId: PlanId): void {
     this.router.navigate(['/registro'], { queryParams: { plan: planId } });
   }
