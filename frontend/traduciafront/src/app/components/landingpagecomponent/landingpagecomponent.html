@@ -2,8 +2,7 @@
   <nav class="navbar navbar-expand-lg landing-nav py-3">
     <div class="container">
       <a class="navbar-brand brand-logo d-flex align-items-center gap-2" routerLink="/">
-        <i class="fa-solid fa-language"></i>
-        <span>TraducIA</span>
+
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLanding">
         <span class="navbar-toggler-icon"></span>
@@ -15,8 +14,7 @@
           <li class="nav-item"><a class="nav-link" href="#planes">Planes</a></li>
         </ul>
         <div class="d-flex gap-2">
-          <a routerLink="/login" class="btn btn-outline-custom px-4">Iniciar sesión</a>
-          <a routerLink="/registro" class="btn btn-primary-custom px-4">Registrarse</a>
+          <a routerLink="/planes" class="btn btn-primary-custom px-4">Registrarse</a>
         </div>
       </div>
     </div>
@@ -34,7 +32,7 @@
         Mantén intacta la estructura y tipografía de tus documentos combinando hasta tres motores de inteligencia artificial con precisión nativa.
       </p>
       <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
-        <a href="#planes" class="btn btn-primary-custom btn-lg px-5 py-3">Empezar ahora</a>
+        <a routerLink="/planes" class="btn btn-primary-custom btn-lg px-5 py-3">Empezar ahora</a>
         <a href="#demo" class="btn btn-glass btn-lg px-4 py-3">
           <i class="fa-solid fa-play me-2"></i>Ver demostración
         </a>
@@ -135,14 +133,13 @@
               </li>
             </ul>
 
-            <button
-              type="button"
+            <a
+              routerLink="/planes"
               class="btn w-100 py-3 fw-semibold"
               [class.btn-primary-custom]="plan.id === 'oria'"
-              [class.btn-glass]="plan.id !== 'oria'"
-              (click)="seleccionarPlan(plan.id)">
+              [class.btn-glass]="plan.id !== 'oria'">
               {{ plan.precio === 0 ? 'Comenzar gratis' : 'Elegir ' + plan.nombre }}
-            </button>
+            </a>
           </div>
         </div>
       </div>
