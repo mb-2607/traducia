@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
 import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -31,6 +32,7 @@ import { Landingpagecomponent } from './components/landingpagecomponent/landingp
     Navbarcomponent,
     Suscripcioncomponent,
     Landingpagecomponent,
+    Noencontradocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
