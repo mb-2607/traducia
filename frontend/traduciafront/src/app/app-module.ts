@@ -14,6 +14,10 @@ import { Historialtraduccionescomponent } from './components/historialtraduccion
 import { Bibliotecatraduccionescomponent } from './components/bibliotecatraduccionescomponent/bibliotecatraduccionescomponent';
 import { Adminpagecomponent } from './components/adminpagecomponent/adminpagecomponent';
 import { Loggincomponent } from './components/loggincomponent/loggincomponent';
+import { Listausuarioscomponent } from './components/listausuarioscomponent/listausuarioscomponent';
+import { Auditoriacomponent } from './components/auditoriacomponent/auditoriacomponent';
+import { Perfilcomponent } from './components/perfilcomponent/perfilcomponent';
+import { Recuperarcontrasenacomponent } from './components/recuperarcontrasenacomponent/recuperarcontrasenacomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -37,6 +41,10 @@ import { Loggincomponent } from './components/loggincomponent/loggincomponent';
     Bibliotecatraduccionescomponent,
     Adminpagecomponent,
     Loggincomponent,
+    Listausuarioscomponent,
+    Auditoriacomponent,
+    Perfilcomponent,
+    Recuperarcontrasenacomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],

@@ -1,0 +1,389 @@
+<section class="usuarios container-fluid" aria-labelledby="usuarios-titulo">
+  <header class="cabecera">
+    <div>
+      <a class="volver" routerLink="/admin">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Panel de
+        administración
+      </a>
+      <h1 id="usuarios-titulo">Usuarios</h1>
+      <p class="secundario">
+        Consulta las cuentas y administra sus condiciones de acceso.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="boton"
+      (click)="cargarUsuarios()"
+      [disabled]="!gestionDisponible || cargando() || procesando()"
+    >
+      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+      {{ cargando() ? 'Cargando…' : 'Actualizar lista' }}
+    </button>
+  </header>
+
+  @if (!gestionDisponible) {
+    <p class="mensaje" role="status">
+      La consulta y la gestión de usuarios aún no están disponibles.
+    </p>
+  }
+  @if (exito()) {
+    <p class="mensaje" role="status">{{ exito() }}</p>
+  }
+  @if (error()) {
+    <p class="mensaje mensaje-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="panel filtros row g-3" aria-label="Filtros de usuarios">
+    <div class="col-12 col-lg-6">
+      <label for="usuarios-busqueda">Buscar por usuario o correo</label>
+      <input
+        #buscador
+        id="usuarios-busqueda"
+        type="search"
+        class="campo"
+        placeholder="Buscar usuarios"
+        maxlength="254"
+        autocomplete="off"
+        [value]="busqueda()"
+        (input)="buscar(buscador.value)"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <label for="usuarios-plan">Plan</label>
+      <select
+        #plan
+        id="usuarios-plan"
+        class="campo"
+        [value]="filtroPlan()"
+        (change)="cambiarPlan(plan.value)"
+      >
+        <option value="">Todos los planes</option>
+        <option value="FREE">Gratuito</option>
+        <option value="ORIA">OrIA</option>
+        <option value="INFINITIA">InfinitIA</option>
+      </select>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <label for="usuarios-estado">Estado</label>
+      <select
+        #estado
+        id="usuarios-estado"
+        class="campo"
+        [value]="filtroEstado()"
+        (change)="cambiarEstado(estado.value)"
+      >
+        <option value="">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="deshabilitado">Deshabilitado</option>
+        <option value="bloqueado">Bloqueado</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="resumen secundario" role="status">
+    {{ cargando() ? 'Cargando usuarios…' : 'Usuarios encontrados: ' + total() }}
+  </p>
+
+  <div
+    class="panel tabla-contenedor"
+    role="region"
+    aria-label="Tabla de usuarios"
+    tabindex="0"
+    [attr.aria-busy]="cargando()"
+  >
+    <table>
+      <caption class="visualmente-oculto">
+        Cuentas de usuario y acciones de administración
+      </caption>
+      <thead>
+      <tr>
+        <th scope="col">Usuario</th>
+        <th scope="col">Correo electrónico</th>
+        <th scope="col">Rol</th>
+        <th scope="col">Plan</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (usuario of visibles(); track usuario.id) {
+          <tr>
+            <th scope="row">
+              <button
+                type="button"
+                class="enlace-usuario"
+                (click)="verDetalle(usuario)"
+                [attr.aria-label]="'Ver detalle de ' + usuario.username"
+              >
+                {{ usuario.username }}
+              </button>
+            </th>
+            <td class="correo">{{ usuario.email }}</td>
+            <td>{{ usuario.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}</td>
+            <td>
+              {{
+                usuario.planType === null ? 'Sin plan' : planes[usuario.planType]
+              }}
+            </td>
+            <td>
+              <span class="etiqueta">{{ estados[estadoDe(usuario)] }}</span>
+            </td>
+            <td>
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="boton-icono"
+                  (click)="editar(usuario)"
+                  [disabled]="!gestionDisponible || cargando() || procesando()"
+                  title="Editar usuario"
+                  [attr.aria-label]="'Editar a ' + usuario.username"
+                >
+                  <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="boton-icono"
+                  (click)="prepararAccion(usuario, usuario.accountNonLocked ? 'bloquear' : 'desbloquear')"
+                  [disabled]="!gestionDisponible || cargando() || procesando()"
+                  [title]="usuario.accountNonLocked ? 'Bloquear usuario' : 'Desbloquear usuario'"
+                  [attr.aria-label]="(usuario.accountNonLocked ? 'Bloquear a ' : 'Desbloquear a ') + usuario.username"
+                >
+                  <i
+                    class="fa-solid"
+                    [class.fa-lock]="usuario.accountNonLocked"
+                    [class.fa-lock-open]="!usuario.accountNonLocked"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+                <button
+                  type="button"
+                  class="boton-icono"
+                  (click)="prepararAccion(usuario, usuario.enabled ? 'deshabilitar' : 'habilitar')"
+                  [disabled]="!gestionDisponible || cargando() || procesando()"
+                  [title]="usuario.enabled ? 'Deshabilitar cuenta' : 'Habilitar cuenta'"
+                  [attr.aria-label]="(usuario.enabled ? 'Deshabilitar cuenta de ' : 'Habilitar cuenta de ') + usuario.username"
+                >
+                  <i class="fa-solid fa-power-off" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="boton-icono peligro"
+                  (click)="prepararAccion(usuario, 'eliminar')"
+                  [disabled]="!gestionDisponible || cargando() || procesando()"
+                  title="Eliminar usuario"
+                  [attr.aria-label]="'Eliminar a ' + usuario.username"
+                >
+                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="vacio">
+              <i class="fa-solid fa-users" aria-hidden="true"></i>
+              <p>
+                {{
+                  cargando()
+                    ? 'Cargando usuarios…'
+                    : 'No hay usuarios para mostrar.'
+                }}
+              </p>
+              @if (busqueda() || filtroPlan() || filtroEstado()) {
+                <span class="secundario"
+                >Prueba con otra búsqueda o cambia los filtros.</span
+                >
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="paginacion">
+    <div class="cantidad">
+      <label for="usuarios-cantidad">Filas por página</label>
+      <select
+        #cantidad
+        id="usuarios-cantidad"
+        class="campo"
+        [value]="tamanoPagina()"
+        (change)="cambiarTamano(cantidad.value)"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+    <p class="secundario">{{ inicio() }}–{{ fin() }} de {{ total() }}</p>
+    <nav class="navegacion" aria-label="Paginación de usuarios">
+      <button
+        type="button"
+        class="boton-icono"
+        aria-label="Página anterior"
+        [disabled]="pagina() === 1 || cargando()"
+        (click)="irAPagina(pagina() - 1)"
+      >
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <span aria-live="polite"
+      >Página {{ pagina() }} de {{ totalPaginas() }}</span
+      >
+      <button
+        type="button"
+        class="boton-icono"
+        aria-label="Página siguiente"
+        [disabled]="pagina() === totalPaginas() || cargando()"
+        (click)="irAPagina(pagina() + 1)"
+      >
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </nav>
+  </footer>
+</section>
+
+<dialog
+  #modal
+  class="modal-usuarios"
+  aria-labelledby="usuario-modal-titulo"
+  [attr.aria-busy]="procesando()"
+  (cancel)="cancelarModal($event)"
+>
+  <header class="modal-cabecera">
+    <h2 id="usuario-modal-titulo">{{ tituloModal() }}</h2>
+    <button
+      type="button"
+      class="boton-icono"
+      aria-label="Cerrar ventana"
+      [disabled]="procesando()"
+      (click)="cerrarModal()"
+    >
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  @if (seleccionado(); as usuario) {
+    @if (modo() === 'detalle') {
+      <dl class="detalle">
+        <dt>Identificador</dt>
+        <dd>{{ usuario.id }}</dd>
+        <dt>Usuario</dt>
+        <dd>{{ usuario.username }}</dd>
+        <dt>Correo</dt>
+        <dd>{{ usuario.email }}</dd>
+        <dt>Rol</dt>
+        <dd>{{ usuario.role === 'ADMIN' ? 'Administrador' : 'Usuario' }}</dd>
+        <dt>Plan</dt>
+        <dd>
+          {{ usuario.planType === null ? 'Sin plan' : planes[usuario.planType] }}
+        </dd>
+        <dt>Cuenta habilitada</dt>
+        <dd>{{ usuario.enabled ? 'Sí' : 'No' }}</dd>
+        <dt>Cuenta bloqueada</dt>
+        <dd>{{ usuario.accountNonLocked ? 'No' : 'Sí' }}</dd>
+      </dl>
+      <footer class="modal-pie">
+        <button type="button" class="boton" (click)="cerrarModal()">Cerrar</button>
+        <button
+          type="button"
+          class="boton principal"
+          [disabled]="!gestionDisponible"
+          (click)="editar(usuario)"
+        >
+          Editar usuario
+        </button>
+      </footer>
+    }
+    @if (modo() === 'editar') {
+      <form [formGroup]="formulario" (ngSubmit)="prepararEdicion()" novalidate>
+        <div class="campo-formulario">
+          <label for="usuario-editar-nombre">Nombre de usuario</label>
+          <input
+            id="usuario-editar-nombre"
+            class="campo"
+            formControlName="username"
+            autocomplete="off"
+            maxlength="100"
+            [attr.aria-invalid]="formulario.controls.username.touched && formulario.controls.username.invalid"
+            aria-describedby="usuario-nombre-ayuda"
+          />
+          <small id="usuario-nombre-ayuda" class="secundario"
+          >Escribe un nombre de hasta 100 caracteres.</small
+          >
+          @if (formulario.controls.username.touched &&
+          formulario.controls.username.invalid) {
+            <p class="error-campo" role="alert">
+              Ingresa un nombre de usuario válido.
+            </p>
+          }
+        </div>
+        <div class="campo-formulario">
+          <label for="usuario-editar-correo">Correo electrónico</label>
+          <input
+            id="usuario-editar-correo"
+            type="email"
+            class="campo"
+            formControlName="email"
+            autocomplete="off"
+            maxlength="254"
+            [attr.aria-invalid]="formulario.controls.email.touched && formulario.controls.email.invalid"
+          />
+          @if (formulario.controls.email.touched &&
+          formulario.controls.email.invalid) {
+            <p class="error-campo" role="alert">
+              Ingresa un correo electrónico válido.
+            </p>
+          }
+        </div>
+        <footer class="modal-pie">
+          <button type="button" class="boton" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="boton principal">Revisar cambios</button>
+        </footer>
+      </form>
+    }
+    @if (modo() === 'confirmar') {
+      <p class="secundario">{{ detalleAccion()?.aviso }}</p>
+      <p class="usuario-confirmacion">
+        <strong>{{ usuario.username }}</strong><br />{{ usuario.email }}
+      </p>
+      @if (solicitud(); as pendiente) {
+        @if (pendiente.accion === 'actualizar') {
+          <dl class="detalle">
+            <dt>Nuevo usuario</dt>
+            <dd>{{ pendiente.cambios.username }}</dd>
+            <dt>Nuevo correo</dt>
+            <dd>{{ pendiente.cambios.email }}</dd>
+          </dl>
+        }
+      }
+      @if (errorModal()) {
+        <p class="mensaje mensaje-error" role="alert">{{ errorModal() }}</p>
+      }
+      @if (procesando()) {
+        <p role="status">Procesando la solicitud…</p>
+      }
+      <footer class="modal-pie">
+        <button
+          type="button"
+          class="boton"
+          [disabled]="procesando()"
+          (click)="cerrarModal()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="boton principal"
+          [disabled]="procesando()"
+          [class.peligro]="solicitud()?.accion === 'eliminar'"
+          (click)="confirmar()"
+        >
+          {{ procesando() ? 'Procesando…' : 'Confirmar' }}
+        </button>
+      </footer>
+    }
+  }
+</dialog>

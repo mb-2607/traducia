@@ -1,0 +1,493 @@
+<section
+  class="auditoria container-fluid"
+  aria-labelledby="auditoria-titulo"
+>
+  <div class="auditoria-barra">
+    <a class="au-boton" routerLink="/admin">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      Volver al panel
+    </a>
+
+    <span class="au-distintivo">
+      <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+      Administración
+    </span>
+  </div>
+
+  <header class="auditoria-cabecera">
+    <div>
+      <p class="au-antetitulo">Registro de actividad</p>
+
+      <h1 id="auditoria-titulo">Auditoría</h1>
+
+      <p class="au-secundario">
+        Consulta quién realizó cada acción, cuándo ocurrió
+        y cuál fue su resultado.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="au-boton"
+      [disabled]="!consultaDisponible || cargando()"
+      (click)="cargarRegistros()"
+    >
+      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+      {{ cargando() ? 'Actualizando…' : 'Actualizar registro' }}
+    </button>
+  </header>
+
+  @if (!consultaDisponible) {
+    <p class="au-mensaje" role="status">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      La consulta de auditoría aún no está disponible.
+    </p>
+  }
+
+  @if (aviso()) {
+    <p class="au-mensaje" role="status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      {{ aviso() }}
+    </p>
+  }
+
+  @if (error()) {
+    <p class="au-mensaje au-error" role="alert">
+      <i
+        class="fa-solid fa-triangle-exclamation"
+        aria-hidden="true"
+      ></i>
+      {{ error() }}
+    </p>
+  }
+
+  <div class="au-panel auditoria-filtros">
+    <div class="row g-3">
+      <div class="col-12 col-lg-4">
+        <label for="auditoria-busqueda">
+          <i
+            class="fa-solid fa-magnifying-glass"
+            aria-hidden="true"
+          ></i>
+          Buscar evento
+        </label>
+
+        <input
+          #buscador
+          id="auditoria-busqueda"
+          class="au-campo"
+          type="search"
+          autocomplete="off"
+          maxlength="254"
+          placeholder="ID, usuario, correo o acción"
+          [value]="busqueda()"
+          (input)="buscar(buscador.value)"
+        />
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label for="auditoria-desde">
+          <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+          Desde
+        </label>
+
+        <input
+          #fechaDesde
+          id="auditoria-desde"
+          class="au-campo"
+          type="date"
+          [value]="desde()"
+          [max]="hasta()"
+          [attr.aria-invalid]="rangoInvalido()"
+          [attr.aria-describedby]="
+            rangoInvalido() ? 'auditoria-rango-error' : null
+          "
+          (input)="cambiarDesde(fechaDesde.value)"
+        />
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label for="auditoria-hasta">
+          <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+          Hasta
+        </label>
+
+        <input
+          #fechaHasta
+          id="auditoria-hasta"
+          class="au-campo"
+          type="date"
+          [value]="hasta()"
+          [min]="desde()"
+          [attr.aria-invalid]="rangoInvalido()"
+          [attr.aria-describedby]="
+            rangoInvalido() ? 'auditoria-rango-error' : null
+          "
+          (input)="cambiarHasta(fechaHasta.value)"
+        />
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label for="auditoria-actor">
+          <i class="fa-solid fa-user-tag" aria-hidden="true"></i>
+          Tipo de actor
+        </label>
+
+        <select
+          #actor
+          id="auditoria-actor"
+          class="au-campo"
+          [value]="tipoActor()"
+          (change)="cambiarTipoActor(actor.value)"
+        >
+          <option value="">Todos</option>
+          <option value="USER">Usuario</option>
+          <option value="ADMIN">Administrador</option>
+          <option value="SYSTEM">Sistema</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label for="auditoria-resultado">
+          <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+          Resultado
+        </label>
+
+        <select
+          #estado
+          id="auditoria-resultado"
+          class="au-campo"
+          [value]="resultado()"
+          (change)="cambiarResultado(estado.value)"
+        >
+          <option value="">Todos</option>
+          <option value="SUCCESS">Exitoso</option>
+          <option value="FAILURE">Fallido</option>
+          <option value="PENDING">Pendiente</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="auditoria-filtros-pie">
+      <p class="au-secundario">
+        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+        Fechas y horas de Colombia (UTC−5).
+      </p>
+
+      <button
+        type="button"
+        class="au-boton au-boton-pequeno"
+        [disabled]="!hayFiltros()"
+        (click)="limpiarFiltros()"
+      >
+        <i
+          class="fa-solid fa-filter-circle-xmark"
+          aria-hidden="true"
+        ></i>
+        Limpiar filtros
+      </button>
+    </div>
+
+    @if (rangoInvalido()) {
+      <p
+        id="auditoria-rango-error"
+        class="au-error"
+        role="alert"
+      >
+        La fecha inicial debe ser anterior o igual a la fecha final.
+      </p>
+    }
+  </div>
+
+  <p class="auditoria-resumen" role="status">
+    @if (cargando()) {
+      Cargando eventos…
+    } @else {
+      Eventos encontrados: <strong>{{ total() }}</strong>
+    }
+  </p>
+
+  <div
+    class="au-panel auditoria-tabla-contenedor"
+    role="region"
+    aria-label="Eventos de auditoría"
+    tabindex="0"
+    [attr.aria-busy]="cargando()"
+  >
+    <table class="auditoria-tabla">
+      <caption class="au-oculto">
+        Eventos ordenados del más reciente al más antiguo.
+        El color del actor identifica su plan actual.
+      </caption>
+
+      <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Hora y fecha</th>
+        <th scope="col">Actor</th>
+        <th scope="col">Acción</th>
+        <th scope="col">Resultado</th>
+        <th scope="col">Detalle</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (fila of visibles(); track fila.id) {
+          <tr>
+            <th scope="row" class="auditoria-id">
+              {{ fila.id }}
+            </th>
+
+            <td>
+              <time [attr.datetime]="fila.fechaIso">
+                <span class="au-fecha">
+                  {{ fila.fechaTexto }}
+                </span>
+                <span class="au-hora">
+                  {{ fila.horaTexto }}
+                </span>
+              </time>
+            </td>
+
+            <td>
+              <div
+                class="auditoria-actor"
+                [attr.data-plan]="fila.planColor"
+              >
+                <span class="auditoria-avatar" aria-hidden="true">
+                  <i
+                    class="fa-solid"
+                    [class.fa-user]="fila.actor.tipo === 'USER'"
+                    [class.fa-user-shield]="fila.actor.tipo === 'ADMIN'"
+                    [class.fa-gears]="fila.actor.tipo === 'SYSTEM'"
+                  ></i>
+                </span>
+
+                <div class="auditoria-actor-datos">
+                  <strong>{{ fila.nombreActor }}</strong>
+
+                  <span class="auditoria-correo">
+                    {{ fila.correoActor }}
+                  </span>
+
+                  <span class="auditoria-actor-meta">
+                    {{ tiposActor[fila.actor.tipo] }}
+
+                    @if (fila.actor.id !== null) {
+                      · ID {{ fila.actor.id }}
+                    }
+                  </span>
+
+                  <span class="auditoria-plan">
+                    {{ fila.planTexto }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <td class="auditoria-accion">
+              {{ fila.accion }}
+            </td>
+
+            <td>
+              <span
+                class="auditoria-resultado"
+                [attr.data-resultado]="fila.resultado"
+              >
+                <i
+                  class="fa-solid"
+                  [class.fa-circle-check]="fila.resultado === 'SUCCESS'"
+                  [class.fa-circle-xmark]="fila.resultado === 'FAILURE'"
+                  [class.fa-clock]="fila.resultado === 'PENDING'"
+                  aria-hidden="true"
+                ></i>
+
+                {{ resultados[fila.resultado] }}
+              </span>
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="au-boton au-boton-pequeno"
+                attr.aria-label="Ver detalle del evento {{ fila.id }}"
+                (click)="verDetalle(fila)"
+              >
+                <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="auditoria-vacio">
+              <span class="auditoria-vacio-icono">
+                <i
+                  class="fa-solid fa-clipboard-list"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <h2>
+                {{
+                  cargando()
+                    ? 'Cargando eventos…'
+                    : 'No hay eventos para mostrar.'
+                }}
+              </h2>
+
+              <p class="au-secundario">
+                Los registros aparecerán cuando estén disponibles
+                para su consulta.
+              </p>
+
+              @if (hayFiltros()) {
+                <p class="au-secundario">
+                  Puedes ajustar o limpiar los filtros para revisar
+                  otros resultados.
+                </p>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="auditoria-paginacion">
+    <div class="auditoria-cantidad">
+      <label for="auditoria-cantidad">Filas por página</label>
+
+      <select
+        #cantidad
+        id="auditoria-cantidad"
+        class="au-campo"
+        [value]="tamanoPagina()"
+        (change)="cambiarTamano(cantidad.value)"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+
+    <p class="au-secundario">
+      {{ inicio() }}–{{ fin() }} de {{ total() }} eventos
+    </p>
+
+    <nav
+      class="auditoria-navegacion"
+      aria-label="Paginación de auditoría"
+    >
+      <button
+        type="button"
+        class="au-boton"
+        [disabled]="pagina() === 1 || cargando()"
+        (click)="irAPagina(pagina() - 1)"
+      >
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        Anterior
+      </button>
+
+      <span aria-live="polite">
+        Página {{ pagina() }} de {{ totalPaginas() }}
+      </span>
+
+      <button
+        type="button"
+        class="au-boton"
+        [disabled]="pagina() === totalPaginas() || cargando()"
+        (click)="irAPagina(pagina() + 1)"
+      >
+        Siguiente
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </nav>
+  </footer>
+</section>
+
+<dialog
+  #detalle
+  class="auditoria-modal"
+  aria-labelledby="auditoria-detalle-titulo"
+  aria-describedby="auditoria-detalle-descripcion"
+  (cancel)="cancelarDetalle($event)"
+>
+  <header class="auditoria-modal-cabecera">
+    <h2 id="auditoria-detalle-titulo">Detalle del evento</h2>
+
+    <button
+      type="button"
+      class="au-boton au-boton-pequeno"
+      (click)="cerrarDetalle()"
+    >
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      Cerrar
+    </button>
+  </header>
+
+  <p id="auditoria-detalle-descripcion" class="au-secundario">
+    Información del evento registrado y del actor asociado.
+  </p>
+
+  @if (seleccionado(); as fila) {
+    <div
+      class="auditoria-actor auditoria-actor-detalle"
+      [attr.data-plan]="fila.planColor"
+    >
+      <span class="auditoria-avatar">
+        <i class="fa-solid fa-user-tag" aria-hidden="true"></i>
+      </span>
+
+      <div class="auditoria-actor-datos">
+        <strong>{{ fila.nombreActor }}</strong>
+
+        <span class="auditoria-correo">
+          {{ fila.correoActor }}
+        </span>
+
+        <span class="auditoria-plan">
+          {{ fila.planTexto }}
+        </span>
+      </div>
+    </div>
+
+    <dl class="auditoria-detalle">
+      <dt>Identificador del evento</dt>
+      <dd>{{ fila.id }}</dd>
+
+      <dt>Fecha y hora</dt>
+      <dd>
+        {{ fila.fechaTexto }} · {{ fila.horaTexto }} (Colombia)
+      </dd>
+
+      <dt>Tipo de actor</dt>
+      <dd>{{ tiposActor[fila.actor.tipo] }}</dd>
+
+      <dt>Identificador del actor</dt>
+      <dd>{{ fila.actor.id ?? 'No disponible' }}</dd>
+
+      <dt>Acción</dt>
+      <dd>{{ fila.accion }}</dd>
+
+      <dt>Resultado</dt>
+      <dd>{{ resultados[fila.resultado] }}</dd>
+    </dl>
+
+    <section
+      class="auditoria-explicacion"
+      aria-labelledby="auditoria-informacion-titulo"
+    >
+      <h3 id="auditoria-informacion-titulo">
+        Información adicional
+      </h3>
+
+      <p>
+        {{
+          fila.detalle
+          ?? 'Este evento no incluye información adicional.'
+        }}
+      </p>
+    </section>
+  }
+</dialog>
