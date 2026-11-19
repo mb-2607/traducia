@@ -203,6 +203,19 @@ public class UserService {
         userRepo.save(usuario.get());
         return modelMapper.map(usuario.get(), UserResponseDTO.class);
     }
+    
+    /**
+     * Actualiza el tipo de plan de un usuario existente a partir de su identificador.
+     * <p>
+     * Verifica que el usuario exista en la base de datos, asigna el nuevo tipo
+     * de plan, guarda los cambios y devuelve la información actualizada en formato DTO.
+     *
+     * @param id identificador único del usuario al que se le cambiará el plan.
+     * @param nuevoPlan nuevo tipo de plan que se asignará al usuario.
+     * @return información actualizada del usuario, representada mediante un {@link UserResponseDTO}.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     */
+    
 
     public UserResponseDTO cambiarPlan(Long id, PlanType nuevoPlan) {
         Optional<User> usuario = userRepo.findById(id);
@@ -213,6 +226,21 @@ public class UserService {
         userRepo.save(usuario.get());
         return modelMapper.map(usuario.get(), UserResponseDTO.class);
     }
+    
+    /**
+     * Cambia la contraseña de un usuario por acción administrativa a partir de su identificador.
+     * <p>
+     * Verifica que el usuario exista, valida que la nueva contraseña cumpla con la
+     * longitud mínima requerida, la codifica con {@link PasswordEncoder} y guarda
+     * los cambios en la base de datos.
+     *
+     * @param id identificador único del usuario al que se le cambiará la contraseña.
+     * @param request objeto DTO que contiene la nueva contraseña a asignar.
+     * @return información actualizada del usuario, representada mediante un {@link UserResponseDTO}.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     * @throws InvalidPasswordException si la nueva contraseña es nula o no cumple la longitud mínima requerida.
+     */
+    
 
     public UserResponseDTO cambiarPassword(Long id, AdminChangePasswordRequestDTO request) {
         Optional<User> usuario = userRepo.findById(id);
@@ -224,6 +252,20 @@ public class UserService {
         userRepo.save(usuario.get());
         return modelMapper.map(usuario.get(), UserResponseDTO.class);
     }
+    
+    /**
+     * Cambia la contraseña de un usuario autenticado previa verificación de su contraseña actual.
+     * <p>
+     * Comprueba que el usuario exista y que la contraseña actual suministrada coincida
+     * con la almacenada. Posteriormente valida la longitud mínima de la nueva contraseña,
+     * la codifica con {@link PasswordEncoder} y guarda los cambios en la base de datos.
+     *
+     * @param id identificador único del usuario que solicita el cambio de contraseña.
+     * @param request objeto DTO que contiene la contraseña actual y la nueva contraseña.
+     * @return información actualizada del usuario, representada mediante un {@link UserResponseDTO}.
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+     * @throws InvalidPasswordException si la contraseña actual es incorrecta o si la nueva contraseña no cumple la longitud mínima requerida.
+     */
 
     public UserResponseDTO cambiarPassword(Long id, ChangePasswordRequestDTO request) {
         Optional<User> usuario = userRepo.findById(id);
