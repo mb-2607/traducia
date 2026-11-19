@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public enum PlanType {
 	FREE(Set.of(ProveedorTraduccion.DEEPL), 500),
-	ORIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMINI), 2000),
-	INFINITIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMINI, ProveedorTraduccion.OPENROUTER), 5000);
+	ORIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMMA), 2000),
+	INFINITIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMMA, ProveedorTraduccion.RIVA), 5000);
 	
 	private final Set<ProveedorTraduccion> listaProveedor;
 	private final long numeroCaracterPorSolicitud;

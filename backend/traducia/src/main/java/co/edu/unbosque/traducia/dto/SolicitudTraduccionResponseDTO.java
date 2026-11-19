@@ -1,12 +1,12 @@
 package co.edu.unbosque.traducia.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class SolicitudTraduccionResponseDTO {
 
 	private long id;
-	private Date fechaCreacion;
+	private LocalDate fechaCreacion;
 	private String textoOriginal;
 	private List<TraduccionResponseDTO> listaTraduccion;
 
@@ -30,11 +30,11 @@ public class SolicitudTraduccionResponseDTO {
 		this.id = id;
 	}
 
-	public Date getFechaCreacion() {
+	public LocalDate getFechaCreacion() {
 		return fechaCreacion;
 	}
 
-	public void setFechaCreacion(Date fechaCreacion) {
+	public void setFechaCreacion(LocalDate fechaCreacion) {
 		this.fechaCreacion = fechaCreacion;
 	}
 

@@ -1,9 +1,13 @@
 package co.edu.unbosque.traducia.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class TraduccionRequestDTO {
 
 	private String origen;
 	private String destino;
+	
+	@NotBlank
 	private String texto;
 
 	public TraduccionRequestDTO() {
