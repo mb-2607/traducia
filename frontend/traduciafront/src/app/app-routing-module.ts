@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
 import {Userpagecomponent} from './components/userpagecomponent/userpagecomponent';
 import {Nuevatraduccioncomponent} from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 /**
  * Configuración de las rutas principales de la aplicación.
@@ -16,6 +17,7 @@ const routes: Routes = [
     //pathMatch: 'full',
     //component: Landingpagecomponent
   //},
+  { path: ' ', component: Noencontradocomponent },
   {
     path: 'planes',
     component: Suscripcioncomponent
