@@ -10,6 +10,7 @@ import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Idiomaselectorcomponent } from './components/idiomaselectorcomponent/idiomaselectorcomponent';
 import { Archivoselectorcomponent } from './components/archivoselectorcomponent/archivoselectorcomponent';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -28,14 +29,10 @@ import { Archivoselectorcomponent } from './components/archivoselectorcomponent/
     Idiomaselectorcomponent,
     Archivoselectorcomponent,
     Navbarcomponent,
-    Suscripcioncomponent
+    Suscripcioncomponent,
+    Noencontradocomponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
