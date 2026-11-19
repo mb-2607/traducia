@@ -26,51 +26,51 @@ import co.edu.unbosque.traducia.repository.UserRepository;
 
 
 /**
- * Servicio encargado de gestionar las operaciones relacionadas con los usuarios.
- * <p>
- * Proporciona funcionalidades para registrar, consultar, actualizar y eliminar
- * usuarios, además de validar la información suministrada durante su creación
- * y actualización. Utiliza {@link UserRepository} para acceder a la base de datos,
- * {@link ModelMapper} para convertir entidades en DTOs y
- * {@link PasswordEncoder} para codificar las contraseñas.
+- Servicio encargado de gestionar las operaciones relacionadas con los usuarios.
+- <p>
+- Proporciona funcionalidades para registrar, consultar, actualizar y eliminar
+- usuarios, además de validar la información suministrada durante su creación
+- y actualización. Utiliza {@link UserRepository} para acceder a la base de datos,
+- {@link ModelMapper} para convertir entidades en DTOs y
+- {@link PasswordEncoder} para codificar las contraseñas.
  *
- * @author
- * @version 1.0
- * @see User
- * @see UserRepository
- * @see UserResponseDTO
- * @see RegisterRequestDTO
- * @see AdminCreateUserRequestDTO
- * @see UpdateUserRequestDTO
+- @author
+- @version 1.0
+- @see User
+- @see UserRepository
+- @see UserResponseDTO
+- @see RegisterRequestDTO
+- @see AdminCreateUserRequestDTO
+- @see UpdateUserRequestDTO
  */
 @Service
 public class UserService {
 
     /**
-     * Repositorio encargado de realizar las operaciones de persistencia de los usuarios.
+- Repositorio encargado de realizar las operaciones de persistencia de los usuarios.
      */
     @Autowired
     UserRepository userRepo;
 
     /**
-     * Componente utilizado para convertir entidades y objetos DTO.
+- Componente utilizado para convertir entidades y objetos DTO.
      */
     @Autowired
     ModelMapper modelMapper;
 
     /**
-     * Componente encargado de codificar las contraseñas antes de almacenarlas.
+- Componente encargado de codificar las contraseñas antes de almacenarlas.
      */
     @Autowired
     PasswordEncoder passwordEncoder;
 
     /**
-     * Obtiene todos los usuarios registrados en la base de datos.
-     * <p>
-     * Convierte cada entidad {@link User} en un objeto {@link UserResponseDTO}
-     * antes de devolver la lista.
+- Obtiene todos los usuarios registrados en la base de datos.
+- <p>
+- Convierte cada entidad {@link User} en un objeto {@link UserResponseDTO}
+- antes de devolver la lista.
      *
-     * @return lista de usuarios representados mediante DTOs.
+- @return lista de usuarios representados mediante DTOs.
      */
     public List<UserResponseDTO> listar() {
         List<User> usuarios = userRepo.findAll();
@@ -83,13 +83,13 @@ public class UserService {
     }
 
     /**
-     * Obtiene los usuarios registrados mediante una consulta paginada.
-     * <p>
-     * Convierte los elementos de la página de entidades {@link User} en objetos
-     * {@link UserResponseDTO}, conservando la información de paginación.
+- Obtiene los usuarios registrados mediante una consulta paginada.
+- <p>
+- Convierte los elementos de la página de entidades {@link User} en objetos
+- {@link UserResponseDTO}, conservando la información de paginación.
      *
-     * @param pageable configuración de paginación y ordenamiento de los resultados.
-     * @return página de usuarios representados mediante DTOs.
+- @param pageable configuración de paginación y ordenamiento de los resultados.
+- @return página de usuarios representados mediante DTOs.
      */
     public Page<UserResponseDTO> listar(Pageable pageable) {
         Page<User> usuarios = userRepo.findAll(pageable);
@@ -97,10 +97,10 @@ public class UserService {
     }
 
     /**
-     * Elimina un usuario de la base de datos a partir de su identificador.
+- Elimina un usuario de la base de datos a partir de su identificador.
      *
-     * @param id identificador del usuario que se desea eliminar.
-     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+- @param id identificador del usuario que se desea eliminar.
+- @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      */
     public void eliminar(Long id) {
         Optional<User> usuario = userRepo.findById(id);
@@ -111,18 +111,18 @@ public class UserService {
     }
 
     /**
-     * Registra un nuevo usuario mediante los datos de una solicitud de registro.
-     * <p>
-     * Normaliza el correo electrónico, valida que el nombre de usuario y el correo
-     * no estén registrados, verifica la longitud de la contraseña y la codifica.
-     * Asigna automáticamente el rol {@link Role#USER} y el plan
-     * {@link PlanType#FREE} antes de guardar el usuario.
+- Registra un nuevo usuario mediante los datos de una solicitud de registro.
+- <p>
+- Normaliza el correo electrónico, valida que el nombre de usuario y el correo
+- no estén registrados, verifica la longitud de la contraseña y la codifica.
+- Asigna automáticamente el rol {@link Role#USER} y el plan
+- {@link PlanType#FREE} antes de guardar el usuario.
      *
-     * @param register objeto con los datos necesarios para registrar al usuario.
-     * @return información del usuario creado, representada mediante un DTO.
-     * @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
-     * @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
-     * @throws InvalidPasswordException si la contraseña no cumple la longitud mínima requerida.
+- @param register objeto con los datos necesarios para registrar al usuario.
+- @return información del usuario creado, representada mediante un DTO.
+- @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
+- @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
+- @throws InvalidPasswordException si la contraseña no cumple la longitud mínima requerida.
      */
     public UserResponseDTO crear(RegisterRequestDTO register) {
         register.setCorreo(register.getCorreo().trim().toLowerCase());
@@ -136,17 +136,17 @@ public class UserService {
     }
 
     /**
-     * Registra un nuevo usuario mediante una solicitud de creación administrativa.
-     * <p>
-     * Normaliza el correo electrónico, valida que el nombre de usuario y el correo
-     * no estén registrados, verifica la contraseña y la codifica antes de guardar
-     * el usuario. Los demás atributos se obtienen del DTO recibido.
+- Registra un nuevo usuario mediante una solicitud de creación administrativa.
+- <p>
+- Normaliza el correo electrónico, valida que el nombre de usuario y el correo
+- no estén registrados, verifica la contraseña y la codifica antes de guardar
+- el usuario. Los demás atributos se obtienen del DTO recibido.
      *
-     * @param register objeto con los datos del usuario que se desea crear.
-     * @return información del usuario creado, representada mediante un DTO.
-     * @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
-     * @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
-     * @throws InvalidPasswordException si la contraseña no cumple la longitud mínima requerida.
+- @param register objeto con los datos del usuario que se desea crear.
+- @return información del usuario creado, representada mediante un DTO.
+- @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
+- @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
+- @throws InvalidPasswordException si la contraseña no cumple la longitud mínima requerida.
      */
     public UserResponseDTO crear(AdminCreateUserRequestDTO register) {
         register.setCorreo(register.getCorreo().trim().toLowerCase());
@@ -158,11 +158,11 @@ public class UserService {
     }
 
     /**
-     * Obtiene la información de un usuario a partir de su identificador.
+- Obtiene la información de un usuario a partir de su identificador.
      *
-     * @param id identificador del usuario que se desea consultar.
-     * @return información del usuario encontrado, representada mediante un DTO.
-     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+- @param id identificador del usuario que se desea consultar.
+- @return información del usuario encontrado, representada mediante un DTO.
+- @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      */
     public UserResponseDTO obtenerPorId(Long id) {
         Optional<User> usuario = userRepo.findById(id);
@@ -174,18 +174,18 @@ public class UserService {
     }
 
     /**
-     * Actualiza los datos de un usuario existente.
-     * <p>
-     * Normaliza el correo electrónico y verifica que el usuario exista.
-     * Posteriormente, valida que el nuevo nombre de usuario y correo no estén
-     * registrados por otros usuarios, actualiza sus atributos y guarda los cambios.
+- Actualiza los datos de un usuario existente.
+- <p>
+- Normaliza el correo electrónico y verifica que el usuario exista.
+- Posteriormente, valida que el nuevo nombre de usuario y correo no estén
+- registrados por otros usuarios, actualiza sus atributos y guarda los cambios.
      *
-     * @param id identificador del usuario que se desea actualizar.
-     * @param register objeto con los nuevos datos del usuario.
-     * @return información actualizada del usuario, representada mediante un DTO.
-     * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
-     * @throws UsernameAlreadyExistsException si el nombre de usuario pertenece a otro usuario.
-     * @throws EmailAlreadyExistsException si el correo electrónico pertenece a otro usuario.
+- @param id identificador del usuario que se desea actualizar.
+- @param register objeto con los nuevos datos del usuario.
+- @return información actualizada del usuario, representada mediante un DTO.
+- @throws UserNotFoundException si no existe un usuario con el identificador indicado.
+- @throws UsernameAlreadyExistsException si el nombre de usuario pertenece a otro usuario.
+- @throws EmailAlreadyExistsException si el correo electrónico pertenece a otro usuario.
      */
     public UserResponseDTO actualizar(Long id, UpdateUserRequestDTO register) {
         register.setCorreo(register.getCorreo().trim().toLowerCase());
@@ -202,17 +202,27 @@ public class UserService {
         return modelMapper.map(usuario.get(), UserResponseDTO.class);
     }
 
+    public UserResponseDTO cambiarPlan(Long id, PlanType nuevoPlan) {
+        Optional<User> usuario = userRepo.findById(id);
+        if(usuario.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        usuario.get().setPlanType(nuevoPlan);
+        userRepo.save(usuario.get());
+        return modelMapper.map(usuario.get(), UserResponseDTO.class);
+    }
+
     /**
-     * Valida los datos de un usuario durante su registro.
-     * <p>
-     * Comprueba que el nombre de usuario y el correo electrónico no estén
-     * registrados previamente. También verifica que la contraseña tenga
-     * al menos ocho caracteres.
+- Valida los datos de un usuario durante su registro.
+- <p>
+- Comprueba que el nombre de usuario y el correo electrónico no estén
+- registrados previamente. También verifica que la contraseña tenga
+- al menos ocho caracteres.
      *
-     * @param register objeto con los datos del usuario que se desea validar.
-     * @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
-     * @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
-     * @throws InvalidPasswordException si la contraseña es nula o tiene menos de ocho caracteres.
+- @param register objeto con los datos del usuario que se desea validar.
+- @throws UsernameAlreadyExistsException si el nombre de usuario ya está registrado.
+- @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
+- @throws InvalidPasswordException si la contraseña es nula o tiene menos de ocho caracteres.
      */
     public void validarUsuario(RegisterRequestDTO register) {
         if(userRepo.existsByUsername(register.getNombre())) {
@@ -225,16 +235,16 @@ public class UserService {
     }
 
     /**
-     * Valida los datos de un usuario durante su actualización.
-     * <p>
-     * Comprueba que el nombre de usuario y el correo electrónico no estén
-     * registrados por otro usuario. Permite conservar los valores actuales
-     * del usuario que se está modificando.
+- Valida los datos de un usuario durante su actualización.
+- <p>
+- Comprueba que el nombre de usuario y el correo electrónico no estén
+- registrados por otro usuario. Permite conservar los valores actuales
+- del usuario que se está modificando.
      *
-     * @param register objeto con los nuevos datos del usuario.
-     * @param user entidad del usuario que se está actualizando.
-     * @throws UsernameAlreadyExistsException si el nombre de usuario pertenece a otro usuario.
-     * @throws EmailAlreadyExistsException si el correo electrónico pertenece a otro usuario.
+- @param register objeto con los nuevos datos del usuario.
+- @param user entidad del usuario que se está actualizando.
+- @throws UsernameAlreadyExistsException si el nombre de usuario pertenece a otro usuario.
+- @throws EmailAlreadyExistsException si el correo electrónico pertenece a otro usuario.
      */
     public void validarUsuario(UpdateUserRequestDTO register, User user) {
         if(userRepo.existsByUsername(register.getNombre()) && !user.getUsername().equals(register.getNombre())) {
@@ -246,10 +256,10 @@ public class UserService {
     }
 
     /**
-     * Verifica que una contraseña cumpla con la longitud mínima establecida.
+- Verifica que una contraseña cumpla con la longitud mínima establecida.
      *
-     * @param password contraseña que se desea validar.
-     * @throws InvalidPasswordException si la contraseña es nula o tiene menos de ocho caracteres.
+- @param password contraseña que se desea validar.
+- @throws InvalidPasswordException si la contraseña es nula o tiene menos de ocho caracteres.
      */
     public void validarPassword(String password) {
         if(password == null || password.length() < 8) {
