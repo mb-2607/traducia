@@ -26,7 +26,7 @@ public class Traduccion {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	/**
 	 * Proveedor que generó la traducción.

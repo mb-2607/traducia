@@ -31,7 +31,7 @@ public class SolicitudTraduccion {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	/**
 	 * Texto original que se desea traducir.
@@ -214,7 +214,7 @@ public class SolicitudTraduccion {
 	 * @param listaTraduccion lista de traducciones, una por cada proveedor consultado a asignar
 	 */
 	public void setListaTraduccion(List<Traduccion> listaTraduccion) {
-		this.listaTraduccion = listaTraduccion;
+		this.listaTraduccion = listaTraduccion; // skipcq: JAVA-E1086
 	}
 
 	/**

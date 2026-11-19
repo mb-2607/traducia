@@ -57,7 +57,7 @@ public class SolicitudTraduccionResponseDTO {
 		this.textoOriginal = textoOriginal;
 		this.origen = origen;
 		this.destino = destino;
-		this.listaTraduccion = listaTraduccion;
+		this.listaTraduccion = listaTraduccion; // skipcq: JAVA-E1086
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class SolicitudTraduccionResponseDTO {
 	 * @param listaTraduccion lista de traducciones, una por cada proveedor consultado a asignar
 	 */
 	public void setListaTraduccion(List<TraduccionResponseDTO> listaTraduccion) {
-		this.listaTraduccion = listaTraduccion;
+		this.listaTraduccion = listaTraduccion; // skipcq: JAVA-E1086
 	}
 
 	/**

@@ -27,7 +27,7 @@ public class IdiomaResponseDTO {
 	/**
 	 * Crea una instancia con todos los atributos.
 	 *
-	 * @param código iso del idioma de origen
+	 * @param codigo iso del idioma de origen
 	 * @param nombre del idioma
 	 */
 	public IdiomaResponseDTO(String codigo, String nombre) {

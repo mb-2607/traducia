@@ -8,10 +8,11 @@ import co.edu.unbosque.traducia.entity.ProveedorTraduccion;
 /**
  * Estrategia de traducción para el proveedor DeepL.
  *
- * Implementación simulada: por ahora devuelve un texto fijo y no llama a la API real.
+ * Implementación simulada: por ahora devuelve un texto fijo y no llama a la API
+ * real.
  */
 @Service
-public class DeeplTraductorStrategy implements TraductorStrategy{
+public class DeeplTraductorStrategy implements TraductorStrategy {
 
 	/**
 	 * Traduce el texto con DeepL.
@@ -35,7 +36,5 @@ public class DeeplTraductorStrategy implements TraductorStrategy{
 	public ProveedorTraduccion getProveedor() {
 		return ProveedorTraduccion.DEEPL;
 	}
-
-	
 
 }

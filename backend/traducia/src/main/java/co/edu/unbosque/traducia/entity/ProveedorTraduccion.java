@@ -7,7 +7,8 @@ package co.edu.unbosque.traducia.entity;
  * IA.
  */
 public enum ProveedorTraduccion {
-	RIVA("Riva-Translate:4b", TipoProveedor.IA), GEMMA("Gemma4:31b", TipoProveedor.IA),
+	RIVA("Riva-Translate:4b", TipoProveedor.IA),
+	GEMMA("Gemma4:31b", TipoProveedor.IA),
 	DEEPL("DeepL", TipoProveedor.TRADICIONAL);
 
 	/**

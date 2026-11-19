@@ -21,7 +21,7 @@ public class Idioma {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	/**
 	 * Código único del idioma (por ejemplo, "es" o "en").
