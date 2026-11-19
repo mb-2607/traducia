@@ -6,4 +6,9 @@ import { Component } from '@angular/core';
   templateUrl: './noencontradocomponent.html',
   styleUrl: './noencontradocomponent.css'
 })
-export class Noencontradocomponent {}
+/**
+ * Componente de pagina no encontrada (404).
+ */
+export class Noencontradocomponent {
+  readonly codigoError = 404;
+}
