@@ -49,5 +49,25 @@ public class EmailService {
 				+ "Si no solicitaste este cambio, ignora este mensaje.");
 		mailSender.send(mensaje);
 	}
+	
+	/**
+	 * Envía el correo con el enlace para verificar la cuenta recién registrada.
+	 *
+	 * @param destinatario correo electrónico del usuario
+	 * @param nombreUsuario nombre de usuario para el saludo
+	 * @param enlace URL del frontend con el token de verificación
+	 */
+	
+	public void enviarCorreoVerificacion(String destinatario, String nombreUsuario, String enlace) {
+		SimpleMailMessage mensaje = new SimpleMailMessage();
+		mensaje.setFrom(remitente);
+		mensaje.setTo(destinatario);
+		mensaje.setSubject("Verifica tu correo - Traducia");
+		mensaje.setText("Hola " + nombreUsuario + ",\n\n"
+				+ "Gracias por registrarte en Traducia. Ingresa al siguiente enlace para activar tu cuenta (válido por 12 horas):\n\n"
+				+ enlace + "\n\n"
+				+ "Si no creaste esta cuenta, ignora este mensaje.");
+		mailSender.send(mensaje);
+	}
 
 }
