@@ -1,0 +1,153 @@
+<div class="landing-wrapper">
+  <nav class="navbar navbar-expand-lg landing-nav py-3">
+    <div class="container">
+      <a class="navbar-brand brand-logo d-flex align-items-center gap-2" routerLink="/">
+
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLanding">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navLanding">
+        <ul class="navbar-nav mx-auto gap-lg-4">
+          <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
+          <li class="nav-item"><a class="nav-link" href="#demo">Prueba en vivo</a></li>
+          <li class="nav-item"><a class="nav-link" href="#planes">Planes</a></li>
+        </ul>
+        <div class="d-flex gap-2">
+          <a routerLink="/planes" class="btn btn-primary-custom px-4">Registrarse</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero-section text-center">
+    <div class="container">
+      <div class="badge-pill mb-3 animate__animated animate__fadeInDown">
+      </div>
+      <h1 class="hero-title mb-4 animate__animated animate__fadeInUp">
+        Traduce textos y archivos <span class="text-gradient">PDF complejos</span> en segundos
+      </h1>
+      <p class="hero-subtitle mx-auto mb-5 animate__animated animate__fadeInUp">
+        Mantén intacta la estructura y tipografía de tus documentos combinando hasta tres motores de inteligencia artificial con precisión nativa.
+      </p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
+        <a routerLink="/planes" class="btn btn-primary-custom btn-lg px-5 py-3">Empezar ahora</a>
+        <a href="#demo" class="btn btn-glass btn-lg px-4 py-3">
+          <i class="fa-solid fa-play me-2"></i>Ver demostración
+        </a>
+      </div>
+
+      <div id="demo" class="demo-card mx-auto text-start animate__animated animate__fadeInUp">
+        <div class="demo-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="ms-2 small text-muted-custom">documento_tecnico.pdf</span>
+          </div>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" [class.btn-primary-custom]="idiomaSeleccionado === 'EN'" [class.btn-glass]="idiomaSeleccionado !== 'EN'" (click)="cambiarIdiomaDemo('EN')">Inglés</button>
+            <button type="button" class="btn" [class.btn-primary-custom]="idiomaSeleccionado === 'FR'" [class.btn-glass]="idiomaSeleccionado !== 'FR'" (click)="cambiarIdiomaDemo('FR')">Francés</button>
+            <button type="button" class="btn" [class.btn-primary-custom]="idiomaSeleccionado === 'DE'" [class.btn-glass]="idiomaSeleccionado !== 'DE'" (click)="cambiarIdiomaDemo('DE')">Alemán</button>
+          </div>
+        </div>
+        <div class="row g-0 demo-body">
+          <div class="col-md-6 p-4 border-end-custom">
+            <span class="lang-tag">Español (Detectado)</span>
+            <p class="mt-3 mb-0 demo-text">{{ textoDemoOrigen }}</p>
+          </div>
+          <div class="col-md-6 p-4 bg-highlight">
+            <span class="lang-tag accent">Traducción IA ({{ idiomaSeleccionado }})</span>
+            <p class="mt-3 mb-0 demo-text">{{ textoDemoDestino }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="caracteristicas" class="features-section py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card h-100">
+            <div class="icon-box mb-3"><i class="fa-solid fa-file-pdf"></i></div>
+            <h4>Formato PDF Intacto</h4>
+            <p class="text-muted-custom mb-0">Sube archivos y aparecerán traducidos conservando la estructura.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card h-100">
+            <div class="icon-box mb-3"><i class="fa-solid fa-brain"></i></div>
+            <h4>Hasta 3 IAs Simultáneas</h4>
+            <p class="text-muted-custom mb-0">Compara entre distintos motores neuronales según el nivel técnico o literario de cada texto.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card h-100">
+            <div class="icon-box mb-3"><i class="fa-solid fa-shield-halved"></i></div>
+            <h4>Privacidad Cifrada</h4>
+            <p class="text-muted-custom mb-0">Tus documentos se procesan bajo cifrado de extremo a extremo y se eliminan automáticamente al finalizar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="planes" class="pricing-section py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Planes diseñados para cada necesidad</h2>
+        <p class="text-muted-custom">Mejora tu capacidad de traducción cuando lo necesites</p>
+      </div>
+
+      <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4" *ngFor="let plan of planes">
+          <div class="pricing-card h-100 d-flex flex-column" [class.featured]="plan.id === 'oria'">
+            <div class="popular-badge" *ngIf="plan.id === 'oria'">Recomendado</div>
+            <div class="mb-4">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="fa-solid {{ plan.icono }} plan-icon"></i>
+                <h3 class="plan-name mb-0">{{ plan.nombre }}</h3>
+              </div>
+              <p class="text-muted-custom small">{{ plan.descripcion }}</p>
+              <div class="price-box my-3">
+                <span class="price">{{ formatearPrecio(plan.precio) }}</span>
+                <span class="period text-muted-custom" *ngIf="plan.precio > 0"> COP / mes</span>
+                <span class="period text-muted-custom" *ngIf="plan.precio === 0"> / siempre</span>
+              </div>
+            </div>
+
+            <ul class="list-unstyled feature-list mb-4 flex-grow-1">
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="fa-solid fa-circle-check mt-1 check-icon"></i>
+                <span>{{ plan.palabras ? 'Hasta ' + plan.palabras + ' palabras por traducción' : 'Palabras ilimitadas por traducción' }}</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="fa-solid fa-circle-check mt-1 check-icon"></i>
+                <span>{{ plan.archivosPorDia ? plan.archivosPorDia + ' archivos PDF por día' : 'Archivos PDF ilimitados por día' }}</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="fa-solid fa-circle-check mt-1 check-icon"></i>
+                <span>{{ plan.ias === 1 ? 'Acceso a 1 motor de IA' : 'Acceso a ' + plan.ias + ' motores de IA' }}</span>
+              </li>
+            </ul>
+
+            <a
+              routerLink="/planes"
+              class="btn w-100 py-3 fw-semibold"
+              [class.btn-primary-custom]="plan.id === 'oria'"
+              [class.btn-glass]="plan.id !== 'oria'">
+              {{ plan.precio === 0 ? 'Comenzar gratis' : 'Elegir ' + plan.nombre }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="landing-footer py-4 text-center">
+    <div class="container">
+      <p class="mb-0 text-muted-custom small">© 2026 TraducIA · traducción sin límites.</p>
+    </div>
+  </footer>
+</div>

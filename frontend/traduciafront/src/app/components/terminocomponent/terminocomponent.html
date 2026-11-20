@@ -1,0 +1,56 @@
+<div class="modal-overlay" *ngIf="activo" [class.animando-exit]="animandoExit">
+
+  <div class="modal-contenedor p-4 p-md-5 rounded-4 shadow-lg"
+       [class.modal-contenedor--error]="error"
+       [class.animando-exit]="animandoExit"
+       [class.animate__animated]="animandoShake"
+       [class.animate__headShake]="animandoShake"
+       (animationend)="onAnimationEnd()">
+
+    <div class="text-center mb-4">
+      <div class="icono-modal-box mx-auto mb-3">
+        <i class="fa-solid fa-language"></i>
+      </div>
+      <h3 class="fw-bold text-dark mb-1">Términos y Condiciones del Servicio</h3>
+      <p class="text-muted small mb-0">Bienvenido a <strong>TraducIA</strong>. Por favor, revisa y acepta nuestros términos y condiciones para continuar.</p>
+    </div>
+
+    <div class="terminos-scroll p-3 mb-4 rounded-3 border">
+      <ul class="lista-terminos ps-0 mb-0">
+        <li class="mb-3">
+          <strong>Vigencia y uso de la cuenta:</strong> El acuerdo rige desde el acceso a TraducIA y permanece activo mientras utilices la plataforma o tu cuenta siga habilitada.
+        </li>
+        <li class="mb-3">
+          <strong>Uso responsable de las traducciones:</strong> Te comprometes a no enviar contenido ilegal, ofensivo, difamatorio o que infrinja derechos de terceros a través de los motores de traducción.
+        </li>
+        <li class="mb-3">
+          <strong>Precisión de los modelos de IA:</strong> Las traducciones generadas mediante inteligencia artificial son asistidas y pueden requerir revisión humana en textos técnicos, legales, médicos o críticos.
+        </li>
+        <li class="mb-3">
+          <strong>Límites de planes y suscripciones:</strong> El acceso a los modelos de IA, límites de palabras y traducción de archivos depende de tu plan activo (Free Pass, orlA o InfinitIA) y de las condiciones vigentes.
+        </li>
+        <li class="mb-3">
+          <strong>Privacidad y procesamiento de textos/archivos:</strong> Los textos y documentos cargados se procesan para brindar el servicio de traducción; evita incluir contraseñas, claves o datos sensibles innecesarios.
+        </li>
+        <li>
+          <strong>Medidas ante abusos o infracciones:</strong> TraducIA puede restringir o suspender el acceso ante usos automatizados no autorizados, intentos de eludir límites o incumplimiento de estas normas.
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2 px-3 small alerta-error" role="alert">
+      <i class="fa-solid fa-circle-exclamation fs-5 flex-shrink-0"></i>
+      <div>Debes aceptar los términos y condiciones para continuar usando TraducIA.</div>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-3">
+      <button type="button" class="btn btn-rechazar w-100 w-sm-auto" (click)="rechazar()">
+        <i class="fa-solid fa-xmark me-1"></i> No estoy de acuerdo
+      </button>
+      <button type="button" class="btn btn-aceptar w-100 w-sm-auto" (click)="aceptar()">
+        <i class="fa-solid fa-check me-1"></i> Sí, estoy de acuerdo
+      </button>
+    </div>
+
+  </div>
+</div>

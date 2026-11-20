@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -111,10 +112,11 @@ public class User implements UserDetails{
 	 * @param username nombre de usuario único
 	 * @param password contraseña del usuario estando ya hasheada
 	 */
-	public User(String username, String password) {
+	public User(String username, String password, String email) {
 		this();
 		this.username = username;
 		this.password = password;
+		this.email = email;
 	}
 	
 	/**
@@ -124,11 +126,12 @@ public class User implements UserDetails{
 	 * @param password contraseña del usuario (ya hasheada)
 	 * @param role     rol asignado al usuario
 	 */
-	public User(String username, String password, Role role) {
+	public User(String username, String password, String email ,Role role) {
 		this();
 		this.username = username;
 		this.password = password;
 		this.role = role;
+		this.email = email;
 	}
 	
 	/**
@@ -296,10 +299,19 @@ public class User implements UserDetails{
 	/**
 	 * Obtiene el identificador único del usuario.
 	 *
-	 * @return identificador del usuario, o null si aún no ha sido guardado
+	 * @return identificador del usuario
 	 */
 	public Long getId() {
 		return id;
+	}
+	
+	/**
+	 * Establece el identificador único del usuario.
+	 *
+	 * @param id identificador del usuario
+	 */
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	

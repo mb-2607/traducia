@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { Suscripcioncomponent } from './components/suscripcioncomponent/suscripcioncomponent';
 import { Userpagecomponent } from './components/userpagecomponent/userpagecomponent';
 import { Nuevatraduccioncomponent } from './components/nuevatraduccioncomponent/nuevatraduccioncomponent';
@@ -11,6 +12,8 @@ import { Adminpagecomponent } from './components/adminpagecomponent/adminpagecom
 import { Auditoriacomponent } from './components/auditoriacomponent/auditoriacomponent';
 import { Perfilcomponent } from './components/perfilcomponent/perfilcomponent';
 import { Recuperarcontrasenacomponent } from './components/recuperarcontrasenacomponent/recuperarcontrasenacomponent';
+import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 import { administradorGuard } from './guards/administradorguard-guard';
 import { autenticacionGuard } from './guards/autenticacionguard-guard';
 import { visitanteGuard } from './guards/visitanteguard-guard';
@@ -18,20 +21,28 @@ import { visitanteGuard } from './guards/visitanteguard-guard';
 /**
  * Configuración de navegación de TraducIA.
  *
- * El login permite el acceso de visitantes y redirige
- * a quienes ya tienen una sesión local vigente.
+ * El acceso inicial dirige al login. La landing y las pantallas
+ * de recuperación de contraseña permanecen disponibles públicamente.
  *
  * El perfil, los planes y el dashboard requieren autenticación.
- * Las páginas administrativas requieren además el rol ADMIN.
+ * Las páginas administrativas requieren el rol ADMIN.
  *
- * La recuperación de contraseña permanece accesible
- * independientemente de que exista una sesión iniciada.
+ * Los guards de rutas hijas comprueban también la navegación
+ * entre las distintas secciones de cada área protegida.
+ *
+ * La última ruta presenta la página no encontrada cuando
+ * ninguna dirección anterior coincide.
  */
 const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
+  },
+  {
+    path: 'landing',
+    component: Landingpagecomponent,
+    title: 'TraducIA',
   },
   {
     path: 'login',
@@ -129,16 +140,17 @@ const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'login',
+    component: Noencontradocomponent,
+    title: 'Página no encontrada | TraducIA',
   },
 ];
 
 /**
  * Módulo de enrutamiento principal.
  *
- * Registra las rutas públicas y protegidas de la aplicación.
+ * Registra las páginas públicas y protegidas de la aplicación.
  * Exporta RouterModule para utilizar los enlaces de navegación
- * y los puntos de presentación de las vistas.
+ * y presentar las vistas mediante router-outlet.
  */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
