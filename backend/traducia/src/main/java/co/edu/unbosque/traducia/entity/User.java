@@ -297,6 +297,15 @@ public class User implements UserDetails{
 	}
 	
 	/**
+	 * Obtiene el identificador único del usuario.
+	 *
+	 * @return identificador del usuario
+	 */
+	public Long getId() {
+		return id;
+	}
+	
+	/**
 	 * Establece el identificador único del usuario.
 	 *
 	 * @param id identificador del usuario
