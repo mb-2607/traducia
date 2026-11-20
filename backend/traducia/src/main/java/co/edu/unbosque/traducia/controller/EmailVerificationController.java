@@ -16,6 +16,7 @@ import co.edu.unbosque.traducia.exception.InvalidTokenException;
 import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.service.EmailVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 /**
  * Controlador REST encargado de exponer los endpoints de verificación de correo electrónico.
@@ -63,7 +64,7 @@ public class EmailVerificationController {
 	 * @return respuesta HTTP 200 confirmando el envío del nuevo enlace
 	 */
 	@PostMapping("/resend-verification")
-	public ResponseEntity<String> resendVerification(@RequestBody ResendVerificationRequestDTO request) {
+	public ResponseEntity<String> resendVerification(@Valid @RequestBody ResendVerificationRequestDTO request) {
 		emailVerificationService.reenviarVerificacion(request);
 		return ResponseEntity.ok("Se ha enviado un nuevo enlace de verificación a tu correo electrónico");
 	}

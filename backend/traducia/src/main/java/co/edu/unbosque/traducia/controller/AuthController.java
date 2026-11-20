@@ -27,6 +27,7 @@ import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
 import co.edu.unbosque.traducia.security.JwtUtil;
 import co.edu.unbosque.traducia.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 /**
  * Controlador REST encargado de gestionar los procesos de autenticación
@@ -108,7 +109,7 @@ public class AuthController {
 	 * @throws AuthenticationException si las credenciales proporcionadas no son válidas.
 	 */
 	@PostMapping(path = "login")
-	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
+	public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getNombre(), loginRequest.getPassword()));
 
@@ -138,7 +139,7 @@ public class AuthController {
 	 * @throws InvalidPasswordException si la contraseña no cumple con los requisitos establecidos.
 	 */
 	@PostMapping(path = "register")
-	public ResponseEntity<UserResponseDTO> register(@RequestBody RegisterRequestDTO registerRequest) {
+	public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO registerRequest) {
 		UserResponseDTO userResponse = userService.crear(registerRequest);
 		return new ResponseEntity<UserResponseDTO>(userResponse, HttpStatus.CREATED);
 	}

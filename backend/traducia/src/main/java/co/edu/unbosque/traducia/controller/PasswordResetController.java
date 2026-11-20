@@ -1,4 +1,5 @@
 package co.edu.unbosque.traducia.controller;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,6 +16,7 @@ import co.edu.unbosque.traducia.exception.InvalidTokenException;
 import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 /**
  * Controlador REST público encargado de gestionar la recuperación de contraseñas olvidadas.
@@ -22,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * Expone los endpoints bajo la ruta base {@code /auth} para solicitar el envío
  * del correo con el enlace de restablecimiento y para establecer una nueva
  * contraseña validando el token recibido desde el frontend.
+ * </p>
  *
  * @author
  * @version 1.0
@@ -37,9 +40,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 		"http://localhost:4200" })
 @RestController
 @RequestMapping("/auth")
-
 public class PasswordResetController {
-	
+
 	/**
 	 * Servicio encargado de gestionar los tokens y el envío de correos de recuperación.
 	 */
@@ -61,7 +63,7 @@ public class PasswordResetController {
 	 * @return {@link ResponseEntity} con estado {@code 200 OK} y un mensaje de confirmación.
 	 */
 	@PostMapping(path = "forgot-password")
-	public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
+	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
 		passwordResetService.solicitarRecuperacion(request);
 		return ResponseEntity.ok("Se ha enviado un enlace de recuperación a tu correo electrónico");
 	}
@@ -73,7 +75,7 @@ public class PasswordResetController {
 	 * @return {@link ResponseEntity} con estado {@code 200 OK} y un mensaje de confirmación.
 	 */
 	@PostMapping(path = "reset-password")
-	public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+	public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
 		passwordResetService.restablecerPassword(request);
 		return ResponseEntity.ok("Contraseña restablecida correctamente");
 	}
@@ -136,5 +138,4 @@ public class PasswordResetController {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN)
 				.body(e.getMessage());
 	}
-
 }

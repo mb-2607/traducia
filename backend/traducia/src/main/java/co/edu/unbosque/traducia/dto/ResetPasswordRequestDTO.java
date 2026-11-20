@@ -1,5 +1,8 @@
 package co.edu.unbosque.traducia.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * Objeto de transferencia de datos (DTO) utilizado para completar el
  * restablecimiento de contraseña mediante un token de recuperación válido.
@@ -7,16 +10,19 @@ package co.edu.unbosque.traducia.dto;
  * @author
  * @version 1.0
  */
-
 public class ResetPasswordRequestDTO {
+
 	/**
 	 * Token único recibido por el usuario en el enlace de recuperación.
 	 */
+	@NotBlank(message = "El token de recuperación es obligatorio")
 	private String token;
 
 	/**
 	 * Nueva contraseña que el usuario desea establecer en su cuenta.
 	 */
+	@NotBlank(message = "La nueva contraseña es obligatoria")
+	@Size(min = 8, message = "La nueva contraseña debe tener al menos 8 caracteres")
 	private String nuevaPassword;
 
 	/**
@@ -71,5 +77,4 @@ public class ResetPasswordRequestDTO {
 	public void setNuevaPassword(String nuevaPassword) {
 		this.nuevaPassword = nuevaPassword;
 	}
-
 }

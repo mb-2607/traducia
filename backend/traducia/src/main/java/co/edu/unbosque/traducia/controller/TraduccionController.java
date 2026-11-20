@@ -14,15 +14,17 @@ import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
 import co.edu.unbosque.traducia.exception.PlanCharacterLimitExceededException;
 import co.edu.unbosque.traducia.service.TraduccionService;
+import jakarta.validation.Valid;
 
 /**
  * Controlador REST del módulo de traducción.
- *
- * Expone los endpoints bajo la ruta <code>/traductor</code>. Requiere un usuario
+ * <p>
+ * Expone los endpoints bajo la ruta {@code /traductor}. Requiere un usuario
  * autenticado y delega la lógica en {@link TraduccionService}.
+ * </p>
  */
 @CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "${front.url}",
-"http://localhost:4200" })
+		"http://localhost:4200" })
 @RestController
 @RequestMapping("/traductor")
 public class TraduccionController {
@@ -40,22 +42,22 @@ public class TraduccionController {
 	public TraduccionController(TraduccionService traduccionServ) {
 		this.traduccionServ = traduccionServ;
 	}
-	
+
 	/**
 	 * Traduce un texto con los proveedores del plan del usuario autenticado.
 	 *
-	 * @param request datos de la traducción: idiomas de origen y destino y texto
+	 * @param request        datos de la traducción: idiomas de origen y destino y texto
 	 * @param authentication autenticación de la que se toma el nombre del usuario
 	 * @return la solicitud creada con la traducción de cada proveedor y estado HTTP 201
 	 */
 	@PostMapping(path = "/traducir")
-    public ResponseEntity<SolicitudTraduccionResponseDTO> traducir(@RequestBody TraduccionRequestDTO request,
-                                           Authentication authentication) {
-        String nombre = authentication.getName();
-        SolicitudTraduccionResponseDTO respuesta = traduccionServ.traducir(request, nombre);
-        return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
-    }
-	
+	public ResponseEntity<SolicitudTraduccionResponseDTO> traducir(@Valid @RequestBody TraduccionRequestDTO request,
+			Authentication authentication) {
+		String nombre = authentication.getName();
+		SolicitudTraduccionResponseDTO respuesta = traduccionServ.traducir(request, nombre);
+		return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+	}
+
 	/**
 	 * Maneja {@link PlanCharacterLimitExceededException}.
 	 *
@@ -65,6 +67,4 @@ public class TraduccionController {
 	public ResponseEntity<String> manejarPlanCharacterLimitExceededException() {
 		return ResponseEntity.badRequest().body("Cantidad de caracteres excedidad frente al plan actual");
 	}
-	
-
 }
