@@ -1,5 +1,7 @@
 package co.edu.unbosque.traducia.dto;
 
+import co.edu.unbosque.traducia.entity.PlanType;
+import co.edu.unbosque.traducia.entity.Role;
 
 /**
  * DTO (Data Transfer Object) utilizado para representar la información de un
@@ -27,12 +29,12 @@ public class UserResponseDTO {
     /**
      * Identificador del plan asociado al usuario.
      */
-    private String planId;
+    private PlanType planId;
 
     /**
      * Rol asignado al usuario dentro del sistema.
      */
-    private String rol;
+    private Role rol;
 
     /**
      * Obtiene el nombre del usuario.
@@ -75,7 +77,7 @@ public class UserResponseDTO {
      *
      * @return identificador del plan.
      */
-    public String getPlanId() {
+    public PlanType getPlanId() {
         return planId;
     }
 
@@ -84,7 +86,7 @@ public class UserResponseDTO {
      *
      * @param planId identificador del plan que se asignará.
      */
-    public void setPlanId(String planId) {
+    public void setPlanId(PlanType planId) {
         this.planId = planId;
     }
 
@@ -93,7 +95,7 @@ public class UserResponseDTO {
      *
      * @return rol asignado al usuario.
      */
-    public String getRol() {
+    public Role getRol() {
         return rol;
     }
 
@@ -102,7 +104,7 @@ public class UserResponseDTO {
      *
      * @param rol rol que se asignará al usuario.
      */
-    public void setRol(String rol) {
+    public void setRol(Role rol) {
         this.rol = rol;
     }
 
@@ -114,7 +116,7 @@ public class UserResponseDTO {
      * @param planId identificador del plan asociado al usuario.
      * @param rol rol asignado al usuario dentro del sistema.
      */
-    public UserResponseDTO(String nombre, String correo, String planId, String rol) {
+    public UserResponseDTO(String nombre, String correo, PlanType planId, Role rol) {
         this.nombre = nombre;
         this.correo = correo;
         this.planId = planId;

@@ -1,5 +1,7 @@
 package co.edu.unbosque.traducia.configuration;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -10,8 +12,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import co.edu.unbosque.traducia.entity.Idioma;
 import co.edu.unbosque.traducia.entity.Role;
 import co.edu.unbosque.traducia.entity.User;
+import co.edu.unbosque.traducia.repository.IdiomaRepository;
 import co.edu.unbosque.traducia.repository.UserRepository;
 
 /**
@@ -82,6 +86,42 @@ public class LoadDatabase {
 				userRepo.save(normalUser);
 				log.info("Precargando usuario normal");
 			}
+		};
+	}
+	
+	/**
+	 * Define el proceso de inicialización de los idiomas predeterminados
+	 * que se ejecuta durante el arranque de la aplicación.
+	 * <p>
+	 * Registra los idiomas Español, Inglés, Francés, Alemán y Portugués
+	 * en la base de datos. Antes de insertar cada idioma, comprueba
+	 * si ya existe un registro con el código correspondiente para evitar
+	 * duplicados.
+	 * </p>
+	 *
+	 * @param idiomaRepo repositorio encargado de consultar y almacenar
+	 *                   los idiomas en la base de datos.
+	 * @return componente CommandLineRunner encargado de ejecutar
+	 *         la inicialización de los idiomas al iniciar la aplicación.
+	 */
+	@Bean
+	CommandLineRunner initIdiomas(IdiomaRepository idiomaRepo) {
+		return args -> {
+			Map<String, String> idiomas = new LinkedHashMap<>();
+			idiomas.put("es", "Español");
+			idiomas.put("en", "Inglés");
+			idiomas.put("fr", "Francés");
+			idiomas.put("de", "Alemán");
+			idiomas.put("pt", "Portugués");
+
+			idiomas.forEach((codigo, nombre) -> {
+				if (idiomaRepo.findByCodigo(codigo).isPresent()) {
+					log.info("El idioma {} ya existe, omitiendo...", codigo);
+				} else {
+					idiomaRepo.save(new Idioma(codigo, nombre));
+					log.info("Precargando idioma {}", codigo);
+				}
+			});
 		};
 	}
 }
