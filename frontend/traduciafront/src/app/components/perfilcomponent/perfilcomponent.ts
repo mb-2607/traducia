@@ -164,7 +164,7 @@ export class Perfilcomponent implements OnInit {
             return EMPTY;
           }
           return this.recarga.pipe(
-            startWith(undefined),
+            startWith(null),
             switchMap(() => {
               this.cargando.set(true);
               this.error.set('');
@@ -319,13 +319,21 @@ export class Perfilcomponent implements OnInit {
       });
   }
 
-  /** Cierra únicamente la sesión que mantiene este navegador. */
+  /**
+   * Cierra únicamente la sesión que mantiene este navegador
+   * y redirige al inicio de sesión.
+   */
   protected cerrarSesion(): void {
     if (this.guardando()) {
       return;
     }
+
     this.auth.cerrarSesion();
-    void this.router.navigate(['/login']);
+    this.router.navigate(['/login']).catch(() => {
+      this.error.set(
+        'La sesión se cerró, pero no fue posible abrir el inicio de sesión.',
+      );
+    });
   }
 
   /** Sustituye el perfil visible y toma sus valores como base de edición. */
