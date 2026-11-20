@@ -91,12 +91,18 @@ export class Recuperarcontrasenacomponent implements OnInit {
     this.enlaceValido.set(token !== undefined && token.length > 0 && token.length <= 4096);
     this.token = this.enlaceValido() && token !== undefined ? token : null;
     if (tokens.length > 0) {
-      void this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { token: null },
-        queryParamsHandling: 'merge',
-        replaceUrl: true,
-      });
+      this.router
+        .navigate([], {
+          relativeTo: this.route,
+          queryParams: { token: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        })
+        .catch(() => {
+          this.error.set(
+            'No fue posible preparar la recuperación. Abre nuevamente el enlace del correo.',
+          );
+        });
     }
   }
 
