@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
@@ -25,11 +26,14 @@ import co.edu.unbosque.traducia.exception.ExternalAPIException;
  * @version 1.0
  */
 public class ExternalHTTPRequestHandler {
-	
-	/** Cliente HTTP compartido por todas las peticiones (HTTP/2, timeout de conexión de 20 s). */
+
+	/**
+	 * Cliente HTTP compartido por todas las peticiones (HTTP/2, timeout de conexión
+	 * de 20 s).
+	 */
 	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2)
 			.connectTimeout(Duration.ofSeconds(20)).build();
-	
+
 	/**
 	 * Realiza una petición HTTP GET a una API externa y deserializa el cuerpo JSON
 	 * de la respuesta en un objeto del tipo indicado.
@@ -54,12 +58,12 @@ public class ExternalHTTPRequestHandler {
 	 *                                  válido para {@code classType}.
 	 * @throws IllegalArgumentException si {@code url} no es una URI válida.
 	 */
-	public static <T> T doGetAndConvertToDTO(String url, String apiKey, AuthenticationType authType,Class<T> classType){
+	public static <T> T doGetAndConvertToDTO(String url, String apiKey, AuthenticationType authType,
+			Class<T> classType) {
 		HttpRequest request = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.header("Content-Type", "application/json")
-				.header("Authorization", authType.crearFormatoLlave(apiKey))
+				.header("Content-Type", "application/json").header("Authorization", authType.crearFormatoLlave(apiKey))
 				.build();
-		
+
 		HttpResponse<String> response = null;
 		try {
 			response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
@@ -81,6 +85,67 @@ public class ExternalHTTPRequestHandler {
 			throw new IllegalStateException("Error al deserializar el JSON");
 		}
 
+	}
+
+	/**
+	 * Realiza una petición HTTP POST a una API externa enviando un cuerpo JSON y
+	 * deserializa el cuerpo JSON de la respuesta en un objeto del tipo indicado.
+	 * <p>
+	 * El objeto {@code body} se serializa a JSON con Gson y se envía con los
+	 * encabezados {@code Content-Type: application/json} y {@code Authorization},
+	 * este último construido con
+	 * {@link AuthenticationType#crearFormatoLlave(String)}. La petición tiene un
+	 * tiempo máximo de espera de 60 segundos.
+	 * </p>
+	 *
+	 * @param <T>       tipo del DTO al que se convertirá la respuesta.
+	 * @param url       dirección completa del recurso al que se enviará la
+	 *                  petición.
+	 * @param apiKey    llave o token de acceso de la API externa.
+	 * @param authType  tipo de autenticación que define el esquema del encabezado
+	 *                  {@code Authorization}.
+	 * @param body      objeto (DTO o {@code Map}) que se serializará a JSON y se
+	 *                  enviará como cuerpo de la petición.
+	 * @param classType clase del DTO destino para la deserialización con Gson.
+	 * @return objeto de tipo {@code T} con los datos de la respuesta.
+	 * @throws ExternalAPIException     si ocurre un error de comunicación o se
+	 *                                  agota el tiempo de espera (código 502), la
+	 *                                  petición es interrumpida (código 504) o la
+	 *                                  API responde con un código HTTP fuera del
+	 *                                  rango 2xx.
+	 * @throws IllegalStateException    si el cuerpo de la respuesta no es un JSON
+	 *                                  válido para {@code classType}.
+	 * @throws IllegalArgumentException si {@code url} no es una URI válida.
+	 */
+	public static <T> T doPostAndConvertToDTO(String url, String apiKey, AuthenticationType authType, Object body,
+			Class<T> classType) {
+
+		Gson gson = new Gson();
+		String jsonBody = gson.toJson(body);
+
+		HttpRequest request = HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+				.uri(URI.create(url)).timeout(Duration.ofSeconds(60)).header("Content-Type", "application/json")
+				.header("Authorization", authType.crearFormatoLlave(apiKey)).build();
+
+		HttpResponse<String> response = null;
+		try {
+			response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+		} catch (IOException e) {
+			throw new ExternalAPIException(502);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new ExternalAPIException(504);
+		}
+
+		if (response.statusCode() < 200 || response.statusCode() >= 300) {
+			throw new ExternalAPIException(response.statusCode());
+		}
+
+		try {
+			return gson.fromJson(response.body(), classType);
+		} catch (JsonParseException e) {
+			throw new IllegalStateException("Error al deserializar el JSON", e);
+		}
 	}
 
 }

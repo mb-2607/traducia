@@ -108,11 +108,39 @@ public class LoadDatabase {
 	CommandLineRunner initIdiomas(IdiomaRepository idiomaRepo) {
 		return args -> {
 			Map<String, String> idiomas = new LinkedHashMap<>();
-			idiomas.put("es", "Español");
-			idiomas.put("en", "Inglés");
-			idiomas.put("fr", "Francés");
-			idiomas.put("de", "Alemán");
-			idiomas.put("pt", "Portugués");
+			idiomas.put("es",    "Español");
+			idiomas.put("en-US", "Inglés (Estados Unidos)");
+			idiomas.put("en-GB", "Inglés (Reino Unido)");
+			idiomas.put("pt-BR", "Portugués (Brasil)");
+			idiomas.put("pt-PT", "Portugués (Portugal)");
+			idiomas.put("fr",    "Francés");
+			idiomas.put("de",    "Alemán");
+			idiomas.put("it",    "Italiano");
+			idiomas.put("nl",    "Neerlandés");
+			idiomas.put("pl",    "Polaco");
+			idiomas.put("ru",    "Ruso");
+			idiomas.put("uk",    "Ucraniano");
+			idiomas.put("tr",    "Turco");
+			idiomas.put("ar",    "Árabe");
+			idiomas.put("zh-CN", "Chino (simplificado)");
+			idiomas.put("zh-TW", "Chino (tradicional)");
+			idiomas.put("ja",    "Japonés");
+			idiomas.put("ko",    "Coreano");
+			idiomas.put("sv",    "Sueco");
+			idiomas.put("da",    "Danés");
+			idiomas.put("nb",    "Noruego (Bokmål)");
+			idiomas.put("fi",    "Finés");
+			idiomas.put("cs",    "Checo");
+			idiomas.put("sk",    "Eslovaco");
+			idiomas.put("sl",    "Esloveno");
+			idiomas.put("ro",    "Rumano");
+			idiomas.put("hu",    "Húngaro");
+			idiomas.put("el",    "Griego");
+			idiomas.put("bg",    "Búlgaro");
+			idiomas.put("id",    "Indonesio");
+			idiomas.put("et",    "Estonio");
+			idiomas.put("lv",    "Letón");
+			idiomas.put("lt",    "Lituano");
 
 			idiomas.forEach((codigo, nombre) -> {
 				if (idiomaRepo.findByCodigo(codigo).isPresent()) {
