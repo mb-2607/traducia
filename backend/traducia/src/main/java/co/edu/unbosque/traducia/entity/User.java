@@ -297,12 +297,12 @@ public class User implements UserDetails{
 	}
 	
 	/**
-	 * Obtiene el identificador único del usuario.
+	 * Establece el identificador único del usuario.
 	 *
-	 * @return identificador del usuario, o null si aún no ha sido guardado
+	 * @param id identificador del usuario
 	 */
-	public Long getId() {
-		return id;
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	
