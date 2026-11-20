@@ -4,39 +4,46 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * DTO de entrada para solicitar una traducción.
+ * <p>
+ * Contiene los códigos de los idiomas de origen y destino, así como el texto
+ * que se desea traducir.
+ * </p>
  *
- * Contiene los códigos de los idiomas de origen y destino y el texto, que no puede estar vacío.
+ * @author
+ * @version 1.0
  */
 public class TraduccionRequestDTO {
 
 	/**
 	 * Código del idioma de origen.
 	 */
+	@NotBlank(message = "El idioma de origen es obligatorio")
 	private String origen;
+
 	/**
 	 * Código del idioma de destino.
 	 */
+	@NotBlank(message = "El idioma de destino es obligatorio")
 	private String destino;
-	
+
 	/**
 	 * Texto a traducir.
 	 */
-	@NotBlank
+	@NotBlank(message = "El texto a traducir es obligatorio")
 	private String texto;
 
 	/**
-	 * Constructor vacío, requerido por JPA y por la deserialización JSON.
+	 * Constructor vacío, requerido para la deserialización JSON.
 	 */
 	public TraduccionRequestDTO() {
-		
 	}
 
 	/**
 	 * Crea una instancia con todos los atributos.
 	 *
-	 * @param origen código del idioma de origen
-	 * @param destino código del idioma de destino
-	 * @param texto texto a traducir
+	 * @param origen  código del idioma de origen.
+	 * @param destino código del idioma de destino.
+	 * @param texto   texto a traducir.
 	 */
 	public TraduccionRequestDTO(String origen, String destino, String texto) {
 		this.origen = origen;
@@ -47,7 +54,7 @@ public class TraduccionRequestDTO {
 	/**
 	 * Obtiene el código del idioma de origen.
 	 *
-	 * @return código del idioma de origen
+	 * @return código del idioma de origen.
 	 */
 	public String getOrigen() {
 		return origen;
@@ -56,7 +63,7 @@ public class TraduccionRequestDTO {
 	/**
 	 * Establece el código del idioma de origen.
 	 *
-	 * @param origen código del idioma de origen a asignar
+	 * @param origen código del idioma de origen a asignar.
 	 */
 	public void setOrigen(String origen) {
 		this.origen = origen;
@@ -65,7 +72,7 @@ public class TraduccionRequestDTO {
 	/**
 	 * Obtiene el código del idioma de destino.
 	 *
-	 * @return código del idioma de destino
+	 * @return código del idioma de destino.
 	 */
 	public String getDestino() {
 		return destino;
@@ -74,7 +81,7 @@ public class TraduccionRequestDTO {
 	/**
 	 * Establece el código del idioma de destino.
 	 *
-	 * @param destino código del idioma de destino a asignar
+	 * @param destino código del idioma de destino a asignar.
 	 */
 	public void setDestino(String destino) {
 		this.destino = destino;
@@ -83,7 +90,7 @@ public class TraduccionRequestDTO {
 	/**
 	 * Obtiene el texto a traducir.
 	 *
-	 * @return texto a traducir
+	 * @return texto a traducir.
 	 */
 	public String getTexto() {
 		return texto;
@@ -92,10 +99,9 @@ public class TraduccionRequestDTO {
 	/**
 	 * Establece el texto a traducir.
 	 *
-	 * @param texto texto a traducir a asignar
+	 * @param texto texto a traducir a asignar.
 	 */
 	public void setTexto(String texto) {
 		this.texto = texto;
 	}
-
 }

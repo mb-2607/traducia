@@ -1,5 +1,8 @@
 package co.edu.unbosque.traducia.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * Objeto de transferencia de datos (DTO) utilizado para solicitar el envío de un
  * correo de recuperación de contraseña.
@@ -7,11 +10,13 @@ package co.edu.unbosque.traducia.dto;
  * @author
  * @version 1.0
  */
-
 public class ForgotPasswordRequestDTO {
+
 	/**
 	 * Correo electrónico registrado del usuario que solicita recuperar su contraseña.
 	 */
+	@NotBlank(message = "El correo electrónico es obligatorio")
+	@Email(message = "El formato del correo electrónico no es válido")
 	private String correo;
 
 	/**
@@ -46,5 +51,4 @@ public class ForgotPasswordRequestDTO {
 	public void setCorreo(String correo) {
 		this.correo = correo;
 	}
-
 }
