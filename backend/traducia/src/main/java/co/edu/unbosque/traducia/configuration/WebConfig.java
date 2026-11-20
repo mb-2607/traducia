@@ -4,6 +4,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Clase de configuración de Spring MVC.
+ * <p>
+ * Se encarga de registrar el interceptor de auditoría para que intercepte
+ * las solicitudes HTTP de la aplicación, definiendo qué rutas se auditan
+ * y cuáles quedan excluidas.
+ * </p>
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

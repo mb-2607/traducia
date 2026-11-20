@@ -13,6 +13,15 @@ import co.edu.unbosque.traducia.service.AuditoriaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Interceptor que registra la auditoría de las solicitudes HTTP.
+ * <p>
+ * Mide el tiempo de procesamiento de cada solicitud y, al finalizar,
+ * guarda un {@link AuditoriaLog} con el usuario autenticado (o "anonimo"),
+ * el método, la ruta, el código de estado, la IP de origen, la duración
+ * y la fecha del evento.
+ * </p>
+ */
 @Component
 public class AuditoriaInterceptor implements HandlerInterceptor {
 

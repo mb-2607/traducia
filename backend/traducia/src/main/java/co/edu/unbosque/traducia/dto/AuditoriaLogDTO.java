@@ -2,6 +2,15 @@ package co.edu.unbosque.traducia.dto;
 
 import java.time.LocalDateTime;
 
+/**
+ * Objeto de transferencia de datos que representa la información
+ * de un registro de auditoría.
+ * <p>
+ * Se utiliza para transportar los datos de auditoría desde la capa
+ * de servicio hacia las respuestas de la API, sin exponer directamente
+ * la entidad de persistencia.
+ * </p>
+ */
 public class AuditoriaLogDTO {
 
 	/** Identificador único del registro de auditoría. */
