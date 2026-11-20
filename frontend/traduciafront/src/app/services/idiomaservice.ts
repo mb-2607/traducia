@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Idioma} from '../models/idiomamodel';
-import {Observable, of} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { Idioma } from '../models/idiomamodel';
 
 /**
  * Catálogo de idiomas soportados por la aplicación.
@@ -8,7 +9,7 @@ import {Observable, of} from 'rxjs';
  * Cada idioma incluye su identificador (`id`), el nombre que se muestra
  * al usuario (`nombre`) y el código de voz (`voz`), usado para la
  * síntesis de voz con la variante regional correspondiente (por ejemplo, `es-CO`).
- * Esto es así mientras se implementa en el Back.
+ * El catálogo se define localmente mientras se integra con el backend.
  */
 const IDIOMAS: Idioma[] = [
   { id: 'es', nombre: 'Español', voz: 'es-CO' },
@@ -25,14 +26,14 @@ const IDIOMAS: Idioma[] = [
  * Provee la lista de idiomas disponibles para traducir. Los datos son
  * locales (constante `IDIOMAS`), pero se exponen como `Observable` para
  * que, si más adelante se obtienen desde el backend, los componentes
- * que lo consumen no tengan que cambiar.
+ * que lo consumen mantengan la misma forma de acceder al catálogo.
  *
  * Está disponible globalmente (`providedIn: 'root'`).
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class IdiomaService {
+  /** Catálogo de idiomas que entrega el servicio. */
+  private readonly idiomas = IDIOMAS;
 
   /**
    * Obtiene la lista de idiomas disponibles.
@@ -40,7 +41,6 @@ export class IdiomaService {
    * @returns Observable que emite una sola vez el arreglo de idiomas y se completa.
    */
   getListaIdioma(): Observable<Idioma[]> {
-    return of(IDIOMAS);
+    return of(this.idiomas);
   }
-
 }

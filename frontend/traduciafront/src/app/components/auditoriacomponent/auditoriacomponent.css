@@ -1,0 +1,741 @@
+/*
+ * Auditoría de TraducIA.
+ *
+ * Las superficies de cristal respetan los temas claro y oscuro.
+ * Los colores de los planes pertenecen a cada actor y no cambian
+ * el color de las demás filas.
+ */
+:host {
+  --au-fondo: var(--td-fondo, #000);
+  --au-texto: var(--td-texto, #f5f5f5);
+  --au-secundario: var(--td-secundario, #b3b3b3);
+
+  --au-borde: color-mix(
+    in srgb,
+    var(--au-texto) 17%,
+    transparent
+  );
+
+  --au-vidrio: color-mix(
+    in srgb,
+    var(--au-fondo) 78%,
+    transparent
+  );
+
+  --au-solido: color-mix(
+    in srgb,
+    var(--au-fondo) 94%,
+    var(--au-texto) 6%
+  );
+
+  --au-reflejo: color-mix(
+    in srgb,
+    var(--au-texto) 6%,
+    transparent
+  );
+
+  display: block;
+  min-block-size: 100%;
+  background: var(--au-fondo);
+  color: var(--au-texto);
+}
+
+.auditoria {
+  max-inline-size: 96rem;
+  padding: clamp(1rem, 3vw, 2.75rem);
+}
+
+.auditoria-barra,
+.auditoria-cabecera,
+.auditoria-filtros-pie,
+.auditoria-paginacion,
+.auditoria-modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.auditoria-barra {
+  margin-block-end: 2rem;
+}
+
+.auditoria-cabecera {
+  margin-block-end: 1.75rem;
+}
+
+.au-antetitulo {
+  margin-block-end: 0.5rem;
+  color: var(--au-secundario);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 0.7rem;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+p {
+  margin-block: 0 0.8rem;
+}
+
+.au-secundario {
+  color: var(--au-secundario);
+  line-height: 1.65;
+}
+
+.au-distintivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 2rem;
+  color: var(--au-secundario);
+  font-size: 0.8rem;
+}
+
+/* Superficies principales de cristal. */
+.au-panel {
+  border: 1px solid var(--au-borde);
+  border-radius: 1.4rem;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 11%),
+    transparent 55%
+  ),
+  var(--au-vidrio);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 30%),
+  0 18px 45px var(--td-sombra, rgb(0 0 0 / 25%));
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+/* Filtros distribuidos mediante las doce columnas de Bootstrap. */
+.auditoria-filtros {
+  padding: 1.25rem;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-block-end: 0.6rem;
+  color: var(--au-secundario);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.au-campo {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 2.95rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 0.8rem;
+  background: var(--au-fondo);
+  color: var(--au-texto);
+  font: inherit;
+  font-size: 0.85rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+  transition: border-color 180ms ease,
+  box-shadow 180ms ease;
+}
+
+.au-campo::placeholder {
+  color: var(--au-secundario);
+  opacity: 0.85;
+}
+
+.au-campo:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--au-texto) 35%,
+    transparent
+  );
+}
+
+.au-campo:focus-visible {
+  box-shadow: 0 0 0 4px var(--au-reflejo);
+}
+
+select.au-campo {
+  cursor: pointer;
+}
+
+.au-campo option {
+  background: var(--au-solido);
+  color: var(--au-texto);
+}
+
+.au-campo[aria-invalid="true"] {
+  border-color: var(--td-error, #ffb5b5);
+}
+
+.auditoria-filtros-pie {
+  margin-block-start: 1.1rem;
+}
+
+.auditoria-filtros-pie p {
+  margin: 0;
+  font-size: 0.77rem;
+}
+
+.auditoria-filtros-pie p > i {
+  margin-inline-end: 0.4rem;
+}
+
+#auditoria-rango-error {
+  margin-block: 1rem 0;
+  font-size: 0.85rem;
+}
+
+/* Controles con texto, icono e iluminación al interactuar. */
+.au-boton {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  min-block-size: 2.85rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 0.9rem;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 12%),
+    transparent
+  ),
+  var(--au-vidrio);
+  color: var(--au-texto);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 180ms ease,
+  border-color 180ms ease,
+  box-shadow 180ms ease;
+}
+
+.au-boton-pequeno {
+  padding-inline: 0.85rem;
+  font-size: 0.78rem;
+}
+
+.au-boton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--au-texto);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 40%),
+  0 0 22px var(--au-reflejo);
+}
+
+.au-boton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.au-boton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:where(a, button, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--td-foco, #f5f5f5);
+  outline-offset: 4px;
+}
+
+/* Mensajes de consulta y errores. */
+.au-mensaje {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 0.9rem;
+  background: var(--au-vidrio);
+  color: var(--au-secundario);
+  font-size: 0.87rem;
+  line-height: 1.6;
+}
+
+.au-mensaje > i {
+  margin-inline-end: 0.45rem;
+}
+
+.au-error {
+  color: var(--td-error, #ffb5b5);
+}
+
+.au-mensaje.au-error {
+  border-color: var(--td-error, #ffb5b5);
+}
+
+.auditoria-resumen {
+  margin-block: 1.4rem 0.85rem;
+  color: var(--au-secundario);
+  font-size: 0.85rem;
+}
+
+.auditoria-resumen strong {
+  color: var(--au-texto);
+}
+
+/* Filas independientes con contornos redondeados. */
+.auditoria-tabla-contenedor {
+  padding: 0.3rem 0.65rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--au-borde) transparent;
+}
+
+.auditoria-tabla {
+  inline-size: 100%;
+  min-inline-size: 70rem;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+  text-align: start;
+}
+
+.auditoria-tabla th,
+.auditoria-tabla td {
+  padding: 0.9rem;
+  vertical-align: middle;
+}
+
+.auditoria-tabla thead th {
+  padding-block: 1rem;
+  color: var(--au-secundario);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.auditoria-tabla tbody tr > * {
+  border-block: 1px solid var(--au-borde);
+  background: var(--au-reflejo);
+  font-size: 0.84rem;
+  transition: background-color 180ms ease;
+}
+
+.auditoria-tabla tbody tr > :first-child {
+  border-inline-start: 1px solid var(--au-borde);
+  border-start-start-radius: 1rem;
+  border-end-start-radius: 1rem;
+}
+
+.auditoria-tabla tbody tr > :last-child {
+  border-inline-end: 1px solid var(--au-borde);
+  border-start-end-radius: 1rem;
+  border-end-end-radius: 1rem;
+}
+
+.auditoria-tabla tbody tr:hover > * {
+  background-color: color-mix(
+    in srgb,
+    var(--au-texto) 9%,
+    transparent
+  );
+}
+
+.auditoria-id {
+  max-inline-size: 10rem;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+}
+
+.au-fecha,
+.au-hora {
+  display: block;
+  white-space: nowrap;
+}
+
+.au-fecha {
+  font-weight: 600;
+}
+
+.au-hora {
+  margin-block-start: 0.35rem;
+  color: var(--au-secundario);
+  font-size: 0.77rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.auditoria-accion {
+  max-inline-size: 13rem;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+/*
+ * Identificación del actor por su plan actual.
+ * Las variables se limitan a su propia celda.
+ */
+.auditoria-actor {
+  --actor-color: #b7c0ce;
+  --actor-halo: rgb(183 192 206 / 9%);
+
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-inline-size: 16rem;
+  padding: 0.9rem;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--actor-color) 50%,
+    transparent
+  );
+  border-radius: 1rem;
+  background: linear-gradient(
+    125deg,
+    var(--actor-halo),
+    transparent 85%
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%),
+  0 0 16px var(--actor-halo);
+}
+
+.auditoria-actor[data-plan="FREE"] {
+  --actor-color: #a8d8ff;
+  --actor-halo: rgb(130 200 255 / 12%);
+}
+
+.auditoria-actor[data-plan="ORIA"] {
+  --actor-color: #f4c76a;
+  --actor-halo: rgb(244 190 77 / 13%);
+}
+
+.auditoria-actor[data-plan="INFINITIA"] {
+  --actor-color: #c6a3ff;
+  --actor-halo: rgb(174 119 255 / 14%);
+}
+
+.auditoria-actor[data-plan="SIN_PLAN"] {
+  border-color: var(--au-borde);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+.auditoria-avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 2.4rem;
+  block-size: 2.4rem;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--actor-color) 45%,
+    transparent
+  );
+  border-radius: 0.75rem;
+  background: var(--actor-halo);
+  color: color-mix(
+    in srgb,
+    var(--au-texto) 60%,
+    var(--actor-color)
+  );
+}
+
+.auditoria-actor-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-inline-size: 0;
+}
+
+.auditoria-actor-datos strong {
+  color: var(--au-texto);
+  font-size: 0.87rem;
+  overflow-wrap: anywhere;
+}
+
+.auditoria-correo {
+  color: var(--au-secundario);
+  font-size: 0.77rem;
+  overflow-wrap: anywhere;
+}
+
+.auditoria-actor-meta {
+  color: var(--au-secundario);
+  font-size: 0.69rem;
+}
+
+.auditoria-plan {
+  display: inline-block;
+  margin-block-start: 0.15rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--actor-color) 40%,
+    transparent
+  );
+  border-radius: 2rem;
+  background: var(--actor-halo);
+  color: color-mix(
+    in srgb,
+    var(--au-texto) 60%,
+    var(--actor-color)
+  );
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+/* El resultado también se distingue mediante texto e icono. */
+.auditoria-resultado {
+  --resultado-color: #cbd5e1;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--resultado-color) 40%,
+    transparent
+  );
+  border-radius: 2rem;
+  color: color-mix(
+    in srgb,
+    var(--au-texto) 65%,
+    var(--resultado-color)
+  );
+  font-size: 0.73rem;
+  white-space: nowrap;
+}
+
+.auditoria-resultado[data-resultado="SUCCESS"] {
+  --resultado-color: #6ee7b7;
+}
+
+.auditoria-resultado[data-resultado="FAILURE"] {
+  --resultado-color: #fb8c9b;
+}
+
+.auditoria-resultado[data-resultado="PENDING"] {
+  --resultado-color: #f4c76a;
+}
+
+/* Estado vacío. */
+.auditoria-tabla .auditoria-vacio {
+  padding: 3.5rem 1rem;
+  text-align: center;
+}
+
+.auditoria-vacio-icono {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+  margin-block-end: 1.25rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 1.35rem;
+  background: var(--au-reflejo);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+  font-size: 1.6rem;
+}
+
+.auditoria-vacio h2 {
+  margin-block-end: 0.7rem;
+  font-size: 1.1rem;
+}
+
+.auditoria-vacio p {
+  margin-block-end: 0.4rem;
+}
+
+/* Paginación. */
+.auditoria-paginacion {
+  margin-block-start: 1.25rem;
+}
+
+.auditoria-paginacion p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.auditoria-cantidad,
+.auditoria-navegacion {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.auditoria-cantidad label {
+  margin: 0;
+}
+
+.auditoria-cantidad select {
+  inline-size: 5rem;
+}
+
+.auditoria-navegacion > span {
+  color: var(--au-secundario);
+  font-size: 0.77rem;
+  white-space: nowrap;
+}
+
+/* Detalle del evento mediante un diálogo nativo. */
+.auditoria-modal {
+  box-sizing: border-box;
+  inline-size: min(42rem, calc(100% - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  padding: clamp(1.1rem, 3vw, 1.8rem);
+  overflow-y: auto;
+  border: 1px solid var(--au-borde);
+  border-radius: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 9%),
+    transparent
+  ),
+  var(--au-solido);
+  color: var(--au-texto);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%),
+  0 25px 90px rgb(0 0 0 / 35%);
+}
+
+.auditoria-modal::backdrop {
+  background: rgb(0 0 0 / 60%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.auditoria-modal-cabecera {
+  margin-block-end: 1rem;
+}
+
+.auditoria-actor-detalle {
+  min-inline-size: 0;
+  margin-block: 1.25rem;
+}
+
+.auditoria-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: 0;
+  margin: 0;
+}
+
+.auditoria-detalle dt,
+.auditoria-detalle dd {
+  padding-block: 0.8rem;
+  border-block-end: 1px solid var(--au-borde);
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+.auditoria-detalle dt {
+  padding-inline-end: 1rem;
+  color: var(--au-secundario);
+  font-weight: 500;
+}
+
+.auditoria-detalle dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.auditoria-explicacion {
+  margin-block-start: 1.25rem;
+}
+
+.auditoria-explicacion h3 {
+  margin-block-end: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.auditoria-explicacion p {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--au-borde);
+  border-radius: 0.9rem;
+  background: var(--au-reflejo);
+  color: var(--au-secundario);
+  font-size: 0.85rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.au-oculto {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Adaptación de controles y detalle a pantallas pequeñas. */
+@media (max-width: 40rem) {
+  .auditoria-cabecera > .au-boton,
+  .auditoria-filtros-pie > .au-boton {
+    inline-size: 100%;
+  }
+
+  .auditoria-navegacion {
+    inline-size: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .auditoria-navegacion > span {
+    order: -1;
+    inline-size: 100%;
+    text-align: center;
+  }
+
+  .auditoria-navegacion > .au-boton {
+    flex: 1;
+  }
+
+  .auditoria-detalle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auditoria-detalle dt {
+    padding-block-end: 0.15rem;
+    border-block-end: 0;
+  }
+
+  .auditoria-detalle dd {
+    padding-block-start: 0;
+  }
+}
+
+/* Fondo legible cuando el navegador no admite desenfoque. */
+@supports not (
+  (backdrop-filter: blur(1px)) or
+  (-webkit-backdrop-filter: blur(1px))
+) {
+  .au-panel {
+    background: var(--au-solido);
+  }
+}
+
+/* Respeta la preferencia de movimiento reducido. */
+@media (prefers-reduced-motion: reduce) {
+  .au-campo,
+  .au-boton,
+  .auditoria-tabla tbody tr > * {
+    transition: none;
+  }
+
+  .au-boton:hover:not(:disabled),
+  .au-boton:active:not(:disabled) {
+    transform: none;
+  }
+}
