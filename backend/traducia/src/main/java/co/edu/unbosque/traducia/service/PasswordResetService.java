@@ -1,4 +1,5 @@
 package co.edu.unbosque.traducia.service;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import co.edu.unbosque.traducia.dto.ForgotPasswordRequestDTO;
 import co.edu.unbosque.traducia.dto.ResetPasswordRequestDTO;
@@ -18,13 +20,13 @@ import co.edu.unbosque.traducia.exception.UserNotFoundException;
 import co.edu.unbosque.traducia.repository.PasswordResetTokenRepository;
 import co.edu.unbosque.traducia.repository.UserRepository;
 
-
 /**
  * Servicio encargado de gestionar el flujo de recuperación y restablecimiento de contraseñas.
  * <p>
  * Genera tokens temporales con vencimiento de 30 minutos, coordina el envío del enlace
  * hacia el frontend mediante {@link EmailService} y valida la vigencia del token y el
  * estado de la cuenta antes de actualizar la contraseña codificada del usuario.
+ * </p>
  *
  * @author
  * @version 1.0
@@ -33,32 +35,32 @@ import co.edu.unbosque.traducia.repository.UserRepository;
  * @see UserService
  */
 @Service
-
 public class PasswordResetService {
+
 	/**
 	 * Repositorio de usuarios.
 	 */
-	private UserRepository userRepo;
+	private final UserRepository userRepo;
 
 	/**
 	 * Repositorio de tokens de recuperación.
 	 */
-	private PasswordResetTokenRepository tokenRepo;
+	private final PasswordResetTokenRepository tokenRepo;
 
 	/**
 	 * Servicio que valida reglas de usuario.
 	 */
-	private UserService userService;
+	private final UserService userService;
 
 	/**
 	 * Servicio que envía correos electrónicos.
 	 */
-	private EmailService emailService;
+	private final EmailService emailService;
 
 	/**
 	 * Codificador de contraseñas.
 	 */
-	private PasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * URL base del frontend.
@@ -178,7 +180,9 @@ public class PasswordResetService {
 	 */
 	private String construirEnlace(String token) {
 		String base = frontUrl.endsWith("/") ? frontUrl.substring(0, frontUrl.length() - 1) : frontUrl;
-		return base + "/reset-password?token=" + token;
+		return UriComponentsBuilder.fromUriString(base)
+				.path("/reset-password")
+				.queryParam("token", token)
+				.toUriString();
 	}
-
 }

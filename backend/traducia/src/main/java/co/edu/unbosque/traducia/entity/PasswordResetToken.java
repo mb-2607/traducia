@@ -17,9 +17,8 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "password_reset_token")
-
 public class PasswordResetToken {
-	
+
 	/**
 	 * Identificador único del token.
 	 */
@@ -88,6 +87,15 @@ public class PasswordResetToken {
 	 */
 	public Long getId() {
 		return id;
+	}
+
+	/**
+	 * Establece el identificador del token.
+	 *
+	 * @param id identificador del registro
+	 */
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	/**
@@ -161,5 +169,4 @@ public class PasswordResetToken {
 	public void setUsado(boolean usado) {
 		this.usado = usado;
 	}
-
 }

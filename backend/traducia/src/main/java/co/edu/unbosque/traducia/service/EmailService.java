@@ -19,7 +19,7 @@ public class EmailService {
 	/**
 	 * Correo remitente configurado en las propiedades.
 	 */
-	@Value("${spring.mail.username}")
+	@Value("${spring.mail.username")
 	private String remitente;
 
 	/**
