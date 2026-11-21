@@ -253,6 +253,12 @@ class UserControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(is("Contraseña débil")));
 	}
+	
+	/**
+	 * Verifica que {@code PUT /user/actualizar/{id}} retorne HTTP 200 al
+	 * actualizar otro usuario y HTTP 403 con el mensaje correspondiente cuando el
+	 * administrador intenta actualizarse a sí mismo.
+	 */
 
 	@Test
 	@DisplayName("PUT /user/actualizar/{id} debe retornar 200 en otro usuario y 403 en sí mismo")
