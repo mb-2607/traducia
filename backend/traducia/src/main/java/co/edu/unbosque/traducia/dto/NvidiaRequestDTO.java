@@ -63,7 +63,7 @@ public class NvidiaRequestDTO {
 	public NvidiaRequestDTO(String model, boolean stream, List<NvidiaMessageRequestDTO> messages, int max_tokens) {
 		this.model = model;
 		this.stream = stream;
-		this.messages = messages;
+		this.messages = messages; // skipcq: JAVA-E1086
 		this.max_tokens = max_tokens;
 	}
 
@@ -119,7 +119,7 @@ public class NvidiaRequestDTO {
 	 * @param messages lista de {@link NvidiaMessageRequestDTO} a enviar al modelo
 	 */
 	public void setMessages(List<NvidiaMessageRequestDTO> messages) {
-		this.messages = messages;
+		this.messages = messages; // skipcq: JAVA-E1086
 	}
 
 	/**

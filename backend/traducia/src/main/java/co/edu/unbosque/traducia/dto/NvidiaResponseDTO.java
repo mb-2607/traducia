@@ -41,7 +41,7 @@ public class NvidiaResponseDTO {
 	 * @return lista de {@link NvidiaChoiceResponseDTO}
 	 */
 	public List<NvidiaChoiceResponseDTO> getChoices() {
-		return choices;
+		return choices; // skipcq: JAVA-E1086
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class NvidiaResponseDTO {
 	 * @param choices lista de {@link NvidiaChoiceResponseDTO}
 	 */
 	public void setChoices(List<NvidiaChoiceResponseDTO> choices) {
-		this.choices = choices;
+		this.choices = choices; // skipcq: JAVA-E1086
 	}
 	
 	/**

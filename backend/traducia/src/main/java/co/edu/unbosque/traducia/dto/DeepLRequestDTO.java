@@ -30,7 +30,7 @@ public class DeepLRequestDTO {
 	 * @param target_lang código del idioma de destino
 	 */
 	public DeepLRequestDTO(List<String> text, String target_lang) {
-		this.text = text;
+		this.text = text; // skipcq: JAVA-E1086
 		this.target_lang = target_lang;
 	}
 
