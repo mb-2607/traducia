@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * DTO utilizado para solicitar el reenvío del correo de verificación de cuenta.
  *
+ * @author
  * @version 1.0
  */
 public class ResendVerificationRequestDTO {
