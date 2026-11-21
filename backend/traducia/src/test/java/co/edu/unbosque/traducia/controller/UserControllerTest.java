@@ -56,12 +56,12 @@ import co.edu.unbosque.traducia.service.UserService;
  * Pruebas unitarias para {@link UserController} utilizando JUnit 5, Mockito,
  * MockMvc, Hamcrest y AssertJ.
  *
- * <p>Valida los endpoints administrativos de {@code /user} (listar, paginado,
- * consultar por id, crear, actualizar, cambiar contraseña y eliminar), el bloqueo
- * de auto-modificación o auto-eliminación del administrador y el manejo de
- * excepciones de negocio.</p>
+ * <p>Valida los endpoints de perfil propio ({@code /user/me}) y los endpoints
+ * administrativos de {@code /user} (listar, paginado, consultar por id, crear,
+ * actualizar, cambiar contraseña y eliminar), el bloqueo de auto-modificación o
+ * auto-eliminación del administrador y el manejo de excepciones de negocio.</p>
  *
- * @version 1.0
+ * @version 1.1
  */
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -102,6 +102,89 @@ class UserControllerTest {
 		Authentication authentication = mock(Authentication.class);
 		when(authentication.getPrincipal()).thenReturn(usuario);
 		return authentication;
+	}
+
+	/**
+	 * Verifica que {@code GET /user/me} retorne HTTP 200 con los datos del
+	 * usuario autenticado y HTTP 404 cuando el usuario no existe.
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
+	 */
+	@Test
+	@DisplayName("GET /user/me debe retornar 200 si existe y 404 si no existe")
+	void obtenerPerfilActualDebeRetornarOkONotFound() throws Exception {
+		Authentication authExistente = crearAutenticacion(1L);
+		Authentication authInexistente = crearAutenticacion(99L);
+		UserResponseDTO responseDTO = new UserResponseDTO();
+
+		when(userService.obtenerPorId(1L)).thenReturn(responseDTO);
+		when(userService.obtenerPorId(99L)).thenThrow(new UserNotFoundException());
+
+		mockMvc.perform(get("/user/me")
+				.principal(authExistente)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/user/me")
+				.principal(authInexistente)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(is("El usuario no existe")));
+
+		verify(userService).obtenerPorId(1L);
+		verify(userService).obtenerPorId(99L);
+	}
+
+	/**
+	 * Verifica que {@code PUT /user/me} retorne HTTP 200 al actualizar el perfil
+	 * del usuario autenticado y maneje las excepciones de negocio correspondientes.
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
+	 */
+	@Test
+	@DisplayName("PUT /user/me debe retornar 200 cuando es válido y manejar conflictos o ausencia de usuario")
+	void actualizarPerfilActualDebeRetornarOkYManejarExcepciones() throws Exception {
+		Authentication authUsuario = crearAutenticacion(1L);
+		UserResponseDTO responseDTO = new UserResponseDTO();
+
+		String body = """
+				{
+				  "nombre": "perfilActualizado",
+				  "correo": "perfil@ejemplo.com",
+				  "rol": "USER",
+				  "planId": "FREE"
+				}
+				""";
+
+		when(userService.actualizar(eq(1L), any(UpdateUserRequestDTO.class))).thenReturn(responseDTO);
+
+		mockMvc.perform(put("/user/me")
+				.principal(authUsuario)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body))
+				.andExpect(status().isOk());
+
+		verify(userService).actualizar(eq(1L), any(UpdateUserRequestDTO.class));
+
+		when(userService.actualizar(eq(1L), any(UpdateUserRequestDTO.class)))
+				.thenThrow(new EmailAlreadyExistsException("Correo ya registrado"));
+
+		mockMvc.perform(put("/user/me")
+				.principal(authUsuario)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body))
+				.andExpect(status().isConflict())
+				.andExpect(content().string(is("El correo ya existe")));
+
+		when(userService.actualizar(eq(1L), any(UpdateUserRequestDTO.class)))
+				.thenThrow(new UserNotFoundException());
+
+		mockMvc.perform(put("/user/me")
+				.principal(authUsuario)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(is("El usuario no existe")));
 	}
 
 	/**
@@ -253,13 +336,14 @@ class UserControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(is("Contraseña débil")));
 	}
-	
+
 	/**
 	 * Verifica que {@code PUT /user/actualizar/{id}} retorne HTTP 200 al
 	 * actualizar otro usuario y HTTP 403 con el mensaje correspondiente cuando el
 	 * administrador intenta actualizarse a sí mismo.
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
 	 */
-
 	@Test
 	@DisplayName("PUT /user/actualizar/{id} debe retornar 200 en otro usuario y 403 en sí mismo")
 	void actualizarDebeRetornarOkOForbiddenSegunId() throws Exception {

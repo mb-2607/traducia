@@ -1,16 +1,18 @@
 package co.edu.unbosque.traducia.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
 import co.edu.unbosque.traducia.dto.TraduccionResponseDTO;
-import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.entity.EstadoTraduccion;
 import co.edu.unbosque.traducia.entity.Idioma;
 import co.edu.unbosque.traducia.entity.PlanType;
@@ -88,8 +90,6 @@ public class TraduccionService {
 
 		validarCaracteresEnTexto(traduccion, usuario.getPlanType());
 
-		List<Traduccion> listaTraduccion = new ArrayList<>();
-
 		Idioma origen = idiomaService.obtenerPorCodigo(traduccion.getOrigen());
 
 		Idioma destino = idiomaService.obtenerPorCodigo(traduccion.getDestino());
@@ -108,12 +108,70 @@ public class TraduccionService {
 		usuario.getPlanType().getListaProveedor().forEach((ProveedorTraduccion pt) -> {
 			solicitud.addTraduccion(enviarSolicitud(traduccion, pt));
 		});
-		
-		if(solicitud.getListaTraduccion().isEmpty()) {
+
+		if (solicitud.getListaTraduccion().isEmpty()) {
 			throw new TraduccionFailedException("Traduccion fallida en todas las instancias");
 		}
-		
+
 		return toSolicitudDtoResponse(soliRepo.save(solicitud));
+	}
+
+	/**
+	 * Lista de forma paginada el historial de solicitudes de traducción del usuario
+	 * autenticado, ordenado de la más reciente a la más antigua.
+	 *
+	 * @param nombreUsuario nombre del usuario autenticado
+	 * @param pageable      configuración de paginación solicitada
+	 * @return página de solicitudes de traducción en formato DTO
+	 */
+	public Page<SolicitudTraduccionResponseDTO> listarPorUsuario(String nombreUsuario, Pageable pageable) {
+		User usuario = userService.obtenerEntidadPorNombre(nombreUsuario);
+		List<SolicitudTraduccion> filtradas = new ArrayList<>();
+		soliRepo.findAll().forEach((SolicitudTraduccion solicitud) -> {
+			if (solicitud.getUsuario() != null && solicitud.getUsuario().getId().equals(usuario.getId())) {
+				filtradas.add(solicitud);
+			}
+		});
+		filtradas.sort(Comparator.comparing(SolicitudTraduccion::getFecha,
+				Comparator.nullsLast(Comparator.reverseOrder())));
+
+		if (pageable == null || pageable.isUnpaged()) {
+			List<SolicitudTraduccionResponseDTO> todos = filtradas.stream()
+					.map(this::toSolicitudDtoResponse)
+					.toList();
+			return new PageImpl<>(todos);
+		}
+
+		int inicio = (int) pageable.getOffset();
+		int fin = Math.min(inicio + pageable.getPageSize(), filtradas.size());
+		List<SolicitudTraduccionResponseDTO> contenido = inicio >= filtradas.size()
+				? List.of()
+				: filtradas.subList(inicio, fin).stream()
+						.map(this::toSolicitudDtoResponse)
+						.toList();
+
+		return new PageImpl<>(contenido, pageable, filtradas.size());
+	}
+
+	/**
+	 * Consulta una solicitud de traducción por su identificador validando que
+	 * pertenezca al usuario autenticado.
+	 *
+	 * @param id identificador de la solicitud de traducción
+	 * @param nombreUsuario nombre del usuario autenticado
+	 * @return detalle de la solicitud de traducción en formato DTO
+	 * @throws TraduccionFailedException si la solicitud no existe o no pertenece al usuario
+	 */
+	public SolicitudTraduccionResponseDTO obtenerPorIdYUsuario(Long id, String nombreUsuario) {
+		User usuario = userService.obtenerEntidadPorNombre(nombreUsuario);
+		SolicitudTraduccion solicitud = soliRepo.findById(id)
+				.orElseThrow(() -> new TraduccionFailedException("Solicitud de traducción no encontrada"));
+
+		if (solicitud.getUsuario() == null || !solicitud.getUsuario().getId().equals(usuario.getId())) {
+			throw new TraduccionFailedException("La solicitud no pertenece al usuario autenticado");
+		}
+
+		return toSolicitudDtoResponse(solicitud);
 	}
 
 	/**
@@ -144,14 +202,14 @@ public class TraduccionService {
 		respuesta.setProveedorTraduccion(pt);
 		try {
 			respuesta.setTextoTraducido(tsr.getStrategy(pt).traducir(traduccion));
-			respuesta.setEstado(EstadoTraduccion.EXITOSA);			
+			respuesta.setEstado(EstadoTraduccion.EXITOSA);
 		} catch (Exception e) {
 			respuesta.setEstado(EstadoTraduccion.FALLIDA);
 			e.printStackTrace();
 		}
 		return respuesta;
 	}
-	
+
 	/**
 	 * Convierte una solicitud en su DTO de respuesta.
 	 *
@@ -159,22 +217,20 @@ public class TraduccionService {
 	 * @return DTO con los códigos de idioma y las traducciones
 	 */
 	private SolicitudTraduccionResponseDTO toSolicitudDtoResponse(SolicitudTraduccion solicitud) {
-		
 		SolicitudTraduccionResponseDTO respuesta = new SolicitudTraduccionResponseDTO();
 		respuesta.setId(solicitud.getId());
 		respuesta.setDestino(solicitud.getIdiomaDestino().getCodigo());
 		respuesta.setOrigen(solicitud.getIdiomaOrigen().getCodigo());
 		List<TraduccionResponseDTO> listaTraduccionDTO = new ArrayList<>();
-		solicitud.getListaTraduccion().forEach((Traduccion traduccion)->{
+		solicitud.getListaTraduccion().forEach((Traduccion traduccion) -> {
 			listaTraduccionDTO.add(toDTOResponse(traduccion));
 		});
 		respuesta.setListaTraduccion(listaTraduccionDTO);
 		respuesta.setFechaCreacion(solicitud.getFecha());
 		respuesta.setTextoOriginal(solicitud.getTextoOriginal());
-		
 		return respuesta;
 	}
-	
+
 	/**
 	 * Convierte una traducción en su DTO de respuesta.
 	 *

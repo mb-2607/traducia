@@ -9,6 +9,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
@@ -38,10 +45,11 @@ import co.edu.unbosque.traducia.service.strategy.TraductorStrategyRegistry;
  *
  * <p>Valida la validación de límites de caracteres por {@link PlanType}, la
  * verificación de idiomas distintos, la ejecución de estrategias por proveedor
- * con estados {@link EstadoTraduccion#EXITOSA} o {@link EstadoTraduccion#FALLIDA}
- * y la persistencia de {@link SolicitudTraduccion}.</p>
+ * con estados {@link EstadoTraduccion#EXITOSA} o {@link EstadoTraduccion#FALLIDA},
+ * la persistencia de {@link SolicitudTraduccion} y la consulta de historial y
+ * detalle por usuario.</p>
  *
- * @version 1.0
+ * @version 1.2
  */
 @ExtendWith(MockitoExtension.class)
 class TraduccionServiceTest {
@@ -64,13 +72,32 @@ class TraduccionServiceTest {
 	/**
 	 * Crea un {@link Idioma} con el código indicado.
 	 *
-	 * @param codigo código ISO del idioma.
-	 * @return entidad {@link Idioma} configurada.
+	 * @param codigo código ISO del idioma
+	 * @return entidad {@link Idioma} configurada
 	 */
 	private Idioma crearIdioma(String codigo) {
 		Idioma idioma = new Idioma();
 		idioma.setCodigo(codigo);
 		return idioma;
+	}
+
+	/**
+	 * Crea una {@link SolicitudTraduccion} de prueba con identificador y usuario
+	 * asignados.
+	 *
+	 * @param id identificador asignado mediante reflexión
+	 * @param usuario propietario de la solicitud
+	 * @return entidad {@link SolicitudTraduccion} lista para pruebas
+	 */
+	private SolicitudTraduccion crearSolicitud(Long id, User usuario) {
+		SolicitudTraduccion solicitud = new SolicitudTraduccion();
+		ReflectionTestUtils.setField(solicitud, "id", id);
+		solicitud.setTextoOriginal("Hola");
+		solicitud.setIdiomaOrigen(crearIdioma("es"));
+		solicitud.setIdiomaDestino(crearIdioma("en"));
+		solicitud.setFecha(LocalDateTime.now());
+		solicitud.setUsuario(usuario);
+		return solicitud;
 	}
 
 	/**
@@ -223,7 +250,7 @@ class TraduccionServiceTest {
 
 		when(usuarioMock.getPlanType()).thenReturn(planMock);
 		when(planMock.getNumeroCaracterPorSolicitud()).thenReturn(500L);
-		when(planMock.getListaProveedor()).thenReturn(java.util.Set.of());
+		when(planMock.getListaProveedor()).thenReturn(Set.of());
 
 		TraduccionRequestDTO request = new TraduccionRequestDTO();
 		request.setOrigen("es");
@@ -241,5 +268,76 @@ class TraduccionServiceTest {
 				.isInstanceOf(TraduccionFailedException.class);
 
 		verifyNoInteractions(soliRepo);
+	}
+
+	/**
+	 * Verifica que {@code listarPorUsuario} retorne únicamente las solicitudes de
+	 * traducción del usuario autenticado mapeadas a
+	 * {@link SolicitudTraduccionResponseDTO}.
+	 */
+	/**
+	 * Verifica que {@code listarPorUsuario} retorne de forma paginada únicamente
+	 * las solicitudes del usuario autenticado ordenadas de la más reciente a la
+	 * más antigua.
+	 */
+	@Test
+	@DisplayName("listarPorUsuario debe retornar página con solicitudes del usuario autenticado")
+	void listarPorUsuarioDebeRetornarSolicitudesDelUsuario() {
+		User usuario = new User();
+		ReflectionTestUtils.setField(usuario, "id", 1L);
+
+		User otroUsuario = new User();
+		ReflectionTestUtils.setField(otroUsuario, "id", 2L);
+
+		SolicitudTraduccion antigua = crearSolicitud(20L, usuario);
+		antigua.setFecha(LocalDateTime.of(2026, 11, 20, 10, 0));
+
+		SolicitudTraduccion reciente = crearSolicitud(22L, usuario);
+		reciente.setFecha(LocalDateTime.of(2026, 11, 21, 12, 0));
+
+		SolicitudTraduccion sOtro = crearSolicitud(21L, otroUsuario);
+
+		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(usuario);
+		when(soliRepo.findAll()).thenReturn(List.of(antigua, sOtro, reciente));
+
+		Page<SolicitudTraduccionResponseDTO> resultado = traduccionService.listarPorUsuario("dsantiago",
+				PageRequest.of(0, 1));
+
+		assertThat(resultado.getTotalElements()).isEqualTo(2);
+		assertThat(resultado.getTotalPages()).isEqualTo(2);
+		assertThat(resultado.getContent()).hasSize(1);
+		assertThat(resultado.getContent().get(0).getId()).isEqualTo(22L);
+		verify(soliRepo, times(1)).findAll();
+	}
+	
+	/**
+	 * Verifica que {@code obtenerPorIdYUsuario} retorne el detalle cuando la
+	 * solicitud pertenece al usuario y lance {@link TraduccionFailedException} si
+	 * pertenece a otro usuario o no existe.
+	 */
+	@Test
+	@DisplayName("obtenerPorIdYUsuario debe retornar detalle si es del usuario y lanzar excepción si no")
+	void obtenerPorIdYUsuarioDebeValidarPropietarioYExistencia() {
+		User dueno = new User();
+		ReflectionTestUtils.setField(dueno, "id", 1L);
+
+		User otroUsuario = new User();
+		ReflectionTestUtils.setField(otroUsuario, "id", 2L);
+
+		SolicitudTraduccion solicitud = crearSolicitud(30L, dueno);
+
+		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(dueno);
+		when(soliRepo.findById(30L)).thenReturn(Optional.of(solicitud));
+
+		SolicitudTraduccionResponseDTO detalle = traduccionService.obtenerPorIdYUsuario(30L, "dsantiago");
+		assertThat(detalle.getId()).isEqualTo(30L);
+
+		when(userService.obtenerEntidadPorNombre("otro")).thenReturn(otroUsuario);
+		assertThatThrownBy(() -> traduccionService.obtenerPorIdYUsuario(30L, "otro"))
+				.isInstanceOf(TraduccionFailedException.class);
+
+		when(soliRepo.findById(999L)).thenReturn(Optional.empty());
+		assertThatThrownBy(() -> traduccionService.obtenerPorIdYUsuario(999L, "dsantiago"))
+				.isInstanceOf(TraduccionFailedException.class);
 	}
 }
