@@ -9,11 +9,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -115,6 +117,7 @@ class DeeplTraductorStrategyTest {
 	void traducirConIdiomaEstandarDebeNormalizarYRetornarTexto() {
 		TraduccionRequestDTO dto = crearSolicitud("es", "en", "Hola mundo");
 		DeepLResponseDTO responseMock = crearRespuestaMock("Hello world");
+		List<DeepLRequestDTO> solicitudesEnviadas = new ArrayList<>();
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -123,22 +126,18 @@ class DeeplTraductorStrategyTest {
 					eq(AuthenticationType.DEEPL),
 					any(DeepLRequestDTO.class),
 					eq(DeepLResponseDTO.class)))
-					.thenReturn(responseMock);
+					.thenAnswer(invocation -> {
+						solicitudesEnviadas.add(invocation.getArgument(3, DeepLRequestDTO.class));
+						return responseMock;
+					});
 
 			String resultado = strategy.traducir(dto);
 
-			ArgumentCaptor<DeepLRequestDTO> captor = ArgumentCaptor.forClass(DeepLRequestDTO.class);
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.DEEPL),
-					captor.capture(),
-					eq(DeepLResponseDTO.class)));
-
 			assertThat(resultado).isEqualTo("Hello world");
 			assertThat(dto.getDestino()).isEqualTo("EN");
-			assertThat(captor.getValue().getTarget_lang()).isEqualTo("EN");
-			assertThat(captor.getValue().getText()).containsExactly("Hola mundo");
+			assertThat(solicitudesEnviadas).hasSize(1);
+			assertThat(solicitudesEnviadas.get(0).getTarget_lang()).isEqualTo("EN");
+			assertThat(solicitudesEnviadas.get(0).getText()).containsExactly("Hola mundo");
 		}
 	}
 
@@ -151,6 +150,7 @@ class DeeplTraductorStrategyTest {
 	void traducirConChinoSimplificadoDebeConvertirAZhHans() {
 		TraduccionRequestDTO dto = crearSolicitud("es", "zh-CN", "Buenos días");
 		DeepLResponseDTO responseMock = crearRespuestaMock("早上好");
+		List<DeepLRequestDTO> solicitudesEnviadas = new ArrayList<>();
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -159,22 +159,18 @@ class DeeplTraductorStrategyTest {
 					eq(AuthenticationType.DEEPL),
 					any(DeepLRequestDTO.class),
 					eq(DeepLResponseDTO.class)))
-					.thenReturn(responseMock);
+					.thenAnswer(invocation -> {
+						solicitudesEnviadas.add(invocation.getArgument(3, DeepLRequestDTO.class));
+						return responseMock;
+					});
 
 			String resultado = strategy.traducir(dto);
 
-			ArgumentCaptor<DeepLRequestDTO> captor = ArgumentCaptor.forClass(DeepLRequestDTO.class);
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.DEEPL),
-					captor.capture(),
-					eq(DeepLResponseDTO.class)));
-
 			assertThat(resultado).isEqualTo("早上好");
 			assertThat(dto.getDestino()).isEqualTo("ZH-HANS");
-			assertThat(captor.getValue().getTarget_lang()).isEqualTo("ZH-HANS");
-			assertThat(captor.getValue().getText()).containsExactly("Buenos días");
+			assertThat(solicitudesEnviadas).hasSize(1);
+			assertThat(solicitudesEnviadas.get(0).getTarget_lang()).isEqualTo("ZH-HANS");
+			assertThat(solicitudesEnviadas.get(0).getText()).containsExactly("Buenos días");
 		}
 	}
 
@@ -187,6 +183,7 @@ class DeeplTraductorStrategyTest {
 	void traducirConChinoTradicionalDebeConvertirAZhHant() {
 		TraduccionRequestDTO dto = crearSolicitud("es", "zh-TW", "Buenas noches");
 		DeepLResponseDTO responseMock = crearRespuestaMock("晚安");
+		List<DeepLRequestDTO> solicitudesEnviadas = new ArrayList<>();
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -195,22 +192,18 @@ class DeeplTraductorStrategyTest {
 					eq(AuthenticationType.DEEPL),
 					any(DeepLRequestDTO.class),
 					eq(DeepLResponseDTO.class)))
-					.thenReturn(responseMock);
+					.thenAnswer(invocation -> {
+						solicitudesEnviadas.add(invocation.getArgument(3, DeepLRequestDTO.class));
+						return responseMock;
+					});
 
 			String resultado = strategy.traducir(dto);
 
-			ArgumentCaptor<DeepLRequestDTO> captor = ArgumentCaptor.forClass(DeepLRequestDTO.class);
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.DEEPL),
-					captor.capture(),
-					eq(DeepLResponseDTO.class)));
-
 			assertThat(resultado).isEqualTo("晚安");
 			assertThat(dto.getDestino()).isEqualTo("ZH-HANT");
-			assertThat(captor.getValue().getTarget_lang()).isEqualTo("ZH-HANT");
-			assertThat(captor.getValue().getText()).containsExactly("Buenas noches");
+			assertThat(solicitudesEnviadas).hasSize(1);
+			assertThat(solicitudesEnviadas.get(0).getTarget_lang()).isEqualTo("ZH-HANT");
+			assertThat(solicitudesEnviadas.get(0).getText()).containsExactly("Buenas noches");
 		}
 	}
 

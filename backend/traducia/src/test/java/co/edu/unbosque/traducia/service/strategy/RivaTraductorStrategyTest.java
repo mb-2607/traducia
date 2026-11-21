@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -122,7 +122,7 @@ class RivaTraductorStrategyTest {
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
 					.thenAnswer(invocation -> {
-						NvidiaRequestDTO solicitud = invocation.getArgument(3);
+						NvidiaRequestDTO solicitud = invocation.getArgument(3, NvidiaRequestDTO.class);
 						assertThat(solicitud.getModel()).isEqualTo("nvidia/riva-translate-4b-instruct-v2");
 						assertThat(solicitud.getMax_tokens()).isEqualTo(4096);
 						assertThat(solicitud.isStream()).isFalse();
@@ -141,13 +141,6 @@ class RivaTraductorStrategyTest {
 			assertThat(resultado).isEqualTo("Bonjour le monde");
 			assertThat(mensajesSistema).containsExactly("es-en", "en-fr");
 			assertThat(mensajesUsuario).containsExactly("Hola mundo", "Hello world");
-
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.BEARER),
-					any(NvidiaRequestDTO.class),
-					eq(NvidiaResponseDTO.class)), times(2));
 		}
 	}
 
@@ -182,7 +175,7 @@ class RivaTraductorStrategyTest {
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
 					.thenAnswer(invocation -> {
-						NvidiaRequestDTO solicitud = invocation.getArgument(3);
+						NvidiaRequestDTO solicitud = invocation.getArgument(3, NvidiaRequestDTO.class);
 						paresIdiomas.add(solicitud.getMessages().get(0).getContent());
 						int llamada = paresIdiomas.size();
 						if (llamada == 1 || llamada == 3) {
@@ -208,6 +201,7 @@ class RivaTraductorStrategyTest {
 	@DisplayName("traducir debe propagar excepción en el primer paso sin ejecutar el segundo")
 	void traducirDebePropagarExcepcionEnPrimeraLlamadaSinEjecutarSegunda() {
 		TraduccionRequestDTO dto = crearSolicitud("es", "de", "Hola");
+		AtomicInteger llamadas = new AtomicInteger(0);
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -216,18 +210,16 @@ class RivaTraductorStrategyTest {
 					eq(AuthenticationType.BEARER),
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
-					.thenThrow(new RuntimeException("Error en primer paso de Riva"));
+					.thenAnswer(invocation -> {
+						llamadas.incrementAndGet();
+						throw new RuntimeException("Error en primer paso de Riva");
+					});
 
 			assertThatThrownBy(() -> strategy.traducir(dto))
 					.isInstanceOf(RuntimeException.class)
 					.hasMessage("Error en primer paso de Riva");
 
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.BEARER),
-					any(NvidiaRequestDTO.class),
-					eq(NvidiaResponseDTO.class)), times(1));
+			assertThat(llamadas.get()).isEqualTo(1);
 		}
 	}
 
@@ -240,6 +232,7 @@ class RivaTraductorStrategyTest {
 	@DisplayName("traducir debe propagar IndexOutOfBoundsException si falla la segunda respuesta")
 	void traducirDebePropagarExcepcionEnSegundaLlamada() {
 		TraduccionRequestDTO dto = crearSolicitud("es", "it", "Hola");
+		AtomicInteger llamadas = new AtomicInteger(0);
 
 		NvidiaResponseDTO respuestaPaso1 = mock(NvidiaResponseDTO.class);
 		when(respuestaPaso1.obtenerContenido()).thenReturn("Hello");
@@ -254,18 +247,13 @@ class RivaTraductorStrategyTest {
 					eq(AuthenticationType.BEARER),
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
-					.thenReturn(respuestaPaso1, respuestaPaso2);
+					.thenAnswer(invocation -> llamadas.incrementAndGet() == 1 ? respuestaPaso1 : respuestaPaso2);
 
 			assertThatThrownBy(() -> strategy.traducir(dto))
 					.isInstanceOf(IndexOutOfBoundsException.class)
 					.hasMessage("Sin choices en paso 2");
 
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.BEARER),
-					any(NvidiaRequestDTO.class),
-					eq(NvidiaResponseDTO.class)), times(2));
+			assertThat(llamadas.get()).isEqualTo(2);
 		}
 	}
 }

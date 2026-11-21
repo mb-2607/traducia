@@ -8,11 +8,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -105,6 +107,7 @@ class GemmaTraductorStrategyTest {
 		TraduccionRequestDTO dto = crearSolicitud("es", "en", "Hola mundo");
 		NvidiaResponseDTO responseMock = mock(NvidiaResponseDTO.class);
 		when(responseMock.obtenerContenido()).thenReturn("Hello world");
+		List<NvidiaRequestDTO> solicitudesEnviadas = new ArrayList<>();
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -113,20 +116,17 @@ class GemmaTraductorStrategyTest {
 					eq(AuthenticationType.BEARER),
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
-					.thenReturn(responseMock);
+					.thenAnswer(invocation -> {
+						solicitudesEnviadas.add(invocation.getArgument(3, NvidiaRequestDTO.class));
+						return responseMock;
+					});
 
 			String resultado = strategy.traducir(dto);
 
-			ArgumentCaptor<NvidiaRequestDTO> captor = ArgumentCaptor.forClass(NvidiaRequestDTO.class);
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.BEARER),
-					captor.capture(),
-					eq(NvidiaResponseDTO.class)));
-
-			NvidiaRequestDTO solicitudEnviada = captor.getValue();
 			assertThat(resultado).isEqualTo("Hello world");
+			assertThat(solicitudesEnviadas).hasSize(1);
+
+			NvidiaRequestDTO solicitudEnviada = solicitudesEnviadas.get(0);
 			assertThat(solicitudEnviada.getModel()).isEqualTo("google/gemma-4-31b-it");
 			assertThat(solicitudEnviada.getMax_tokens()).isEqualTo(4096);
 			assertThat(solicitudEnviada.isStream()).isFalse();
@@ -156,6 +156,7 @@ class GemmaTraductorStrategyTest {
 		TraduccionRequestDTO dto = crearSolicitud("auto", "fr", "Buenos días");
 		NvidiaResponseDTO responseMock = mock(NvidiaResponseDTO.class);
 		when(responseMock.obtenerContenido()).thenReturn("Bonjour");
+		List<NvidiaRequestDTO> solicitudesEnviadas = new ArrayList<>();
 
 		try (MockedStatic<ExternalHTTPRequestHandler> mockedHandler = mockStatic(ExternalHTTPRequestHandler.class)) {
 			mockedHandler.when(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
@@ -164,20 +165,16 @@ class GemmaTraductorStrategyTest {
 					eq(AuthenticationType.BEARER),
 					any(NvidiaRequestDTO.class),
 					eq(NvidiaResponseDTO.class)))
-					.thenReturn(responseMock);
+					.thenAnswer(invocation -> {
+						solicitudesEnviadas.add(invocation.getArgument(3, NvidiaRequestDTO.class));
+						return responseMock;
+					});
 
 			String resultado = strategy.traducir(dto);
 
-			ArgumentCaptor<NvidiaRequestDTO> captor = ArgumentCaptor.forClass(NvidiaRequestDTO.class);
-			mockedHandler.verify(() -> ExternalHTTPRequestHandler.doPostAndConvertToDTO(
-					eq(URL_BASE),
-					eq(API_KEY),
-					eq(AuthenticationType.BEARER),
-					captor.capture(),
-					eq(NvidiaResponseDTO.class)));
-
 			assertThat(resultado).isEqualTo("Bonjour");
-			assertThat(captor.getValue().getMessages().get(0).getContent())
+			assertThat(solicitudesEnviadas).hasSize(1);
+			assertThat(solicitudesEnviadas.get(0).getMessages().get(0).getContent())
 					.contains("Source language: auto")
 					.contains("Target language: fr");
 		}
