@@ -3,14 +3,15 @@
   type="file"
   hidden
   [accept]="tiposPermitidos"
+  [disabled]="deshabilitado"
   (change)="seleccionar(selector)"
 />
 
 <button
   type="button"
   class="boton-icono"
-  aria-label="Adjuntar archivo"
-  title="Adjuntar archivo"
+  aria-label="Adjuntar documento o imagen"
+  title="Adjuntar documento o imagen"
   [disabled]="deshabilitado"
   (click)="selector.click()"
 >

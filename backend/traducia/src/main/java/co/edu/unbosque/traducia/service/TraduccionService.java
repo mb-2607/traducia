@@ -1,16 +1,12 @@
 package co.edu.unbosque.traducia.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
 import co.edu.unbosque.traducia.dto.TraduccionResponseDTO;
-import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.entity.EstadoTraduccion;
 import co.edu.unbosque.traducia.entity.Idioma;
 import co.edu.unbosque.traducia.entity.PlanType;

@@ -1,20 +1,7 @@
-/**
- * Componente reutilizable encargado de gestionar la selección de archivos.
- *
- * Permite seleccionar archivos desde un elemento input de tipo file,
- * validar que no estén vacíos y comprobar que no superen el tamaño
- * máximo permitido de 5 MB.
- *
- * Comunica el resultado de la selección al componente padre mediante
- * eventos de salida, diferenciando entre archivos aceptados y rechazados.
- */
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../api-config';
 
-/**
- * Tamaño máximo permitido para los archivos seleccionados, expresado en bytes.
- */
-const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
-
+/** Selecciona documentos; el backend vuelve a validar formato real y tamaño. */
 @Component({
   selector: 'app-archivoselectorcomponent',
   standalone: false,
@@ -22,46 +9,27 @@ const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
   templateUrl: './archivoselectorcomponent.html',
 })
 export class Archivoselectorcomponent {
-
-  /** Indica si el selector de archivos debe permanecer deshabilitado. */
   @Input() deshabilitado = false;
+  @Output() readonly archivoSeleccionado = new EventEmitter<File>();
+  @Output() readonly archivoRechazado = new EventEmitter<string>();
+  readonly tiposPermitidos = EXTENSIONES_DOCUMENTO.map((tipo) => `.${tipo}`).join(',');
 
-  /** Emite el archivo seleccionado cuando supera las validaciones establecidas. */
-  @Output() readonly archivoSeleccionado :EventEmitter<File> = new EventEmitter<File>();
-
-  /** Emite un mensaje descriptivo cuando el archivo seleccionado no es válido. */
-  @Output() readonly archivoRechazado :EventEmitter<string> = new EventEmitter<string>();
-
-  /** Extensiones de archivo permitidas en el selector. */
-  readonly tiposPermitidos = '.pdf,.png,.jpg,.jpeg,docx';
-
-  /**
-   * Obtiene el archivo seleccionado y valida que no esté vacío
-   * ni supere el tamaño máximo permitido.
-   *
-   * Limpia el valor del input para permitir seleccionar nuevamente
-   * el mismo archivo y emite el evento correspondiente según el resultado.
-   *
-   * @param input Elemento HTMLInputElement desde el cual se obtiene el archivo.
-   */
+  /** Limpia el input para permitir volver a seleccionar el mismo archivo. */
   seleccionar(input: HTMLInputElement): void {
     const archivo = input.files?.item(0);
     input.value = '';
-
-    if (!archivo) {
+    if (this.deshabilitado || !archivo) {
       return;
     }
-
-    if (archivo.size === 0) {
+    const extension = archivo.name.split('.').pop()?.toLowerCase();
+    if (!extension || !EXTENSIONES_DOCUMENTO.some((tipo) => tipo === extension)) {
+      this.archivoRechazado.emit('Selecciona TXT, PDF, Word o una imagen admitida.');
+    } else if (archivo.size === 0) {
       this.archivoRechazado.emit('El archivo está vacío.');
-      return;
+    } else if (archivo.size > MAX_ARCHIVO_BYTES) {
+      this.archivoRechazado.emit('El archivo supera el máximo de 10 MB.');
+    } else {
+      this.archivoSeleccionado.emit(archivo);
     }
-
-    if (archivo.size > TAMANO_MAXIMO_BYTES) {
-      this.archivoRechazado.emit('El archivo supera el máximo de 5 MB.');
-      return;
-    }
-
-    this.archivoSeleccionado.emit(archivo);
   }
 }
