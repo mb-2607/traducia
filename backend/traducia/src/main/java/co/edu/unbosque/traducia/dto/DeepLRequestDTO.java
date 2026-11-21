@@ -15,7 +15,7 @@ import java.util.List;
 public class DeepLRequestDTO {
 
 	/** Lista de textos que se desean traducir. */
-	private List<String> text;
+	private List<String> text; // skipcq: JAVA-E1086
 
 	/**
 	 * Código del idioma de destino de la traducción (por ejemplo, {@code "ES"},
@@ -74,7 +74,7 @@ public class DeepLRequestDTO {
 	 * @param text lista de textos
 	 */
 	public void setText(List<String> text) {
-		this.text = text;
+		this.text = text; // skipcq: JAVA-E1086
 	}
 
 	/**

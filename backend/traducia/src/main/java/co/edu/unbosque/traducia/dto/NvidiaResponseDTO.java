@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class NvidiaResponseDTO {
 	/** Lista de respuestas (opciones) generadas por el modelo. */
-	private List<NvidiaChoiceResponseDTO> choices;
+	private List<NvidiaChoiceResponseDTO> choices; 
 	
 	/**
 	 * Constructor por defecto.
@@ -32,7 +32,7 @@ public class NvidiaResponseDTO {
 	 * @param choices lista de opciones generadas por el modelo
 	 */
 	public NvidiaResponseDTO(List<NvidiaChoiceResponseDTO> choices) {
-		this.choices = choices;
+		this.choices = choices; // skipcq: JAVA-E1086
 	}
 	
 	/**

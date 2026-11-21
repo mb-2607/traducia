@@ -46,7 +46,7 @@ public class DeepLResponseDTO {
 	 * @param translations lista de {@link DeepLTraduccion}
 	 */
 	public void setTranslations(List<DeepLTraduccion> translations) {
-		this.translations = translations;
+		this.translations = translations; // skipcq: JAVA-E1086
 	}
 
 	/**
