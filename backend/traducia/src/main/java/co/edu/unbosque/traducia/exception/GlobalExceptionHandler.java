@@ -3,8 +3,7 @@ package co.edu.unbosque.traducia.exception;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,8 +26,7 @@ public class GlobalExceptionHandler {
 	 * con {@code @Valid} en cualquier controlador.
 	 *
 	 * @param ex excepción lanzada por Spring al detectar restricciones incumplidas.
-	 * @return mapa con el detalle de los campos inválidos bajo estado HTTP 400 (Bad
-	 *         Request).
+	 * @return mapa con el detalle de los campos inválidos bajo estado HTTP 400 (Bad Request).
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -36,7 +34,9 @@ public class GlobalExceptionHandler {
 		Map<String, String> erroresCampos = new LinkedHashMap<>();
 
 		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-			String mensaje = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Valor inválido";
+			String mensaje = error.getDefaultMessage() != null
+					? error.getDefaultMessage()
+					: "Valor inválido";
 			erroresCampos.putIfAbsent(error.getField(), mensaje);
 		}
 
@@ -47,14 +47,5 @@ public class GlobalExceptionHandler {
 		cuerpo.put("errores", erroresCampos);
 
 		return cuerpo;
-	}
-
-	/**
-	 * Atiende archivos demasiado grandes, incluso cuando Spring los rechaza antes
-	 * de ejecutar el controlador.
-	 */
-	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	public ResponseEntity<Map<String, String>> manejarArchivoGrande(MaxUploadSizeExceededException exception) {
-		return ResponseEntity.status(413).body(Map.of("mensaje", "El archivo supera el tamaño máximo permitido"));
 	}
 }
