@@ -38,7 +38,7 @@ export class AuthService {
   private storageService: StorageService = inject(StorageService);
 
   /** URL base de la API de autenticación. Pendiente de configurar. */
-  private readonly URL_BASE = 'TODO';
+  private readonly URL_BASE = 'http://localhost:8080/auth';
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */
   private readonly HEADER: HttpHeaders = new HttpHeaders({
