@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,12 +39,13 @@ import co.edu.unbosque.traducia.service.UserService;
  * Pruebas unitarias para {@link PlanController} utilizando JUnit 5, Mockito,
  * MockMvc, Hamcrest y AssertJ.
  *
- * <p>Valida la actualización del plan del usuario autenticado ({@code FREE},
+ * <p>Valida la consulta del catálogo de planes, la consulta del plan actual y
+ * la actualización del plan del usuario autenticado ({@code FREE},
  * {@code ORIA} e {@code INFINITIA}), el manejo de validaciones {@code @Valid}
  * mediante {@link GlobalExceptionHandler} y los manejadores de excepciones
  * locales del controlador.</p>
  *
- * @version 1.0
+ * @version 1.1
  */
 @ExtendWith(MockitoExtension.class)
 class PlanControllerTest {
@@ -82,6 +84,85 @@ class PlanControllerTest {
 		Authentication authentication = mock(Authentication.class);
 		when(authentication.getPrincipal()).thenReturn(usuario);
 		return authentication;
+	}
+
+	/**
+	 * Crea un objeto {@link Authentication} simulado con el nombre de usuario
+	 * indicado.
+	 *
+	 * @param nombreUsuario nombre del usuario autenticado.
+	 * @return instancia simulada de {@link Authentication}.
+	 */
+	private Authentication crearAutenticacionPorNombre(String nombreUsuario) {
+		Authentication authentication = mock(Authentication.class);
+		when(authentication.getName()).thenReturn(nombreUsuario);
+		return authentication;
+	}
+
+	/**
+	 * Verifica que {@code GET /plan} retorne HTTP 200 junto con todos los planes
+	 * definidos en {@link PlanType} y sus propiedades.
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
+	 */
+	@Test
+	@DisplayName("GET /plan debe retornar 200 con el catálogo completo de planes")
+	void listarPlanesDebeRetornarOkConCatalogoDePlanes() throws Exception {
+		PlanType[] esperados = PlanType.values();
+
+		mockMvc.perform(get("/plan"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()", is(esperados.length)))
+				.andExpect(jsonPath("$[0].plan", is(esperados[0].name())))
+				.andExpect(jsonPath("$[0].numeroCaracterPorSolicitud").isNumber())
+				.andExpect(jsonPath("$[0].proveedores").isArray());
+
+		verifyNoInteractions(userService);
+	}
+
+	/**
+	 * Verifica que {@code GET /plan/actual} retorne HTTP 200 con el detalle del
+	 * plan vigente del usuario autenticado.
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
+	 */
+	@Test
+	@DisplayName("GET /plan/actual debe retornar 200 con el plan vigente del usuario autenticado")
+	void obtenerPlanActualDebeRetornarOkConPlanDelUsuario() throws Exception {
+		Authentication authentication = crearAutenticacionPorNombre("dsantiago");
+		User usuario = new User();
+		usuario.setPlanType(PlanType.FREE);
+
+		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(usuario);
+
+		mockMvc.perform(get("/plan/actual")
+				.principal(authentication))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.plan", is(PlanType.FREE.name())))
+				.andExpect(jsonPath("$.numeroCaracterPorSolicitud",
+						is((int) PlanType.FREE.getNumeroCaracterPorSolicitud())))
+				.andExpect(jsonPath("$.proveedores.length()", is(PlanType.FREE.getListaProveedor().size())));
+
+		verify(userService).obtenerEntidadPorNombre("dsantiago");
+	}
+
+	/**
+	 * Verifica que {@code GET /plan/actual} retorne HTTP 404 cuando el usuario
+	 * autenticado no existe en la base de datos ({@link UserNotFoundException}).
+	 *
+	 * @throws Exception si falla la ejecución de la petición simulada.
+	 */
+	@Test
+	@DisplayName("GET /plan/actual debe retornar 404 cuando el usuario no existe")
+	void obtenerPlanActualDebeRetornarNotFoundCuandoUsuarioNoExiste() throws Exception {
+		Authentication authentication = crearAutenticacionPorNombre("inexistente");
+
+		when(userService.obtenerEntidadPorNombre("inexistente")).thenThrow(new UserNotFoundException());
+
+		mockMvc.perform(get("/plan/actual")
+				.principal(authentication))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(is("El usuario no existe")));
 	}
 
 	/**
