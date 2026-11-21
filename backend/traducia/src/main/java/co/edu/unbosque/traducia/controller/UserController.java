@@ -36,10 +36,11 @@ import jakarta.validation.Valid;
  * Controlador REST encargado de gestionar las operaciones administrativas sobre los usuarios.
  * <p>
  * Expone los endpoints bajo la ruta base {@code /user} para listar, consultar,
- * crear, actualizar, cambiar contraseñas y eliminar usuarios. Delega la lógica
- * de negocio en {@link UserService}, valida que un administrador no realice
- * acciones de modificación o eliminación sobre su propia cuenta y maneja de forma
- * centralizada las excepciones de negocio con sus respectivos códigos de estado HTTP.
+ * crear, actualizar, cambiar contraseñas y eliminar usuarios, así como gestionar
+ * el perfil del usuario autenticado. Delega la lógica de negocio en {@link UserService},
+ * valida que un administrador no realice acciones de modificación o eliminación sobre su
+ * propia cuenta y maneja de forma centralizada las excepciones de negocio con sus
+ * respectivos códigos de estado HTTP.
  * </p>
  *
  * @author
@@ -72,6 +73,34 @@ public class UserController {
 	 */
 	public UserController(UserService userService) {
 		this.userService = userService;
+	}
+
+	/**
+	 * Consulta la información del perfil del usuario autenticado actualmente.
+	 *
+	 * @param authentication información de autenticación del usuario que realiza la solicitud.
+	 * @return {@link ResponseEntity} con estado {@code 200 OK} y los datos del usuario autenticado.
+	 */
+	@GetMapping(path = "me")
+	public ResponseEntity<UserResponseDTO> obtenerPerfilActual(Authentication authentication) {
+		User usuarioActual = (User) authentication.getPrincipal();
+		UserResponseDTO userResponse = userService.obtenerPorId(usuarioActual.getId());
+		return ResponseEntity.ok(userResponse);
+	}
+
+	/**
+	 * Actualiza los datos del perfil del usuario autenticado actualmente.
+	 *
+	 * @param request        objeto DTO con los nuevos datos del usuario.
+	 * @param authentication información de autenticación del usuario que realiza la solicitud.
+	 * @return {@link ResponseEntity} con estado {@code 200 OK} y los datos actualizados del usuario.
+	 */
+	@PutMapping(path = "me")
+	public ResponseEntity<UserResponseDTO> actualizarPerfilActual(@Valid @RequestBody UpdateUserRequestDTO request,
+			Authentication authentication) {
+		User usuarioActual = (User) authentication.getPrincipal();
+		UserResponseDTO userResponse = userService.actualizar(usuarioActual.getId(), request);
+		return ResponseEntity.ok(userResponse);
 	}
 
 	/**
@@ -128,8 +157,8 @@ public class UserController {
 	 * actualizar su propia cuenta antes de delegar la operación en el servicio.
 	 * </p>
 	 *
-	 * @param id identificador único del usuario que se desea actualizar.
-	 * @param request objeto DTO con los nuevos datos del usuario.
+	 * @param id             identificador único del usuario que se desea actualizar.
+	 * @param request        objeto DTO con los nuevos datos del usuario.
 	 * @param authentication información de autenticación del administrador que realiza la solicitud.
 	 * @return {@link ResponseEntity} con estado {@code 200 OK} y los datos actualizados del usuario.
 	 * @throws SelfActionNotAllowedException si el administrador intenta actualizar su propia cuenta.
@@ -148,7 +177,7 @@ public class UserController {
 	/**
 	 * Cambia la contraseña de un usuario específico por acción de un administrador.
 	 *
-	 * @param id identificador único del usuario al que se le cambiará la contraseña.
+	 * @param id      identificador único del usuario al que se le cambiará la contraseña.
 	 * @param request objeto DTO que contiene la nueva contraseña a asignar.
 	 * @return {@link ResponseEntity} con estado {@code 200 OK} y los datos del usuario actualizado.
 	 */
@@ -166,7 +195,7 @@ public class UserController {
 	 * eliminar su propia cuenta antes de ejecutar la eliminación.
 	 * </p>
 	 *
-	 * @param id identificador único del usuario que se desea eliminar.
+	 * @param id             identificador único del usuario que se desea eliminar.
 	 * @param authentication información de autenticación del administrador que realiza la solicitud.
 	 * @return {@link ResponseEntity} con estado {@code 200 OK} y un mensaje de confirmación.
 	 * @throws SelfActionNotAllowedException si el administrador intenta eliminarse a sí mismo.

@@ -239,6 +239,20 @@ class UserServiceTest {
 		UserResponseDTO dtoEsperado = new UserResponseDTO();
 
 		when(userRepo.findById(1L)).thenReturn(Optional.of(usuarioExistente));
+
+		UpdateUserRequestDTO requestNombreDup = new UpdateUserRequestDTO(
+				"nombreOcupado", "nuevo@ejemplo.com", Role.USER, PlanType.FREE);
+		when(userRepo.existsByUsername("nombreOcupado")).thenReturn(true);
+		assertThatThrownBy(() -> userService.actualizar(1L, requestNombreDup))
+				.isInstanceOf(UsernameAlreadyExistsException.class);
+
+		UpdateUserRequestDTO requestCorreoDup = new UpdateUserRequestDTO(
+				"otroNombreLibre", "correo@ocupado.com", Role.USER, PlanType.FREE);
+		when(userRepo.existsByUsername("otroNombreLibre")).thenReturn(false);
+		when(userRepo.existsByEmail("correo@ocupado.com")).thenReturn(true);
+		assertThatThrownBy(() -> userService.actualizar(1L, requestCorreoDup))
+				.isInstanceOf(EmailAlreadyExistsException.class);
+
 		when(userRepo.existsByUsername("nuevoNombre")).thenReturn(false);
 		when(userRepo.existsByEmail("nuevo@ejemplo.com")).thenReturn(false);
 		when(modelMapper.map(usuarioExistente, UserResponseDTO.class)).thenReturn(dtoEsperado);
