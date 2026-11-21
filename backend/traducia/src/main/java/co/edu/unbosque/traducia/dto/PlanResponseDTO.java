@@ -1,5 +1,7 @@
 package co.edu.unbosque.traducia.dto;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import co.edu.unbosque.traducia.entity.ProveedorTraduccion;
@@ -46,7 +48,7 @@ public class PlanResponseDTO {
 	public PlanResponseDTO(String plan, long numeroCaracterPorSolicitud, Set<ProveedorTraduccion> proveedores) {
 		this.plan = plan;
 		this.numeroCaracterPorSolicitud = numeroCaracterPorSolicitud;
-		this.proveedores = proveedores == null ? null : Set.copyOf(proveedores);
+		this.proveedores = proveedores == null ? null : new LinkedHashSet<>(proveedores);
 	}
 
 	/**
@@ -91,7 +93,7 @@ public class PlanResponseDTO {
 	 * @return conjunto inmutable de proveedores permitidos.
 	 */
 	public Set<ProveedorTraduccion> getProveedores() {
-		return proveedores == null ? null : Set.copyOf(proveedores);
+		return proveedores == null ? null : Collections.unmodifiableSet(new LinkedHashSet<>(proveedores));
 	}
 
 	/**
@@ -100,6 +102,6 @@ public class PlanResponseDTO {
 	 * @param proveedores conjunto de proveedores permitidos.
 	 */
 	public void setProveedores(Set<ProveedorTraduccion> proveedores) {
-		this.proveedores = proveedores == null ? null : Set.copyOf(proveedores);
+		this.proveedores = proveedores == null ? null : new LinkedHashSet<>(proveedores);
 	}
 }
