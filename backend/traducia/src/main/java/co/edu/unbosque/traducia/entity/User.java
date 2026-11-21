@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -296,12 +297,12 @@ public class User implements UserDetails{
 	}
 	
 	/**
-	 * Obtiene el identificador único del usuario.
+	 * Establece el identificador único del usuario.
 	 *
-	 * @return identificador del usuario, o null si aún no ha sido guardado
+	 * @param id identificador del usuario
 	 */
-	public Long getId() {
-		return id;
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	

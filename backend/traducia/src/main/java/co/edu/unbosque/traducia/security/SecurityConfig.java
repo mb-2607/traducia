@@ -89,6 +89,7 @@ public class SecurityConfig {
 						.requestMatchers("/user/getall", "/user/count", "/user/exists/**", "/user/getbyid/**").hasAnyRole("USER", "ADMIN")
 						.requestMatchers("/user/**").hasAnyRole("ADMIN")
 						.requestMatchers("/traductor/**").hasAnyRole("USER", "ADMIN")
+						.requestMatchers("/auditoria/**").hasAnyRole("ADMIN")
 						.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
