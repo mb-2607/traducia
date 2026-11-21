@@ -46,7 +46,7 @@ public class PlanResponseDTO {
 	public PlanResponseDTO(String plan, long numeroCaracterPorSolicitud, Set<ProveedorTraduccion> proveedores) {
 		this.plan = plan;
 		this.numeroCaracterPorSolicitud = numeroCaracterPorSolicitud;
-		this.proveedores = proveedores;
+		this.proveedores = proveedores == null ? null : Set.copyOf(proveedores);
 	}
 
 	/**
@@ -88,10 +88,10 @@ public class PlanResponseDTO {
 	/**
 	 * Obtiene los proveedores habilitados por el plan.
 	 *
-	 * @return conjunto de proveedores permitidos.
+	 * @return conjunto inmutable de proveedores permitidos.
 	 */
 	public Set<ProveedorTraduccion> getProveedores() {
-		return proveedores;
+		return proveedores == null ? null : Set.copyOf(proveedores);
 	}
 
 	/**
@@ -100,6 +100,6 @@ public class PlanResponseDTO {
 	 * @param proveedores conjunto de proveedores permitidos.
 	 */
 	public void setProveedores(Set<ProveedorTraduccion> proveedores) {
-		this.proveedores = proveedores;
+		this.proveedores = proveedores == null ? null : Set.copyOf(proveedores);
 	}
 }
