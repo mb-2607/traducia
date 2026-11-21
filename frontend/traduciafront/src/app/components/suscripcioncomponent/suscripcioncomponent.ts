@@ -82,18 +82,13 @@ function precioFormateado(precio: number): string {
 }
 
 /**
- * Obtiene la descripción del límite de palabras por traducción.
- * Un valor `null` en el plan representa un límite ilimitado.
+ * Describe el máximo de caracteres de entrada permitido por solicitud.
  *
- * @param plan Plan del cual se desea consultar el límite de palabras.
- * @returns Descripción del límite de palabras por traducción.
+ * @param plan Plan cuyo límite se desea mostrar.
+ * @returns Descripción del límite de caracteres.
  */
-function limitePalabras(plan: Planmodel): string {
-  if (plan.palabras === null) {
-    return 'Palabras ilimitadas por traducción';
-  }
-
-  return `${FORMATO_NUMERO.format(plan.palabras)} palabras por traducción`;
+function limiteCaracteres(plan: Planmodel): string {
+  return `${FORMATO_NUMERO.format(plan.caracteresPorSolicitud)} caracteres por traducción`;
 }
 
 /**
@@ -177,8 +172,8 @@ export class Suscripcioncomponent {
   /** Formatea los precios que se muestran en la plantilla. */
   readonly precioFormateado = precioFormateado;
 
-  /** Describe el límite de palabras de un plan en la plantilla. */
-  readonly limitePalabras = limitePalabras;
+  /** Describe el límite de caracteres de un plan en la plantilla. */
+  readonly limiteCaracteres = limiteCaracteres;
 
   /** Describe el cupo diario de archivos de un plan en la plantilla. */
   readonly limiteArchivos = limiteArchivos;

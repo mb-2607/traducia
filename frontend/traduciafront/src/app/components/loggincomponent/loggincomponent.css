@@ -235,3 +235,19 @@
     transform: none;
   }
 }
+
+.acceso-recuperar {
+  display: block;
+  margin-block: 0.75rem 1rem;
+  color: inherit;
+  font-size: 0.85rem;
+  text-align: right;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.acceso-recuperar:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 0.25rem;
+}

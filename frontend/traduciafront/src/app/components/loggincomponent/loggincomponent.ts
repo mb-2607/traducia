@@ -3,47 +3,45 @@ import {
   Component,
   EventEmitter,
   Output,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import type { AbstractControl, ValidatorFn } from '@angular/forms';
 import type { LoginRequest, RegisterRequest } from '../../models/usermodel';
+import { TerminosService } from '../../services/terminosservice';
+import { Terminocomponent } from '../terminocomponent/terminocomponent';
 
 /**
- * Datos adicionales solicitados por el formulario de registro.
- * Amplía el contrato existente mientras se acuerda su integración con el backend.
+ * Datos adicionales de la interfaz.
+ *
+ * Ciudad y edad permanecen pendientes de soporte en el backend.
  */
 type RegistroCuenta = RegisterRequest & {
   ciudad: string;
   edad: number;
 };
 
-/**
- * Verifica que la contraseña y su confirmación coincidan.
- *
- * La obligatoriedad de ambos campos se valida por separado.
- *
- * @param control Grupo que contiene la contraseña y su confirmación.
- * @returns El error de coincidencia o `null` cuando ambos valores coinciden.
- */
+/** Valida la coincidencia sin modificar las contraseñas ingresadas. */
 const contrasenasIguales: ValidatorFn = (control) => {
   const password: unknown = control.get('password')?.value;
   const confirmacion: unknown = control.get('confirmacion')?.value;
 
-  if (password === confirmacion) {
-    return null;
-  }
-
-  return { contrasenasDistintas: true };
+  return password === confirmacion ? null : { contrasenasDistintas: true };
 };
 
-/**
- * Obtiene un mensaje de validación para un campo que ya fue tocado.
- *
- * @param control Campo que se desea comprobar.
- * @returns El primer mensaje aplicable o una cadena vacía.
- */
+/** Comprueba la estructura de los errores de longitud de Angular. */
+function esErrorLongitud(valor: unknown): valor is { requiredLength: number } {
+  return (
+    typeof valor === 'object' &&
+    valor !== null &&
+    'requiredLength' in valor &&
+    typeof valor.requiredLength === 'number'
+  );
+}
+
+/** Devuelve el mensaje aplicable a un control que ya fue tocado. */
 function obtenerError(control: AbstractControl): string {
   if (!control.touched || !control.errors) {
     return '';
@@ -57,12 +55,16 @@ function obtenerError(control: AbstractControl): string {
     return 'Ingresa un correo válido.';
   }
 
-  if (control.hasError('minlength')) {
-    return `Ingresa al menos ${control.getError('minlength').requiredLength} caracteres.`;
+  const minimo: unknown = control.getError('minlength');
+
+  if (esErrorLongitud(minimo)) {
+    return `Ingresa al menos ${minimo.requiredLength} caracteres.`;
   }
 
-  if (control.hasError('maxlength')) {
-    return `Ingresa hasta ${control.getError('maxlength').requiredLength} caracteres.`;
+  const maximo: unknown = control.getError('maxlength');
+
+  if (esErrorLongitud(maximo)) {
+    return `Ingresa hasta ${maximo.requiredLength} caracteres.`;
   }
 
   if (control.hasError('min') || control.hasError('max')) {
@@ -73,14 +75,11 @@ function obtenerError(control: AbstractControl): string {
 }
 
 /**
- * Gestiona los formularios de acceso y registro de TraducIA.
+ * Gestiona los formularios de acceso y registro.
  *
- * Valida los datos antes de emitir las solicitudes a la integración
- * responsable de autenticar o registrar al usuario.
- *
- * Mantiene las contraseñas en los controles del formulario y permite
- * alternar su visibilidad. El acceso con Google se solicita mediante
- * un evento independiente.
+ * Comprueba la aceptación de términos antes de emitir solicitudes.
+ * La integración recibe los eventos y determina el resultado
+ * de las operaciones con el backend.
  */
 @Component({
   selector: 'app-loggincomponent',
@@ -91,35 +90,42 @@ function obtenerError(control: AbstractControl): string {
 })
 export class Loggincomponent {
   private readonly fb = inject(NonNullableFormBuilder);
-
-  /** Solicitud de acceso validada con el contrato existente del proyecto. */
-  @Output() readonly accesoSolicitado = new EventEmitter<LoginRequest>();
-
-  /** Solicitud de registro con los datos adicionales del formulario. */
-  @Output() readonly registroSolicitado = new EventEmitter<RegistroCuenta>();
-
-  /** Solicita a la integración iniciar el acceso mediante Google. */
-  @Output() readonly googleSolicitado = new EventEmitter<void>();
-
-  /** Indica si se está mostrando el formulario de registro. */
+  private readonly terminos = inject(TerminosService);
+  @ViewChild(Terminocomponent)
+  private modalTerminos?: Terminocomponent;
+  /** Credenciales validadas, compatibles con el contrato de acceso. */
+  @Output()
+  readonly accesoSolicitado = new EventEmitter<LoginRequest>();
+  /** Datos de registro conservando los campos de la interfaz actual. */
+  @Output()
+  readonly registroSolicitado = new EventEmitter<RegistroCuenta>();
+  /** Solicita el flujo de acceso con Google a la integración. */
+  @Output()
+  readonly googleSolicitado = new EventEmitter<void>();
+  /** Estado de aceptación compartido con el modal. */
+  readonly terminosAceptados = this.terminos.aceptados;
   readonly modoRegistro = signal(false);
-
-  /** Controla la visibilidad de las contraseñas de la tarjeta. */
   readonly passwordVisible = signal(false);
-
-  /** Mensaje de validación o estado de la solicitud. */
   readonly mensaje = signal('');
-
   /** Expone los mensajes de validación a la plantilla. */
   readonly errorCampo = obtenerError;
 
-  /** Formulario de inicio de sesión. */
+  /**
+   * Formulario de acceso.
+   *
+   * El nombre de usuario puede incluir números y no puede
+   * contener únicamente espacios.
+   */
   readonly acceso = this.fb.group({
-    correo: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
+    nombre: ['', [Validators.required, Validators.maxLength(80), Validators.pattern(/\S/)]],
     password: ['', [Validators.required, Validators.maxLength(128)]],
   });
 
-  /** Formulario de registro y confirmación de contraseña. */
+  /**
+   * Formulario de registro.
+   *
+   * Ciudad y edad siguen siendo campos adicionales del frontend.
+   */
   readonly registro = this.fb.group(
     {
       nombre: [
@@ -128,7 +134,7 @@ export class Loggincomponent {
           Validators.required,
           Validators.minLength(2),
           Validators.maxLength(80),
-          Validators.pattern(/^[\p{L}\p{M}]+(?:[ .’'-][\p{L}\p{M}]+)*$/u),
+          Validators.pattern(/\S/),
         ],
       ],
       ciudad: [
@@ -164,15 +170,25 @@ export class Loggincomponent {
     { validators: contrasenasIguales },
   );
 
-  /**
-   * Alterna el formulario y limpia contraseñas y mensajes anteriores.
-   * Conserva los demás campos para facilitar la navegación entre modos.
-   */
+  /** Actualiza el mensaje después de una decisión en el modal. */
+  actualizarAceptacionTerminos(aceptados: boolean): void {
+    if (!aceptados) {
+      this.mensaje.set('Debes aceptar los términos para continuar.');
+      return;
+    }
+
+    this.mensaje.set(
+      this.terminos.persistenciaDisponible()
+        ? ''
+        : 'Aceptación válida para esta sesión. El navegador no permitió recordarla.',
+    );
+  }
+
+  /** Alterna el formulario y elimina las contraseñas del modo anterior. */
   cambiarModo(): void {
     this.modoRegistro.update((actual) => !actual);
     this.passwordVisible.set(false);
     this.mensaje.set('');
-
     this.acceso.controls.password.reset();
     this.registro.controls.password.reset();
     this.registro.controls.confirmacion.reset();
@@ -183,37 +199,42 @@ export class Loggincomponent {
     this.passwordVisible.update((actual) => !actual);
   }
 
-  /**
-   * Valida las credenciales y emite la solicitud de acceso.
-   * La integración de autenticación determina el resultado de la operación.
-   */
+  /** Emite las credenciales únicamente después de aceptar y validar. */
   iniciarSesion(): void {
-    this.mensaje.set('');
+    if (!this.comprobarTerminos()) {
+      return;
+    }
 
+    this.mensaje.set('');
+    const nombre = this.acceso.controls.nombre;
+    nombre.setValue(nombre.value.trim());
     if (this.acceso.invalid) {
       this.acceso.markAllAsTouched();
       this.mensaje.set('Revisa los campos para continuar.');
       return;
     }
 
-    const datos = this.acceso.getRawValue();
-
+    const datos: LoginRequest = this.acceso.getRawValue();
     this.mensaje.set('Datos validados. El inicio de sesión está pendiente de conexión.');
-    this.accesoSolicitado.emit({
-      correo: datos.correo.trim(),
-      password: datos.password,
-    });
+    this.accesoSolicitado.emit(datos);
   }
 
   /**
-   * Valida el formulario y emite los datos necesarios para crear la cuenta.
+   * Normaliza datos de texto y emite el registro.
    *
-   * Mapea el nombre al campo `username` del contrato actual del proyecto.
-   * Convierte la edad a número después de superar las validaciones.
+   * Conserva la contraseña exactamente como fue ingresada.
+   * No inicia sesión automáticamente.
    */
   registrarCuenta(): void {
-    this.mensaje.set('');
+    if (!this.comprobarTerminos()) {
+      return;
+    }
 
+    this.mensaje.set('');
+    const { nombre, ciudad, correo } = this.registro.controls;
+    nombre.setValue(nombre.value.trim());
+    ciudad.setValue(ciudad.value.trim());
+    correo.setValue(correo.value.trim());
     if (this.registro.invalid) {
       this.registro.markAllAsTouched();
       this.mensaje.set('Revisa los campos para crear tu cuenta.');
@@ -221,20 +242,39 @@ export class Loggincomponent {
     }
 
     const datos = this.registro.getRawValue();
-
     this.mensaje.set('Datos validados. La creación de la cuenta está pendiente de conexión.');
     this.registroSolicitado.emit({
-      username: datos.nombre.trim(),
-      ciudad: datos.ciudad.trim(),
-      correo: datos.correo.trim(),
+      nombre: datos.nombre,
+      ciudad: datos.ciudad,
+      correo: datos.correo,
       edad: Number(datos.edad),
       password: datos.password,
     });
   }
 
-  /** Solicita el acceso mediante Google a la integración de autenticación. */
+  /** Comprueba los términos antes de solicitar el flujo de Google. */
   continuarConGoogle(): void {
+    if (!this.comprobarTerminos()) {
+      return;
+    }
+
     this.mensaje.set('El acceso con Google está pendiente de conexión.');
     this.googleSolicitado.emit();
+  }
+
+  /**
+   * Consulta el estado real del servicio antes de continuar.
+   *
+   * El evento del modal comunica la decisión, pero no sustituye
+   * esta comprobación.
+   */
+  private comprobarTerminos(): boolean {
+    if (this.terminosAceptados()) {
+      return true;
+    }
+
+    this.mensaje.set('Debes aceptar los términos para continuar.');
+    this.modalTerminos?.abrir();
+    return false;
   }
 }

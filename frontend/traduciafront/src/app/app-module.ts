@@ -22,6 +22,7 @@ import { Recuperarcontrasenacomponent } from './components/recuperarcontrasenaco
 import { Landingpagecomponent } from './components/landingpagecomponent/landingpagecomponent';
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 import { Terminocomponent } from './components/terminocomponent/terminocomponent';
+import { Verificarcorreocomponent } from './components/verificarcorreocomponent/verificarcorreocomponent';
 
 /**
  * Módulo principal de la aplicación.
@@ -54,6 +55,7 @@ import { Terminocomponent } from './components/terminocomponent/terminocomponent
     Landingpagecomponent,
     Noencontradocomponent,
     Terminocomponent,
+    Verificarcorreocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],

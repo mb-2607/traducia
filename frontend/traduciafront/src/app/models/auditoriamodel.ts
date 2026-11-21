@@ -2,21 +2,75 @@ import type { Rol } from './usermodel';
 import type { PlanAdministracion } from './usuarioadminmodel';
 
 /**
- * Identifica una cuenta de usuario, un administrador
- * o un proceso automático del sistema.
+ * Clasificación del actor utilizada por la interfaz.
+ *
+ * UNKNOWN indica que no hay información suficiente para
+ * identificar el rol o la naturaleza del actor.
  */
-export type TipoActorAuditoria = Rol | 'SYSTEM';
+export type TipoActorAuditoria = Rol | 'SYSTEM' | 'UNKNOWN';
 
-/** Resultado comunicado por el backend para una acción registrada. */
+/**
+ * Resultados utilizados por la interfaz.
+ *
+ * El backend actual devuelve un código HTTP, no estos valores.
+ * La integración deberá establecer la correspondencia.
+ * PENDING se conserva por compatibilidad con la pantalla actual.
+ */
 export type ResultadoAuditoria = 'SUCCESS' | 'FAILURE' | 'PENDING';
 
 /**
- * Información del actor asociado al evento.
+ * Registro devuelto por el backend.
  *
- * Los valores nulos representan datos no disponibles o que no
- * corresponden a un proceso del sistema.
+ * Coincide con AuditoriaLogDTO.
+ * Representa una petición HTTP registrada en la auditoría.
+ */
+export interface AuditoriaLogDTO {
+  readonly id: number;
+  readonly usuario: string;
+  readonly metodo: string;
+  readonly ruta: string;
+
+  /** Código HTTP de la respuesta registrada. */
+  readonly status: number;
+  readonly ip: string;
+
+  /** Duración de la petición en milisegundos. */
+  readonly duracionMs: number;
+
+  /**
+   * Fecha serializada desde LocalDateTime.
+   *
+   * No incluye zona horaria. La integración deberá acordar
+   * con el backend cómo interpretar esta fecha.
+   */
+  readonly fecha: string;
+}
+
+/**
+ * Respuesta paginada en el formato Page utilizado actualmente
+ * por el controlador de auditoría.
  *
- * No incluye contraseñas, hashes ni tokens.
+ * Los filtros y el paginador deberán trabajar con estos
+ * metadatos cuando se implemente la consulta al servidor.
+ */
+export interface PaginaAuditoriaDTO {
+  readonly content: readonly AuditoriaLogDTO[];
+
+  /** Índice de página del servidor, comenzando en cero. */
+  readonly number: number;
+  readonly size: number;
+  readonly totalElements: number;
+  readonly totalPages: number;
+  readonly first: boolean;
+  readonly last: boolean;
+  readonly empty: boolean;
+}
+
+/**
+ * Información del actor utilizada por la pantalla.
+ *
+ * Los campos que no estén disponibles se representan con null.
+ * El rol desconocido se representa mediante UNKNOWN.
  */
 export interface ActorAuditoria {
   readonly id: number | null;
@@ -25,32 +79,37 @@ export interface ActorAuditoria {
   readonly tipo: TipoActorAuditoria;
 
   /**
-   * Plan actual de la cuenta al consultar la auditoría.
-   * No representa necesariamente el plan que tenía al ocurrir el evento.
+   * Plan actual de la cuenta, cuando esté disponible.
+   *
+   * No representa necesariamente el plan que tenía
+   * la cuenta cuando ocurrió el evento.
    */
   readonly planActual: PlanAdministracion | null;
 }
 
 /**
- * Contrato de lectura que consume la pantalla de auditoría.
+ * Registro preparado para su presentación en el componente.
  *
- * La integración adapta los campos del backend a esta estructura.
- * Cada evento debe tener un identificador único y estable.
+ * Es diferente de AuditoriaLogDTO: la integración deberá
+ * adaptar los datos recibidos a esta estructura.
  */
 export interface RegistroAuditoria {
+  /** Identificador estable del evento, convertido a texto. */
   readonly id: string;
 
-  /** Instante ISO 8601 con zona horaria u offset explícito. */
+  /**
+   * Fecha normalizada para su presentación.
+   *
+   * Debe incluir zona horaria u offset explícito.
+   * La conversión requiere conocer la zona de la fecha original.
+   */
   readonly fecha: string;
   readonly actor: ActorAuditoria;
 
-  /** Nombre legible de la acción, preparado por la integración. */
+  /** Descripción legible de la operación registrada. */
   readonly accion: string;
   readonly resultado: ResultadoAuditoria;
 
-  /**
-   * Explicación apta para el administrador.
-   * No debe contener credenciales ni información secreta.
-   */
+  /** Información adicional apta para mostrar al administrador. */
   readonly detalle: string | null;
 }

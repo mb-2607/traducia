@@ -1,3 +1,6 @@
+<app-terminocomponent
+  (terminosAceptadosChange)="actualizarAceptacionTerminos($event)"
+/>
 <section class="acceso-pagina container">
   <div class="row justify-content-center">
     <div class="col-12 col-md-9 col-lg-7 col-xl-6">
@@ -30,7 +33,7 @@
         </button>
 
         <div class="acceso-separador" aria-hidden="true">
-          <span>o con tu correo</span>
+          <span>{{ modoRegistro() ? 'o crea tu cuenta' : 'o inicia sesión con tus datos' }}</span>
         </div>
 
         @if (modoRegistro()) {
@@ -42,7 +45,7 @@
             <div class="row g-3">
               <div class="col-12">
                 <label class="acceso-campo" for="registro-nombre">
-                  Nombre completo
+                  Nombre de usuario
                 </label>
 
                 <input
@@ -50,9 +53,9 @@
                   class="acceso-input"
                   type="text"
                   formControlName="nombre"
-                  autocomplete="name"
+                  autocomplete="username"
                   maxlength="80"
-                  placeholder="Ingresa tu nombre"
+                  placeholder="Elige tu nombre de usuario"
                   [attr.aria-invalid]="!!errorCampo(registro.controls.nombre)"
                   aria-describedby="error-nombre"
                 />
@@ -196,7 +199,7 @@
               </div>
             </div>
 
-            <button type="submit" class="boton-acceso">
+            <button type="submit" class="boton-acceso" [disabled]="!terminosAceptados()">
               Crear cuenta
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </button>
@@ -207,25 +210,25 @@
             (ngSubmit)="iniciarSesion()"
             novalidate
           >
-            <label class="acceso-campo" for="acceso-correo">
-              Correo electrónico
+            <label class="acceso-campo" for="acceso-nombre">
+              Nombre de usuario
             </label>
 
             <input
-              id="acceso-correo"
+              id="acceso-nombre"
               class="acceso-input"
-              type="email"
-              formControlName="correo"
+              type="text"
+              formControlName="nombre"
               autocomplete="username"
-              maxlength="254"
-              placeholder="nombre@correo.com"
-              [attr.aria-invalid]="!!errorCampo(acceso.controls.correo)"
-              aria-describedby="error-acceso-correo"
+              maxlength="80"
+              placeholder="Ingresa tu nombre de usuario"
+              [attr.aria-invalid]="!!errorCampo(acceso.controls.nombre)"
+              aria-describedby="error-acceso-nombre"
             />
 
-            <span id="error-acceso-correo" class="acceso-error">
-              {{ errorCampo(acceso.controls.correo) }}
-            </span>
+            <span id="error-acceso-nombre" class="acceso-error">
+  {{ errorCampo(acceso.controls.nombre) }}
+</span>
 
             <label class="acceso-campo campo-password" for="acceso-password">
               Contraseña
@@ -264,7 +267,14 @@
               {{ errorCampo(acceso.controls.password) }}
             </span>
 
-            <button type="submit" class="boton-acceso">
+            <a
+              class="acceso-recuperar"
+              routerLink="/recuperar-contrasena"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+
+            <button type="submit" class="boton-acceso" [disabled]="!terminosAceptados()">
               Iniciar sesión
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </button>

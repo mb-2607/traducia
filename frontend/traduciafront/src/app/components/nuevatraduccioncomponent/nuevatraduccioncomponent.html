@@ -1,7 +1,7 @@
 <header class="encabezado">
   <div>
-    <h1>Traductor</h1>
-    <p>Escribe, dicta o adjunta lo que quieras traducir.</p>
+    <h1>¿Qué traduciremos hoy?</h1>
+    <p>Escribe, pega o adjunta el texto que quieras traducir.</p>
   </div>
 </header>
 
@@ -10,52 +10,96 @@
     <app-idiomaselectorcomponent
       titulo="Idioma de origen"
       [control]="form.controls.origen"
-      [listaIdioma]="listaIdioma"
-      [cargando]="cargandoListaIdioma" ></app-idiomaselectorcomponent>
+      [listaIdioma]="listaIdioma()"
+      [cargando]="cargandoListaIdioma()"
+    />
 
-    <i class="fa-solid fa-arrow-right idiomas-flecha" aria-hidden="true"></i>
+    <i
+      class="fa-solid fa-arrow-right idiomas-flecha"
+      aria-hidden="true"
+    ></i>
 
     <app-idiomaselectorcomponent
       titulo="Idioma de destino"
       [control]="form.controls.destino"
-      [listaIdioma]="listaIdioma"
-      [cargando]="cargandoListaIdioma" ></app-idiomaselectorcomponent>
-
+      [listaIdioma]="listaIdioma()"
+      [cargando]="cargandoListaIdioma()"
+    />
   </div>
+
+  @if (errorIdiomas()) {
+    <div class="estado">
+      <p class="error" role="alert">{{ errorIdiomas() }}</p>
+
+      <button
+        type="button"
+        (click)="cargarIdiomas()"
+        [disabled]="cargandoListaIdioma() || ocupado()"
+      >
+        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+        Reintentar idiomas
+      </button>
+    </div>
+  }
 
   <label class="campo">
     <span>Texto original</span>
+
     <textarea
       formControlName="texto"
       rows="7"
-      aria-describedby="contador"
-      placeholder="Escribe o pega tu texto aquí…"></textarea>
+      [attr.maxlength]="limiteCaracteres()"
+      [attr.aria-invalid]="
+        form.controls.texto.invalid && form.controls.texto.touched
+      "
+      aria-describedby="contador error-texto"
+      placeholder="Escribe o pega tu texto aquí…"
+    ></textarea>
   </label>
 
   <div class="herramientas">
     <div class="acciones">
       <app-archivoselectorcomponent
-        [deshabilitado]="ocupado || escuchando"
-        (archivoSeleccionado)="alSeleccionarArchivo($event)" />
+        [deshabilitado]="ocupado()"
+        (archivoSeleccionado)="alSeleccionarArchivo($event)"
+        (archivoRechazado)="error.set($event)"
+      />
     </div>
 
     <span id="contador" class="contador">
-      {{ form.controls.texto.value.length }} caracteres
+      {{ form.controls.texto.value.length }} /
+      {{ limiteCaracteres() }} caracteres
     </span>
   </div>
 
   <div class="estado" aria-live="polite">
+    <p id="error-texto" class="error">
+      @if (form.controls.texto.touched &&
+      form.controls.texto.hasError('vacio')) {
+        Escribe un texto que no contenga únicamente espacios.
+      }
+
+      @if (form.controls.texto.hasError('maxlength')) {
+        El texto supera el límite de caracteres de tu plan.
+      }
+    </p>
+
     @if (form.hasError('mismosIdiomas')) {
-      <p class="error">Elige idiomas de origen y destino diferentes.</p>
+      <p class="error">
+        Elige idiomas de origen y destino diferentes.
+      </p>
     }
-    @if (error) {
-      <p class="error" role="alert">{{ error }}</p>
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
     }
-    @if (escuchando) {
-      <p>Escuchando… Pulsa el micrófono para detener el dictado.</p>
+
+    @if (aviso()) {
+      <p>{{ aviso() }}</p>
     }
-    @if (estado === 'extrayendo') {
-      <p>Extrayendo el texto del archivo…</p>
+
+    @if (!traduccionDisponible) {
+      <p>La traducción aún no está disponible.</p>
     }
   </div>
 
@@ -63,9 +107,45 @@
     <button
       type="submit"
       class="boton-traducir"
-      [disabled]="form.invalid || escuchando">
+      [disabled]="
+        form.invalid ||
+        ocupado() ||
+        cargandoListaIdioma() ||
+        !traduccionDisponible
+      "
+      [attr.aria-busy]="ocupado()"
+    >
       <i class="fa-solid fa-language" aria-hidden="true"></i>
-      {{ estado === 'traduciendo' ? 'Traduciendo…' : 'Traducir' }}
+      {{ ocupado() ? 'Traduciendo…' : 'Traducir' }}
     </button>
   </footer>
 </form>
+
+@if (resultados().length > 0) {
+  <section
+    aria-labelledby="titulo-resultados"
+    aria-live="polite"
+  >
+    <h2 id="titulo-resultados">Resultados de la traducción</h2>
+
+    @for (resultado of resultados();
+      track resultado.proveedorTraduccion) {
+      <article class="glass editor">
+        <h3>
+          {{ nombresProveedores[resultado.proveedorTraduccion] }}
+        </h3>
+
+        @if (resultado.estado === 'EXITOSA' &&
+        resultado.textoTraducido !== null) {
+          <p class="resultado-texto">
+            {{ resultado.textoTraducido }}
+          </p>
+        } @else {
+          <p class="error">
+            Este proveedor no pudo completar la traducción.
+          </p>
+        }
+      </article>
+    }
+  </section>
+}
