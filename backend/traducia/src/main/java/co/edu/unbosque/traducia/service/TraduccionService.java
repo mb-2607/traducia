@@ -147,6 +147,7 @@ public class TraduccionService {
 			respuesta.setEstado(EstadoTraduccion.EXITOSA);			
 		} catch (Exception e) {
 			respuesta.setEstado(EstadoTraduccion.FALLIDA);
+			e.printStackTrace();
 		}
 		return respuesta;
 	}
