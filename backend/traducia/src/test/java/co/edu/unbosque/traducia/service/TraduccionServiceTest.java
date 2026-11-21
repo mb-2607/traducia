@@ -1,4 +1,4 @@
-package co.edu.unbosque.traducia.service;
+ package co.edu.unbosque.traducia.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
