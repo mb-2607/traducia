@@ -17,6 +17,7 @@ import { Noencontradocomponent } from './components/noencontradocomponent/noenco
 import { administradorGuard } from './guards/administradorguard-guard';
 import { autenticacionGuard } from './guards/autenticacionguard-guard';
 import { visitanteGuard } from './guards/visitanteguard-guard';
+import { Verificarcorreocomponent } from './components/verificarcorreocomponent/verificarcorreocomponent';
 
 /**
  * Configuración de navegación de TraducIA.
@@ -73,6 +74,11 @@ const routes: Routes = [
     component: Suscripcioncomponent,
     canActivate: [autenticacionGuard],
     title: 'Planes | TraducIA',
+  },
+  {
+    path: 'verificar-correo',
+    component: Verificarcorreocomponent,
+    title: 'Verificar correo | TraducIA',
   },
   {
     path: 'dashboard',

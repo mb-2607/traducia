@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/usermodel';
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  User,
+  UserResponseDTO,
+} from '../models/usermodel';
+import type { PlanId } from '../models/planmodel';
 import { StorageService } from './storageservice';
 
 /** Clave bajo la cual se guarda el usuario autenticado en el almacenamiento. */
@@ -82,26 +89,24 @@ export class AuthService {
   }
 
   /**
-   * Inicia sesión enviando las credenciales al endpoint `/login`.
-   *
-   * Si la autenticación es exitosa, guarda el JWT y el usuario en memoria
-   * y en el almacenamiento, y notifica a los suscriptores de
-   * {@link getUserAsObservable}.
-   *
-   * @param usuario Credenciales de acceso.
-   * @returns Observable que emite el usuario autenticado.
+   * Autentica al usuario y conserva la sesión recibida del backend.
    */
-  iniciarSesion(usuario: LoginRequest) {
+  iniciarSesion(credenciales: LoginRequest): Observable<User> {
     return this.cliente
-      .post<AuthResponse>(`${this.URL_BASE}/login`, usuario, { headers: this.HEADER })
+      .post<AuthResponse>(`${this.URL_BASE}/login`, credenciales, { headers: this.HEADER })
       .pipe(
-        tap((response) => {
-          this.jwt = response.jwt;
-          this.userSubject.next(response.user);
-          this.storageService.set(USER_KEY, response.user);
-          this.storageService.set(TOKEN_KEY, response.jwt);
+        map((respuesta) => ({
+          usuario: this.adaptarUsuario(respuesta.userResponse),
+          token: respuesta.jwt,
+        })),
+        tap(({ usuario, token }) => {
+          this.storageService.set(USER_KEY, usuario);
+          this.storageService.set(TOKEN_KEY, token);
+
+          this.jwt = token;
+          this.userSubject.next(usuario);
         }),
-        map((response) => response.user),
+        map(({ usuario }) => usuario),
       );
   }
 
@@ -117,14 +122,21 @@ export class AuthService {
   }
 
   /**
-   * Registra un nuevo usuario mediante el endpoint `/register`.
-   * No inicia sesión automáticamente.
+   * Registra la cuenta sin iniciar sesión automáticamente.
    *
-   * @param usuario Datos de registro del nuevo usuario.
-   * @returns Observable con la respuesta del servidor.
+   * La cuenta debe completar la verificación de correo
+   * exigida por el backend.
    */
-  registrarUsuario(usuario: RegisterRequest) {
-    return this.cliente.post(`${this.URL_BASE}/register`, usuario, { headers: this.HEADER });
+  registrarUsuario(datos: RegisterRequest): Observable<User> {
+    const solicitud: RegisterRequest = {
+      nombre: datos.nombre,
+      correo: datos.correo,
+      password: datos.password,
+    };
+
+    return this.cliente
+      .post<UserResponseDTO>(`${this.URL_BASE}/register`, solicitud, { headers: this.HEADER })
+      .pipe(map((respuesta) => this.adaptarUsuario(respuesta)));
   }
 
   /**
@@ -134,5 +146,26 @@ export class AuthService {
    */
   haySesion(): boolean {
     return this.jwt !== null && this.userSubject.value !== null;
+  }
+
+  /**
+   * Convierte los datos del backend al modelo interno del frontend.
+   *
+   * Mantiene los identificadores visuales utilizados por las
+   * tarjetas de suscripción y el perfil.
+   */
+  private adaptarUsuario(datos: UserResponseDTO): User {
+    const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
+      FREE: 'gratuito',
+      ORIA: 'oria',
+      INFINITIA: 'infinitia',
+    };
+
+    return {
+      nombre: datos.nombre,
+      correo: datos.correo,
+      rol: datos.rol,
+      plan: planes[datos.planId],
+    };
   }
 }

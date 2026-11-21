@@ -1,0 +1,88 @@
+select {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: 0.6rem 2.75rem 0.6rem 1.25rem;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: color-mix(in srgb, currentColor 6%, transparent);
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, currentColor 55%, transparent) 0%,
+      color-mix(in srgb, currentColor 55%, transparent) 38%,
+      #9db8e4 46%,
+      #ffffff 50%,
+      #9db8e4 54%,
+      color-mix(in srgb, currentColor 55%, transparent) 62%,
+      color-mix(in srgb, currentColor 55%, transparent) 100%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d8ca3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-size: 250% 100%, 0.9rem;
+  background-position: 100% 0, right 1rem center;
+  -webkit-background-clip: border-box, border-box;
+  background-clip: border-box, border-box;
+  transition:
+    border-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+}
+
+select:hover,
+select:focus-visible,
+select:not(:has(option[value=""]:checked)) {
+  -webkit-background-clip: text, border-box;
+  background-clip: text, border-box;
+  -webkit-text-fill-color: transparent;
+  animation: brillo 3s infinite linear;
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+select:focus-visible {
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 14%, transparent);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  animation: none;
+}
+
+option {
+  background: Canvas;
+  color: CanvasText;
+  -webkit-text-fill-color: CanvasText;
+}
+
+@keyframes brillo {
+  0% {
+    background-position: 100% 0, right 1rem center;
+  }
+
+  60% {
+    background-position: 0% 0, right 1rem center;
+  }
+
+  100% {
+    background-position: 0% 0, right 1rem center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  select:hover,
+  select:focus-visible,
+  select:not(:has(option[value=""]:checked)) {
+    animation: none;
+    -webkit-background-clip: border-box, border-box;
+    background-clip: border-box, border-box;
+    -webkit-text-fill-color: currentColor;
+  }
+}

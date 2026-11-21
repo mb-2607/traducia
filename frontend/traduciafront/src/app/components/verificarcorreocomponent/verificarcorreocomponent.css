@@ -1,0 +1,254 @@
+/* Superficie glass coherente con el acceso de TraducIA. */
+:host {
+  --vc-fondo: var(--td-fondo, #080a10);
+  --vc-texto: var(--td-texto, #f5f7ff);
+  --vc-secundario: var(--td-secundario, #b6bed0);
+  --vc-acento: #b3ceff;
+  --vc-error: var(--td-error, #ffb5b5);
+  --vc-borde: color-mix(in srgb, var(--vc-texto) 18%, transparent);
+
+  display: block;
+  background: var(--vc-fondo);
+  color: var(--vc-texto);
+}
+
+.vc-pagina {
+  display: grid;
+  place-items: center;
+  min-block-size: 75dvh;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: radial-gradient(
+    ellipse at 50% 10%,
+    #8bafff16,
+    transparent 65%
+  );
+}
+
+.vc-tarjeta {
+  box-sizing: border-box;
+  inline-size: min(100%, 35rem);
+  padding: clamp(1.3rem, 5vw, 2.5rem);
+  border: 1px solid var(--vc-borde);
+  border-radius: 1.8rem;
+  background: linear-gradient(145deg, #ffffff12, #ffffff03),
+  color-mix(in srgb, var(--vc-fondo) 88%, transparent);
+  box-shadow: inset 0 1px 0 #ffffff45,
+  0 24px 70px #00000040;
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+.vc-cabecera {
+  text-align: center;
+}
+
+.vc-marca {
+  display: inline-block;
+  margin-block-end: 1.8rem;
+  color: var(--vc-texto);
+  font-size: 1.2rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.vc-icono {
+  display: grid;
+  place-items: center;
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+  margin: 0 auto 1.2rem;
+  border: 1px solid var(--vc-borde);
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, #ffffff22, #ffffff05);
+  box-shadow: inset 0 1px 0 #ffffff60,
+  0 0 30px #aacaff1a;
+  color: var(--vc-acento);
+  font-size: 1.8rem;
+}
+
+.vc-icono-exito {
+  color: #a0e9cb;
+}
+
+.vc-icono-error {
+  color: var(--vc-error);
+}
+
+.vc-etiqueta {
+  color: var(--vc-secundario);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0.7rem 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.vc-descripcion,
+.vc-ayuda {
+  color: var(--vc-secundario);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.vc-reenvio,
+.vc-pie {
+  margin-block-start: 1.6rem;
+  padding-block-start: 1.4rem;
+  border-block-start: 1px solid var(--vc-borde);
+}
+
+fieldset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+label {
+  display: block;
+  margin-block: 1rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.vc-campo {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 3rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--vc-borde);
+  border-radius: 0.85rem;
+  background: color-mix(
+    in srgb,
+    var(--vc-fondo) 85%,
+    transparent
+  );
+  color: var(--vc-texto);
+  font: inherit;
+}
+
+.vc-campo::placeholder {
+  color: var(--vc-secundario);
+}
+
+.vc-campo[aria-invalid='true'] {
+  border-color: var(--vc-error);
+}
+
+.vc-campo:disabled {
+  opacity: 0.6;
+}
+
+.vc-error-campo {
+  display: block;
+  margin-block-start: 0.5rem;
+  color: var(--vc-error);
+  font-size: 0.8rem;
+}
+
+.vc-error-campo:empty {
+  display: none;
+}
+
+/* Botones con iluminación al pasar el cursor y al presionarlos. */
+.vc-boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 3rem;
+  margin-block-start: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--vc-borde);
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--vc-texto);
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 160ms ease,
+  box-shadow 160ms ease;
+}
+
+.vc-principal {
+  background: var(--vc-acento);
+  color: #101b30;
+}
+
+.vc-boton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px #aacaff50;
+}
+
+.vc-boton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 0 38px #aacaff70;
+}
+
+.vc-boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vc-aviso {
+  margin-block: 1rem 0;
+  padding: 0.9rem;
+  border: 1px solid var(--vc-borde);
+  border-radius: 0.9rem;
+  color: var(--vc-secundario);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.vc-aviso-error {
+  color: var(--vc-error);
+}
+
+.vc-aviso-exito {
+  color: var(--vc-texto);
+}
+
+:where(a, button, input):focus-visible {
+  outline: 2px solid var(--vc-acento);
+  outline-offset: 4px;
+}
+
+.vc-oculto {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .vc-tarjeta {
+    background: var(--vc-fondo);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-boton {
+    transition: none;
+  }
+
+  .vc-boton:hover:not(:disabled),
+  .vc-boton:active:not(:disabled) {
+    transform: none;
+  }
+
+  .vc-icono .fa-spin {
+    animation: none;
+  }
+}

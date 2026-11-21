@@ -152,6 +152,7 @@ export class Auditoriacomponent implements OnInit {
     USER: 'Usuario',
     ADMIN: 'Administrador',
     SYSTEM: 'Sistema',
+    UNKNOWN: 'Tipo no disponible',
   };
 
   protected readonly resultados: Readonly<Record<ResultadoAuditoria, string>> = {
@@ -304,9 +305,15 @@ export class Auditoriacomponent implements OnInit {
     this.paginaSolicitada.set(1);
   }
 
-  /** Acepta únicamente los tipos de actor disponibles. */
+  /** Acepta únicamente los tipos de actor contemplados por la interfaz. */
   protected cambiarTipoActor(valor: string): void {
-    if (valor === '' || valor === 'USER' || valor === 'ADMIN' || valor === 'SYSTEM') {
+    if (
+      valor === '' ||
+      valor === 'USER' ||
+      valor === 'ADMIN' ||
+      valor === 'SYSTEM' ||
+      valor === 'UNKNOWN'
+    ) {
       this.tipoActor.set(valor);
       this.paginaSolicitada.set(1);
     }

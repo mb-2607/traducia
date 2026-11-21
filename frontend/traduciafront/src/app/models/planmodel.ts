@@ -5,7 +5,7 @@ export interface Planmodel {
   readonly nombre: string;
   readonly descripcion: string;
   readonly precio: number;
-  readonly palabras: number | null;
+  readonly caracteresPorSolicitud: number;
   readonly archivosPorDia: number | null;
   readonly ias: number;
   readonly icono: string;
@@ -17,7 +17,7 @@ export const PLANES: Readonly<Record<PlanId, Planmodel>> = {
     nombre: 'Free Pass',
     descripcion: 'Para empezar con traducciones de uso diario.',
     precio: 0,
-    palabras: 250,
+    caracteresPorSolicitud: 500,
     archivosPorDia: 2,
     ias: 1,
     icono: 'fa-ticket',
@@ -27,7 +27,7 @@ export const PLANES: Readonly<Record<PlanId, Planmodel>> = {
     nombre: 'orIA',
     descripcion: 'Para textos más largos y más archivos cada día.',
     precio: 19900,
-    palabras: 1500,
+    caracteresPorSolicitud: 2000,
     archivosPorDia: 10,
     ias: 2,
     icono: 'fa-crown',
@@ -35,9 +35,9 @@ export const PLANES: Readonly<Record<PlanId, Planmodel>> = {
   infinitia: {
     id: 'infinitia',
     nombre: 'InfinitIA',
-    descripcion: 'Para traducir con las tres IAs y sin límites de uso.',
+    descripcion: 'Para traducir con las tres IAs con mayor cantidad de caracteres por traducción.',
     precio: 39900,
-    palabras: null,
+    caracteresPorSolicitud: 5000,
     archivosPorDia: null,
     ias: 3,
     icono: 'fa-satellite',

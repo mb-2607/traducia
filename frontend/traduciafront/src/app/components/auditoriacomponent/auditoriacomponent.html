@@ -144,6 +144,7 @@
           <option value="USER">Usuario</option>
           <option value="ADMIN">Administrador</option>
           <option value="SYSTEM">Sistema</option>
+          <option value="UNKNOWN">Tipo no disponible</option>
         </select>
       </div>
 
@@ -260,6 +261,7 @@
                     [class.fa-user]="fila.actor.tipo === 'USER'"
                     [class.fa-user-shield]="fila.actor.tipo === 'ADMIN'"
                     [class.fa-gears]="fila.actor.tipo === 'SYSTEM'"
+                    [class.fa-circle-question]="fila.actor.tipo === 'UNKNOWN'"
                   ></i>
                 </span>
 
