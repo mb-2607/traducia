@@ -7,9 +7,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import type { AbstractControl, ValidatorFn } from '@angular/forms';
 import type { LoginRequest, RegisterRequest } from '../../models/usermodel';
+import { AuthService } from '../../services/authservice';
 import { TerminosService } from '../../services/terminosservice';
 import { Terminocomponent } from '../terminocomponent/terminocomponent';
 
@@ -90,7 +92,10 @@ function obtenerError(control: AbstractControl): string {
 })
 export class Loggincomponent {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly terminos = inject(TerminosService);
+
   @ViewChild(Terminocomponent)
   private modalTerminos?: Terminocomponent;
   /** Credenciales validadas, compatibles con el contrato de acceso. */
@@ -120,7 +125,6 @@ export class Loggincomponent {
     nombre: ['', [Validators.required, Validators.maxLength(80), Validators.pattern(/\S/)]],
     password: ['', [Validators.required, Validators.maxLength(128)]],
   });
-
   /**
    * Formulario de registro.
    *
@@ -215,8 +219,29 @@ export class Loggincomponent {
     }
 
     const datos: LoginRequest = this.acceso.getRawValue();
-    this.mensaje.set('Datos validados. El inicio de sesión está pendiente de conexión.');
     this.accesoSolicitado.emit(datos);
+    this.mensaje.set('Iniciando sesión...');
+
+    this.auth.iniciarSesion(datos).subscribe({
+      next: (usuario) => {
+        this.mensaje.set('');
+        const destino = usuario.rol === 'ADMIN' ? ['/admin'] : ['/dashboard/new'];
+        void this.router.navigate(destino);
+      },
+      error: (err: unknown) => {
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'error' in err &&
+          typeof err.error === 'string' &&
+          err.error.trim().length > 0
+        ) {
+          this.mensaje.set(err.error);
+          return;
+        }
+        this.mensaje.set('No fue posible iniciar sesión. Revisa tus datos.');
+      },
+    });
   }
 
   /**
@@ -242,13 +267,36 @@ export class Loggincomponent {
     }
 
     const datos = this.registro.getRawValue();
-    this.mensaje.set('Datos validados. La creación de la cuenta está pendiente de conexión.');
-    this.registroSolicitado.emit({
+    const payloadRegistro: RegisterRequest = {
       nombre: datos.nombre,
-      ciudad: datos.ciudad,
       correo: datos.correo,
-      edad: Number(datos.edad),
       password: datos.password,
+    };
+
+    this.registroSolicitado.emit({
+      ...payloadRegistro,
+      ciudad: datos.ciudad,
+      edad: Number(datos.edad),
+    });
+    this.mensaje.set('Creando cuenta...');
+
+    this.auth.registrarUsuario(payloadRegistro).subscribe({
+      next: () => {
+        this.mensaje.set('Cuenta creada. Revisa tu correo para verificarla antes de iniciar sesión.');
+      },
+      error: (err: unknown) => {
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'error' in err &&
+          typeof err.error === 'string' &&
+          err.error.trim().length > 0
+        ) {
+          this.mensaje.set(err.error);
+          return;
+        }
+        this.mensaje.set('No fue posible crear la cuenta.');
+      },
     });
   }
 
