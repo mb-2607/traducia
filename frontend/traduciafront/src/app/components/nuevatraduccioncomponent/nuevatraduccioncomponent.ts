@@ -47,8 +47,7 @@ type Estado = 'reposo' | 'traduciendo';
  * Aplica el límite de caracteres del usuario, gestiona los idiomas
  * disponibles y presenta los resultados individuales por proveedor.
  *
- * La implementación de TraduccionService se registra durante
- * la integración con el backend.
+ * Utiliza TraduccionService para enviar las solicitudes al backend.
  */
 @Component({
   selector: 'app-nuevatraduccioncomponent',
@@ -61,14 +60,16 @@ export class Nuevatraduccioncomponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AuthService);
   private readonly idiomaService = inject(IdiomaService);
-  private readonly traductor = inject(TraduccionService, { optional: true });
+  private readonly traductor = inject(TraduccionService);
   private readonly destroyRef = inject(DestroyRef);
+
   /** Sin una sesión disponible se utiliza el límite del plan gratuito. */
   private readonly planActual = signal<PlanId>('gratuito');
   readonly estado = signal<Estado>('reposo');
   readonly ocupado = computed(() => this.estado() === 'traduciendo');
-  /** Indica si existe una implementación registrada del servicio. */
-  readonly traduccionDisponible = this.traductor !== null;
+
+  /** Indica que el servicio de traducción está disponible para enviar solicitudes. */
+  readonly traduccionDisponible = true;
   readonly listaIdioma = signal<Idioma[]>([]);
   readonly cargandoListaIdioma = signal(false);
   readonly errorIdiomas = signal('');
@@ -143,7 +144,7 @@ export class Nuevatraduccioncomponent implements OnInit {
   }
 
   /**
-   * Valida el formulario y utiliza el servicio cuando esté disponible.
+   * Valida el formulario y envía la solicitud mediante TraduccionService.
    *
    * Conserva el texto original, incluidos espacios y saltos de línea.
    * El backend deberá volver a validar el límite del usuario.
@@ -161,17 +162,11 @@ export class Nuevatraduccioncomponent implements OnInit {
       return;
     }
 
-    const servicio = this.traductor;
-    if (servicio === null) {
-      this.aviso.set('La traducción aún no está disponible.');
-      return;
-    }
-
     const solicitud: SolicitudTraduccion = this.form.getRawValue();
     this.resultados.set([]);
     this.estado.set('traduciendo');
     this.form.disable({ emitEvent: false });
-    servicio
+    this.traductor
       .traducir(solicitud)
       .pipe(
         takeUntilDestroyed(this.destroyRef),

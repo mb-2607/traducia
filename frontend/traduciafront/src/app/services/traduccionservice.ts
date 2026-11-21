@@ -1,3 +1,5 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import type {
   SolicitudTraduccion,
@@ -5,18 +7,27 @@ import type {
 } from '../models/traduccionmodel';
 
 /**
- * Contrato del servicio de traducción.
+ * Servicio de traducción que comunica las solicitudes del frontend con el
+ * backend de TraducIA.
  *
- * Define la comunicación que necesita el frontend.
- * La implementación HTTP se proporcionará durante
- * la integración con el backend.
+ * Envía el texto y los idiomas de origen y destino hacia el endpoint
+ * protegido de traducción y devuelve los resultados por proveedor.
  */
-export abstract class TraduccionService {
+@Injectable({ providedIn: 'root' })
+export class TraduccionService {
+  /** Cliente HTTP utilizado para realizar las peticiones al backend. */
+  private readonly http = inject(HttpClient);
+
+  /** URL del endpoint de traducción en el backend. */
+  private readonly url = 'http://localhost:8080/traductor/traducir';
+
   /**
    * Solicita una traducción para los idiomas indicados.
    *
    * @param solicitud Texto original y códigos de los idiomas.
    * @returns Respuesta con los resultados de los proveedores.
    */
-  abstract traducir(solicitud: SolicitudTraduccion): Observable<SolicitudTraduccionResponseDTO>;
+  traducir(solicitud: SolicitudTraduccion): Observable<SolicitudTraduccionResponseDTO> {
+    return this.http.post<SolicitudTraduccionResponseDTO>(this.url, solicitud);
+  }
 }
