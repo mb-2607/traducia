@@ -48,7 +48,10 @@ public class PlanResponseDTO {
 	public PlanResponseDTO(String plan, long numeroCaracterPorSolicitud, Set<ProveedorTraduccion> proveedores) {
 		this.plan = plan;
 		this.numeroCaracterPorSolicitud = numeroCaracterPorSolicitud;
-		this.proveedores = proveedores == null ? null : new LinkedHashSet<>(proveedores);
+		this.proveedores = new LinkedHashSet<>();
+		if (proveedores != null) {
+			this.proveedores.addAll(proveedores);
+		}
 	}
 
 	/**
@@ -102,6 +105,9 @@ public class PlanResponseDTO {
 	 * @param proveedores conjunto de proveedores permitidos.
 	 */
 	public void setProveedores(Set<ProveedorTraduccion> proveedores) {
-		this.proveedores = proveedores == null ? null : new LinkedHashSet<>(proveedores);
+		this.proveedores = new LinkedHashSet<>();
+		if (proveedores != null) {
+			this.proveedores.addAll(proveedores);
+		}
 	}
 }
