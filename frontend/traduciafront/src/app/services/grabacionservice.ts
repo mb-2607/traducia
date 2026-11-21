@@ -13,7 +13,9 @@ const TIPOS_AUDIO = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
  * Se proporciona en el componente para limitar su ciclo de vida a la página.
  * No sube fragmentos individuales ni realiza reconocimiento de voz local.
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GrabacionService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly estadoInterno = signal<EstadoGrabacion>('inactivo');
@@ -49,7 +51,7 @@ export class GrabacionService {
     return new Promise<File | null>((resolve, reject) => {
       this.resolver = resolve;
       this.rechazar = reject;
-      void this.preparar(intento, mimeType).catch((error: unknown) => {
+      this.preparar(intento, mimeType).catch((error: unknown) => {
         if (intento === this.intento) {
           this.finalizar(null, error);
         }

@@ -1,5 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
@@ -9,7 +16,11 @@ import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../api-config';
 import type { Idioma } from '../../models/idiomamodel';
 import { PLANES } from '../../models/planmodel';
 import type { PlanId } from '../../models/planmodel';
-import type { ProveedorTraduccion, SolicitudTraduccion, TraduccionResponseDTO } from '../../models/traduccionmodel';
+import type {
+  ProveedorTraduccion,
+  SolicitudTraduccion,
+  TraduccionResponseDTO,
+} from '../../models/traduccionmodel';
 import { AuthService } from '../../services/authservice';
 import { DocumentoService } from '../../services/documentoservice';
 import { GrabacionService } from '../../services/grabacionservice';
@@ -29,7 +40,8 @@ const idiomasDistintos: ValidatorFn = (grupo) => {
   const origen: unknown = grupo.get('origen')?.value;
   const destino: unknown = grupo.get('destino')?.value;
   return typeof origen === 'string' && origen.length > 0 && origen === destino
-    ? { mismosIdiomas: true } : null;
+    ? { mismosIdiomas: true }
+    : null;
 };
 
 type Estado = 'reposo' | 'extrayendo' | 'grabando' | 'transcribiendo' | 'traduciendo';
@@ -45,10 +57,7 @@ type Estado = 'reposo' | 'extrayendo' | 'grabando' | 'transcribiendo' | 'traduci
   templateUrl: './nuevatraduccioncomponent.html',
   styleUrl: './nuevatraduccioncomponent.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    GrabacionService,
-    { provide: TraduccionService, useClass: TraduccionHttpService },
-  ],
+  providers: [GrabacionService, { provide: TraduccionService, useClass: TraduccionHttpService }],
 })
 export class Nuevatraduccioncomponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
@@ -71,34 +80,45 @@ export class Nuevatraduccioncomponent implements OnInit {
   readonly error = signal('');
   readonly aviso = signal('');
   readonly resultados = signal<readonly TraduccionResponseDTO[]>([]);
-  readonly limiteCaracteres = computed(() =>
-    this.limiteServidor() ?? PLANES[this.planActual()].caracteresPorSolicitud);
+  readonly limiteCaracteres = computed(
+    () => this.limiteServidor() ?? PLANES[this.planActual()].caracteresPorSolicitud,
+  );
   readonly mensajeEstado = computed(() => {
     switch (this.estado()) {
-      case 'extrayendo': return 'Extrayendo el texto del documento…';
-      case 'transcribiendo': return 'Transcribiendo el audio…';
-      case 'traduciendo': return 'Traduciendo el texto…';
+      case 'extrayendo':
+        return 'Extrayendo el texto del documento…';
+      case 'transcribiendo':
+        return 'Transcribiendo el audio…';
+      case 'traduciendo':
+        return 'Traduciendo el texto…';
       case 'grabando':
         return this.grabacion.estado() === 'solicitando'
           ? 'Permite el acceso al micrófono para comenzar.'
           : this.escuchando()
             ? 'Grabando. Pulsa detener para transcribir. Máximo: 2 minutos.'
             : 'Preparando el audio…';
-      default: return '';
+      default:
+        return '';
     }
   });
   readonly nombresProveedores: Readonly<Record<ProveedorTraduccion, string>> = {
-    DEEPL: 'DeepL', GEMMA: 'Gemma', RIVA: 'Riva',
+    DEEPL: 'DeepL',
+    GEMMA: 'Gemma',
+    RIVA: 'Riva',
   };
-  readonly form = this.fb.group({
-    texto: ['', [sinSoloEspacios, Validators.maxLength(PLANES.gratuito.caracteresPorSolicitud)]],
-    origen: ['', Validators.required],
-    destino: ['', Validators.required],
-  }, { validators: idiomasDistintos });
+  readonly form = this.fb.group(
+    {
+      texto: ['', [sinSoloEspacios, Validators.maxLength(PLANES.gratuito.caracteresPorSolicitud)]],
+      origen: ['', Validators.required],
+      destino: ['', Validators.required],
+    },
+    { validators: idiomasDistintos },
+  );
 
   /** Sincroniza el plan y borra resultados anteriores al editar el formulario. */
   ngOnInit(): void {
-    this.auth.getUserAsObservable()
+    this.auth
+      .getUserAsObservable()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((usuario) => {
         const plan = usuario?.plan;
@@ -106,7 +126,8 @@ export class Nuevatraduccioncomponent implements OnInit {
         this.limiteServidor.set(null);
         this.actualizarValidacionTexto();
       });
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.resultados.set([]));
     this.cargarIdiomas();
   }
@@ -118,27 +139,30 @@ export class Nuevatraduccioncomponent implements OnInit {
     }
     this.errorIdiomas.set('');
     this.cargandoListaIdioma.set(true);
-    this.idiomaService.getListaIdioma().pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => {
-        if (!this.destroyRef.destroyed) {
-          this.cargandoListaIdioma.set(false);
-        }
-      }),
-    ).subscribe({
-      next: (idiomas) => {
-        this.listaIdioma.set(idiomas);
-        this.elegirIdiomasIniciales();
-        if (new Set(idiomas.map((idioma) => idioma.id)).size < 2) {
-          this.errorIdiomas.set('No hay suficientes idiomas disponibles para traducir.');
-        }
-      },
-      error: () => {
-        this.listaIdioma.set([]);
-        this.form.patchValue({ origen: '', destino: '' });
-        this.errorIdiomas.set('No fue posible cargar los idiomas. Inténtalo nuevamente.');
-      },
-    });
+    this.idiomaService
+      .getListaIdioma()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          if (!this.destroyRef.destroyed) {
+            this.cargandoListaIdioma.set(false);
+          }
+        }),
+      )
+      .subscribe({
+        next: (idiomas) => {
+          this.listaIdioma.set(idiomas);
+          this.elegirIdiomasIniciales();
+          if (new Set(idiomas.map((idioma) => idioma.id)).size < 2) {
+            this.errorIdiomas.set('No hay suficientes idiomas disponibles para traducir.');
+          }
+        },
+        error: () => {
+          this.listaIdioma.set([]);
+          this.form.patchValue({ origen: '', destino: '' });
+          this.errorIdiomas.set('No fue posible cargar los idiomas. Inténtalo nuevamente.');
+        },
+      });
   }
 
   /** Envía el texto revisado; el backend vuelve a validar el límite del plan. */
@@ -158,20 +182,29 @@ export class Nuevatraduccioncomponent implements OnInit {
     }
     const solicitud: SolicitudTraduccion = this.form.getRawValue();
     this.iniciar('traduciendo');
-    this.traductor.traducir(solicitud).pipe(
-      takeUntilDestroyed(this.destroyRef), finalize(() => this.terminar()),
-    ).subscribe({
-      next: (respuesta) => {
-        this.resultados.set(respuesta.listaTraduccion);
-        const exitosas = respuesta.listaTraduccion.filter((resultado) => resultado.estado === 'EXITOSA');
-        if (exitosas.length === 0) {
-          this.error.set('Ningún proveedor pudo completar la traducción.');
-        } else if (exitosas.length !== respuesta.listaTraduccion.length) {
-          this.aviso.set('Algunos proveedores no respondieron. Puedes consultar los resultados disponibles.');
-        }
-      },
-      error: (error: unknown) => this.mostrarError(error, 'No fue posible completar la traducción.'),
-    });
+    this.traductor
+      .traducir(solicitud)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.terminar()),
+      )
+      .subscribe({
+        next: (respuesta) => {
+          this.resultados.set(respuesta.listaTraduccion);
+          const exitosas = respuesta.listaTraduccion.filter(
+            (resultado) => resultado.estado === 'EXITOSA',
+          );
+          if (exitosas.length === 0) {
+            this.error.set('Ningún proveedor pudo completar la traducción.');
+          } else if (exitosas.length !== respuesta.listaTraduccion.length) {
+            this.aviso.set(
+              'Algunos proveedores no respondieron. Puedes consultar los resultados disponibles.',
+            );
+          }
+        },
+        error: (error: unknown) =>
+          this.mostrarError(error, 'No fue posible completar la traducción.'),
+      });
   }
 
   /** Valida la carga y añade el texto extraído sin recortarlo ni borrar lo escrito. */
@@ -198,18 +231,22 @@ export class Nuevatraduccioncomponent implements OnInit {
       return;
     }
     this.iniciar('extrayendo');
-    this.documentos.extraer(archivo, origen).pipe(
-      takeUntilDestroyed(this.destroyRef), finalize(() => this.terminar()),
-    ).subscribe({
-      next: (respuesta) => {
-        if (Number.isSafeInteger(respuesta.limiteCaracteres) && respuesta.limiteCaracteres > 0) {
-          this.limiteServidor.set(respuesta.limiteCaracteres);
-          this.actualizarValidacionTexto();
-        }
-        this.incorporarTexto(respuesta.texto, `Texto de «${archivo.name}» incorporado.`);
-      },
-      error: (error: unknown) => this.mostrarError(error, 'No fue posible extraer el documento.'),
-    });
+    this.documentos
+      .extraer(archivo, origen)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.terminar()),
+      )
+      .subscribe({
+        next: (respuesta) => {
+          if (Number.isSafeInteger(respuesta.limiteCaracteres) && respuesta.limiteCaracteres > 0) {
+            this.limiteServidor.set(respuesta.limiteCaracteres);
+            this.actualizarValidacionTexto();
+          }
+          this.incorporarTexto(respuesta.texto, `Texto de «${archivo.name}» incorporado.`);
+        },
+        error: (error: unknown) => this.mostrarError(error, 'No fue posible extraer el documento.'),
+      });
   }
 
   /** Mantiene bloqueado el editor durante la captura y envía un único audio final. */
@@ -258,12 +295,20 @@ export class Nuevatraduccioncomponent implements OnInit {
   private transcribirAudio(archivo: File): void {
     this.estado.set('transcribiendo');
     const idioma = this.form.controls.origen.value || undefined;
-    this.transcripciones.transcribir(archivo, idioma).pipe(
-      takeUntilDestroyed(this.destroyRef), finalize(() => this.terminar()),
-    ).subscribe({
-      next: (respuesta) => this.incorporarTexto(respuesta.texto, 'Audio transcrito. Revisa el texto antes de traducir.'),
-      error: (error: unknown) => this.mostrarError(error, 'No fue posible transcribir el audio.'),
-    });
+    this.transcripciones
+      .transcribir(archivo, idioma)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.terminar()),
+      )
+      .subscribe({
+        next: (respuesta) =>
+          this.incorporarTexto(
+            respuesta.texto,
+            'Audio transcrito. Revisa el texto antes de traducir.',
+          ),
+        error: (error: unknown) => this.mostrarError(error, 'No fue posible transcribir el audio.'),
+      });
   }
 
   /** Conserva el texto íntegro y el contenido anterior, también si exceden el plan. */
@@ -278,9 +323,11 @@ export class Nuevatraduccioncomponent implements OnInit {
     control.markAsDirty();
     control.markAsTouched();
     this.error.set('');
-    this.aviso.set(combinado.length > this.limiteCaracteres()
-      ? `${mensaje} Se conservó todo el contenido. Reduce el texto a ${this.limiteCaracteres()} caracteres para traducir.`
-      : mensaje);
+    this.aviso.set(
+      combinado.length > this.limiteCaracteres()
+        ? `${mensaje} Se conservó todo el contenido. Reduce el texto a ${this.limiteCaracteres()} caracteres para traducir.`
+        : mensaje,
+    );
   }
 
   /** Aplica el límite del servidor cuando está disponible; no modifica el valor. */
@@ -322,11 +369,18 @@ export class Nuevatraduccioncomponent implements OnInit {
       if (error.status === 401 || error.status === 403) {
         this.error.set('La sesión venció o no tiene permiso. Vuelve a iniciar sesión.');
       } else if (error.status === 0) {
-        this.error.set('No se pudo conectar con el backend. Revisa su dirección y la configuración CORS.');
+        this.error.set(
+          'No se pudo conectar con el backend. Revisa su dirección y la configuración CORS.',
+        );
       } else {
         const cuerpo: unknown = error.error;
-        const detalle = typeof cuerpo === 'object' && cuerpo !== null && 'detail' in cuerpo
-          && typeof cuerpo.detail === 'string' ? cuerpo.detail : mensaje;
+        const detalle =
+          typeof cuerpo === 'object' &&
+          cuerpo !== null &&
+          'detail' in cuerpo &&
+          typeof cuerpo.detail === 'string'
+            ? cuerpo.detail
+            : mensaje;
         this.error.set(detalle);
       }
     } else if (error instanceof DOMException && error.name === 'NotAllowedError') {
