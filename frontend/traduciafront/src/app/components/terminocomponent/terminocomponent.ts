@@ -6,6 +6,9 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
   templateUrl: './terminocomponent.html',
   styleUrl: './terminocomponent.css',
 })
+/**
+ * Componente modal de terminos y condiciones de TraducIA.
+ */
 export class Terminocomponent implements OnInit {
   @Output() terminosAceptadosChange = new EventEmitter<boolean>();
 
@@ -14,12 +17,18 @@ export class Terminocomponent implements OnInit {
   animandoExit: boolean = false;
   animandoShake: boolean = false;
 
+  /**
+   * Consulta en localStorage si ya se aceptaron los terminos y define el estado inicial del modal.
+   */
   ngOnInit(): void {
     const yaAcepto = localStorage.getItem('traduciaTerminosAceptados') === 'true';
     this.activo = !yaAcepto;
     this.terminosAceptadosChange.emit(yaAcepto);
   }
 
+  /**
+   * Guarda la aceptacion de los terminos, emite el cambio y cierra el modal con animacion de salida.
+   */
   aceptar(): void {
     this.error = false;
     this.animandoShake = false;
@@ -33,6 +42,9 @@ export class Terminocomponent implements OnInit {
     }, 350);
   }
 
+  /**
+   * Muestra el mensaje de error, limpia la aceptacion guardada y activa la animacion de sacudida.
+   */
   rechazar(): void {
     this.error = true;
     localStorage.removeItem('traduciaTerminosAceptados');
@@ -44,6 +56,9 @@ export class Terminocomponent implements OnInit {
     });
   }
 
+  /**
+   * Reinicia el estado de la animacion de sacudida al finalizar.
+   */
   onAnimationEnd(): void {
     this.animandoShake = false;
   }
