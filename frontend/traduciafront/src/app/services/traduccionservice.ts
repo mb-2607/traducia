@@ -1,5 +1,5 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import type {
   PageResponse,

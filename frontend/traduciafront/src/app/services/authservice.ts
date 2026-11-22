@@ -18,6 +18,27 @@ const USER_KEY = 'user';
 const TOKEN_KEY = 'token';
 
 /**
+ * Convierte los datos del backend al modelo interno del frontend.
+ *
+ * Mantiene los identificadores visuales utilizados por las
+ * tarjetas de suscripción y el perfil.
+ */
+function adaptarUsuario(datos: UserResponseDTO): User {
+  const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
+    FREE: 'gratuito',
+    ORIA: 'oria',
+    INFINITIA: 'infinitia',
+  };
+
+  return {
+    nombre: datos.nombre,
+    correo: datos.correo,
+    rol: datos.rol,
+    plan: planes[datos.planId],
+  };
+}
+
+/**
  * Servicio de autenticación.
  *
  * Se encarga de iniciar y cerrar sesión, registrar usuarios y mantener
@@ -95,7 +116,7 @@ export class AuthService {
       .post<AuthResponse>(`${this.URL_BASE}/login`, credenciales, { headers: this.HEADER })
       .pipe(
         map((respuesta) => ({
-          usuario: AuthService.adaptarUsuario(respuesta.userResponse),
+          usuario: adaptarUsuario(respuesta.userResponse),
           token: respuesta.jwt,
         })),
         tap(({ usuario, token }) => {
@@ -135,7 +156,7 @@ export class AuthService {
 
     return this.cliente
       .post<UserResponseDTO>(`${this.URL_BASE}/register`, solicitud, { headers: this.HEADER })
-      .pipe(map((respuesta) => AuthService.adaptarUsuario(respuesta)));
+      .pipe(map((respuesta) => adaptarUsuario(respuesta)));
   }
 
   /**
@@ -145,26 +166,5 @@ export class AuthService {
    */
   haySesion(): boolean {
     return this.jwt !== null && this.userSubject.value !== null;
-  }
-
-  /**
-   * Convierte los datos del backend al modelo interno del frontend.
-   *
-   * Mantiene los identificadores visuales utilizados por las
-   * tarjetas de suscripción y el perfil.
-   */
-  private static adaptarUsuario(datos: UserResponseDTO): User {
-    const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
-      FREE: 'gratuito',
-      ORIA: 'oria',
-      INFINITIA: 'infinitia',
-    };
-
-    return {
-      nombre: datos.nombre,
-      correo: datos.correo,
-      rol: datos.rol,
-      plan: planes[datos.planId],
-    };
   }
 }
