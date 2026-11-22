@@ -58,7 +58,7 @@ public class TraduccionService {
 	/**
 	 * Proovedor de reemplazo en caso en que falle alguno.
 	 */
-	private ProveedorTraduccion reemplazo = ProveedorTraduccion.NEMOTRON;
+	private ProveedorTraduccion reemplazo = ProveedorTraduccion.GEMMA;
 	
 	/**
 	 * Crea el componente con sus dependencias inyectadas por Spring.

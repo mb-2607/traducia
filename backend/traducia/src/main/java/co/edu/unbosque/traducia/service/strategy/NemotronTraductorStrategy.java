@@ -1,6 +1,7 @@
 package co.edu.unbosque.traducia.service.strategy;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.traducia.dto.NvidiaMessageRequestDTO;
 import co.edu.unbosque.traducia.dto.NvidiaRequestDTO;
@@ -29,6 +30,7 @@ import co.edu.unbosque.traducia.service.ExternalHTTPRequestHandler;
  * @see NvidiaRequestDTO
  * @see NvidiaResponseDTO
  */
+@Service
 public class NemotronTraductorStrategy implements TraductorStrategy {
 	
 	/** URL del endpoint de chat completions de NVIDIA. */
@@ -69,7 +71,7 @@ public class NemotronTraductorStrategy implements TraductorStrategy {
 	}
 
 	/**
-	 * Indica que esta estrategia corresponde a {@link ProveedorTraduccion#GEMMA}.
+	 * Indica que esta estrategia corresponde a {@link ProveedorTraduccion#NEMOTRON}.
 	 *
 	 * @return {@code ProveedorTraduccion.GEMMA}
 	 */

@@ -9,8 +9,8 @@ import java.util.Set;
  */
 public enum PlanType {
 	FREE(Set.of(ProveedorTraduccion.DEEPL), 500),
-	ORIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMMA), 2000),
-	INFINITIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.GEMMA, ProveedorTraduccion.RIVA), 5000);
+	ORIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.NEMOTRON), 2000),
+	INFINITIA(Set.of(ProveedorTraduccion.DEEPL, ProveedorTraduccion.NEMOTRON, ProveedorTraduccion.RIVA), 5000);
 
 	/**
 	 * Conjunto de proveedores disponibles en el plan.

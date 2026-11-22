@@ -29,6 +29,9 @@ public class TraductorStrategyRegistry {
 	 * @param listaStrategy lista de estrategias de traducción detectadas por Spring
 	 */
 	public TraductorStrategyRegistry(List<TraductorStrategy> listaStrategy) {
+		listaStrategy.forEach((TraductorStrategy pt)->{
+			System.out.println(pt.getProveedor() + " " + pt.toString());
+		});
 		this.strategieMap = new EnumMap<>(ProveedorTraduccion.class);
 		listaStrategy.forEach((TraductorStrategy ts) -> strategieMap.put(ts.getProveedor(), ts));
 	}
