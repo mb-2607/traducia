@@ -57,7 +57,7 @@ export class AuthService {
   /** Servicio para almacenar en el LocalStorage. */
   private storageService: StorageService = inject(StorageService);
 
-  /** URL base de la API de autenticación. */
+  /** URL base de la API de autenticación. Pendiente de configurar. */
   private readonly URL_BASE = 'http://localhost:8080/auth';
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */

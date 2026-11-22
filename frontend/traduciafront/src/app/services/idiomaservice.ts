@@ -1,46 +1,55 @@
-import { Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { Idioma } from '../models/idiomamodel';
+import type { Idioma, IdiomaResponseDTO } from '../models/idiomamodel';
+
+/** Etiquetas de voz por defecto según el código base del idioma. */
+const VOCES_POR_CODIGO: Readonly<Record<string, string>> = {
+  es: 'es-CO',
+  en: 'en-US',
+  fr: 'fr-FR',
+  pt: 'pt-BR',
+  de: 'de-DE',
+  it: 'it-IT',
+};
 
 /**
- * Catálogo de idiomas soportados por la aplicación.
- *
- * Cada idioma incluye su identificador (`id`), el nombre que se muestra
- * al usuario (`nombre`) y el código de voz (`voz`), usado para la
- * síntesis de voz con la variante regional correspondiente (por ejemplo, `es-CO`).
- * El catálogo se define localmente mientras se integra con el backend.
- */
-const IDIOMAS: Idioma[] = [
-  { id: 'es', nombre: 'Español', voz: 'es-CO' },
-  { id: 'en', nombre: 'Inglés', voz: 'en-US' },
-  { id: 'fr', nombre: 'Francés', voz: 'fr-FR' },
-  { id: 'pt', nombre: 'Portugués', voz: 'pt-BR' },
-  { id: 'de', nombre: 'Alemán', voz: 'de-DE' },
-  { id: 'it', nombre: 'Italiano', voz: 'it-IT' },
-];
-
-/**
- * Servicio de idiomas.
- *
- * Provee la lista de idiomas disponibles para traducir. Los datos son
- * locales (constante `IDIOMAS`), pero se exponen como `Observable` para
- * que, si más adelante se obtienen desde el backend, los componentes
- * que lo consumen mantengan la misma forma de acceder al catálogo.
+ * Servicio de idiomas que obtiene el catálogo disponible desde el backend
+ * y lo adapta al modelo utilizado por los componentes del frontend.
  *
  * Está disponible globalmente (`providedIn: 'root'`).
  */
 @Injectable({ providedIn: 'root' })
 export class IdiomaService {
-  /** Catálogo de idiomas que entrega el servicio. */
-  private readonly idiomas = IDIOMAS;
+  /** Cliente HTTP utilizado para consultar los idiomas del backend. */
+  private readonly http = inject(HttpClient);
+
+  /** URL del endpoint que lista los idiomas disponibles. */
+  private readonly url = 'http://localhost:8080/idiomas';
 
   /**
-   * Obtiene la lista de idiomas disponibles.
+   * Obtiene la lista de idiomas disponibles desde el backend y asigna una
+   * etiqueta de voz para cada uno.
    *
-   * @returns Observable que emite una sola vez el arreglo de idiomas y se completa.
+   * @returns Observable que emite el arreglo de {@link Idioma} adaptado.
    */
   getListaIdioma(): Observable<Idioma[]> {
-    return of(this.idiomas);
+    return this.http.get<IdiomaResponseDTO[]>(this.url).pipe(
+      map((idiomas) =>
+        idiomas.map((idioma) => {
+          const codigoNormalizado = idioma.codigo.trim().toLowerCase();
+          const voz =
+            VOCES_POR_CODIGO[codigoNormalizado] ??
+            (codigoNormalizado.length > 0 ? codigoNormalizado : 'es-CO');
+
+          return {
+            id: idioma.codigo,
+            nombre: idioma.nombre,
+            voz,
+          };
+        }),
+      ),
+    );
   }
 }
