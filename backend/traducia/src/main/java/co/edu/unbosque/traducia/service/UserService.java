@@ -84,6 +84,7 @@ public class UserService {
      *
      * @return lista de usuarios representados mediante DTOs.
      */
+    @Transactional(readOnly = true)
     public List<UserResponseDTO> listar() {
         List<User> usuarios = userRepo.findAll();
         List<UserResponseDTO> respuesta = new ArrayList<>();
@@ -104,6 +105,7 @@ public class UserService {
      * @param pageable configuración de paginación y ordenamiento de los resultados.
      * @return página de usuarios representados mediante DTOs.
      */
+    @Transactional(readOnly = true)
     public Page<UserResponseDTO> listar(Pageable pageable) {
         Page<User> usuarios = userRepo.findAll(pageable);
         return usuarios.map((usuario) -> modelMapper.map(usuario, UserResponseDTO.class));
@@ -115,6 +117,7 @@ public class UserService {
      * @param id identificador del usuario que se desea eliminar.
      * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      */
+    @Transactional
     public void eliminar(Long id) {
         Optional<User> usuario = userRepo.findById(id);
         if (usuario.isEmpty()) {
@@ -166,6 +169,7 @@ public class UserService {
      * @throws EmailAlreadyExistsException si el correo electrónico ya está registrado.
      * @throws InvalidPasswordException si la contraseña no cumple la longitud mínima requerida.
      */
+    @Transactional
     public UserResponseDTO crear(AdminCreateUserRequestDTO register) {
         register.setCorreo(register.getCorreo().trim().toLowerCase());
         validarUsuario(register);
@@ -182,6 +186,7 @@ public class UserService {
      * @return información del usuario encontrado, representada mediante un DTO.
      * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      */
+    @Transactional(readOnly = true)
     public UserResponseDTO obtenerPorId(Long id) {
         Optional<User> usuario = userRepo.findById(id);
         if (usuario.isEmpty()) {
@@ -197,6 +202,7 @@ public class UserService {
      * @return entidad del usuario.
      * @throws UserNotFoundException si no existe un usuario con el nombre indicado.
      */
+    @Transactional(readOnly = true)
     public User obtenerEntidadPorNombre(String nombre) {
         Optional<User> usuario = userRepo.findByUsername(nombre);
         if (usuario.isEmpty()) {
@@ -212,6 +218,7 @@ public class UserService {
      * @return información del usuario encontrado, representada mediante un DTO.
      * @throws UserNotFoundException si no existe un usuario con el nombre indicado.
      */
+    @Transactional(readOnly = true)
     public UserResponseDTO obtenerPorNombre(String nombre) {
         Optional<User> usuario = userRepo.findByUsername(nombre);
         if (usuario.isEmpty()) {
@@ -235,6 +242,7 @@ public class UserService {
      * @throws UsernameAlreadyExistsException si el nombre de usuario pertenece a otro usuario.
      * @throws EmailAlreadyExistsException si el correo electrónico pertenece a otro usuario.
      */
+    @Transactional
     public UserResponseDTO actualizar(Long id, UpdateUserRequestDTO register) {
         register.setCorreo(register.getCorreo().trim().toLowerCase());
         Optional<User> usuario = userRepo.findById(id);
@@ -258,6 +266,7 @@ public class UserService {
      * @return información actualizada del usuario, representada mediante un DTO.
      * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      */
+    @Transactional
     public UserResponseDTO cambiarPlan(Long id, PlanType planType) {
         Optional<User> usuarioOpt = userRepo.findById(id);
         if (usuarioOpt.isEmpty()) {
@@ -282,6 +291,7 @@ public class UserService {
      * @throws UserNotFoundException si no existe un usuario con el identificador indicado.
      * @throws InvalidPasswordException si la nueva contraseña no cumple la longitud mínima requerida.
      */
+    @Transactional
     public UserResponseDTO cambiarPassword(Long id, AdminChangePasswordRequestDTO request) {
         Optional<User> usuarioOpt = userRepo.findById(id);
         if (usuarioOpt.isEmpty()) {
