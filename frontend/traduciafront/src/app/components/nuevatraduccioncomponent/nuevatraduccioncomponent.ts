@@ -82,6 +82,7 @@ export class Nuevatraduccioncomponent implements OnInit {
     DEEPL: 'DeepL',
     GEMMA: 'Gemma',
     RIVA: 'Riva',
+    NEMOTRON: 'Nemotron'
   };
 
   readonly form = this.fb.group(
