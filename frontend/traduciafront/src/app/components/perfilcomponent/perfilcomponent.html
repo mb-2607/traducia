@@ -1,0 +1,290 @@
+<section class="perfil container" [attr.data-plan]="perfil()?.plan" aria-labelledby="perfil-titulo">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+      <header class="perfil-cabecera">
+        <div>
+          <p class="pf-antetitulo">Tu cuenta en TraducIA</p>
+          <h1 id="perfil-titulo">Perfil</h1>
+          <p class="pf-secundario">Administra tus datos personales y tu imagen de perfil.</p>
+        </div>
+        <a class="pf-boton" [routerLink]="rutaVolver()"
+          ><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a
+        >
+      </header>
+
+      @if (perfil() === null) {
+        <p class="pf-mensaje" role="status">
+          Inicia sesión para consultar tu perfil. <a routerLink="/login">Ir al inicio de sesión</a>
+        </p>
+      } @else if (!disponible) {
+        <p class="pf-mensaje" role="status">
+          Se muestran los datos de tu sesión. La actualización del perfil aún no está disponible.
+        </p>
+      }
+      @if (cargando()) {
+        <p class="pf-mensaje" role="status">Cargando los datos de tu perfil…</p>
+      }
+      @if (error()) {
+        <div class="pf-mensaje pf-error" role="alert">
+          <p>{{ error() }}</p>
+          @if (!perfilCargado() && disponible) {
+            <button
+              type="button"
+              class="pf-boton"
+              [disabled]="cargando()"
+              (click)="reintentarCarga()"
+            >
+              <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Reintentar
+            </button>
+          }
+        </div>
+      }
+      @if (exito()) {
+        <p class="pf-mensaje" role="status">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ exito() }}
+        </p>
+      }
+
+      <form
+        class="pf-panel"
+        [formGroup]="formulario"
+        (ngSubmit)="guardar()"
+        novalidate
+        [attr.aria-busy]="guardando() || cargando()"
+      >
+        <fieldset [disabled]="perfil() === null || cargando() || guardando() || preparandoFoto()">
+          <legend class="pf-oculto">Datos personales y fotografía</legend>
+          <div class="perfil-fila perfil-foto-fila">
+            <div>
+              <h2>Foto de perfil</h2>
+              <p class="pf-secundario" id="perfil-foto-ayuda">PNG, JPEG o WebP, hasta 10 MB.</p>
+              <p class="pf-ayuda">La imagen se ajustará a un marco circular.</p>
+            </div>
+            <div class="perfil-foto-controles">
+              <div class="perfil-avatar">
+                @if (imagen(); as foto) {
+                  <img
+                    [src]="foto"
+                    alt="Foto de perfil"
+                    referrerpolicy="no-referrer"
+                    (error)="fotoFallida.set(true)"
+                  />
+                } @else {
+                  <span aria-hidden="true">{{ iniciales() }}</span>
+                }
+              </div>
+              <div class="perfil-foto-botones">
+                <input
+                  #archivo
+                  tabindex="-1"
+                  class="pf-oculto"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  aria-label="Seleccionar foto de perfil"
+                  aria-describedby="perfil-foto-ayuda"
+                  (change)="seleccionarFoto($event)"
+                />
+                <button type="button" class="pf-boton" (click)="archivo.click()">
+                  <i class="fa-solid fa-camera" aria-hidden="true"></i> Cambiar foto
+                </button>
+                <button
+                  type="button"
+                  class="pf-boton pf-boton-suave"
+                  [disabled]="!hayFoto()"
+                  (click)="retirarFoto()"
+                >
+                  <i class="fa-regular fa-trash-can" aria-hidden="true"></i> Quitar foto
+                </button>
+              </div>
+            </div>
+          </div>
+          @if (preparandoFoto()) {
+            <p class="pf-ayuda" role="status">Preparando la vista previa…</p>
+          }
+          @if (fotoPendiente()) {
+            <p class="pf-ayuda">El cambio de foto se aplicará al guardar.</p>
+          }
+          @if (errorFoto()) {
+            <p class="pf-error" role="alert">{{ errorFoto() }}</p>
+          }
+
+          <div class="perfil-fila">
+            <div>
+              <label for="perfil-nombre">Nombre completo</label>
+              <p class="pf-ayuda">El nombre que se muestra en tu cuenta.</p>
+            </div>
+            <div>
+              <input
+                id="perfil-nombre"
+                class="pf-campo"
+                formControlName="nombre"
+                autocomplete="name"
+                maxlength="80"
+                [attr.aria-invalid]="
+                  formulario.controls.nombre.touched && formulario.controls.nombre.invalid
+                "
+                aria-describedby="perfil-nombre-error"
+              />
+              <span id="perfil-nombre-error" class="pf-error-campo">
+                @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+                  Escribe un nombre de entre 2 y 80 caracteres.
+                }
+              </span>
+            </div>
+          </div>
+          <div class="perfil-fila">
+            <div>
+              <label for="perfil-correo">Correo electrónico</label>
+              <p class="pf-ayuda">Correo asociado a tu inicio de sesión.</p>
+            </div>
+            <input
+              id="perfil-correo"
+              class="pf-campo"
+              type="email"
+              [value]="perfil()?.correo ?? ''"
+              readonly
+              aria-describedby="perfil-correo-ayuda"
+            />
+          </div>
+          <p id="perfil-correo-ayuda" class="pf-ayuda">
+            El correo se consulta aquí y no se modifica desde este formulario.
+          </p>
+          <div class="perfil-fila">
+            <div>
+              <label for="perfil-ciudad">Ciudad</label>
+              <p class="pf-ayuda">Campo opcional.</p>
+            </div>
+            <div>
+              <input
+                id="perfil-ciudad"
+                class="pf-campo"
+                formControlName="ciudad"
+                autocomplete="address-level2"
+                maxlength="80"
+                [attr.aria-invalid]="
+                  formulario.controls.ciudad.touched && formulario.controls.ciudad.invalid
+                "
+                aria-describedby="perfil-ciudad-error"
+              />
+              <span id="perfil-ciudad-error" class="pf-error-campo">
+                @if (formulario.controls.ciudad.touched && formulario.controls.ciudad.invalid) {
+                  Escribe una ciudad válida de hasta 80 caracteres.
+                }
+              </span>
+            </div>
+          </div>
+          <div class="perfil-fila">
+            <div>
+              <label for="perfil-edad">Edad</label>
+              <p class="pf-ayuda">Campo opcional, en años cumplidos.</p>
+            </div>
+            <div>
+              <input
+                id="perfil-edad"
+                class="pf-campo"
+                formControlName="edad"
+                type="text"
+                inputmode="numeric"
+                maxlength="3"
+                autocomplete="off"
+                [attr.aria-invalid]="
+                  formulario.controls.edad.touched && formulario.controls.edad.invalid
+                "
+                aria-describedby="perfil-edad-error"
+              />
+              <span id="perfil-edad-error" class="pf-error-campo">
+                @if (formulario.controls.edad.touched && formulario.controls.edad.invalid) {
+                  Ingresa una edad entera entre 1 y 120 años o deja el campo vacío.
+                }
+              </span>
+            </div>
+          </div>
+        </fieldset>
+        <footer class="perfil-formulario-pie">
+          <p class="pf-ayuda">
+            {{
+              hayCambios()
+                ? "Tienes cambios sin guardar."
+                : "Tus datos personales se muestran en este formulario."
+            }}
+          </p>
+          <div class="perfil-acciones">
+            <button
+              type="button"
+              class="pf-boton"
+              [disabled]="!hayCambios() || guardando() || cargando() || preparandoFoto()"
+              (click)="descartar()"
+            >
+              <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Descartar
+            </button>
+            <button
+              type="submit"
+              class="pf-boton pf-principal"
+              [disabled]="
+                !disponible ||
+                !perfilCargado() ||
+                !hayCambios() ||
+                guardando() ||
+                cargando() ||
+                preparandoFoto()
+              "
+            >
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              {{ guardando() ? "Guardando…" : "Guardar cambios" }}
+            </button>
+          </div>
+        </footer>
+      </form>
+
+      <section class="pf-panel perfil-cuenta" aria-labelledby="perfil-cuenta-titulo">
+        <h2 id="perfil-cuenta-titulo">Cuenta</h2>
+        <div class="perfil-fila">
+          <div>
+            <h3>Plan y tipo de cuenta</h3>
+            <p class="pf-ayuda">Información de tu acceso actual.</p>
+          </div>
+          <div class="perfil-insignias">
+            @if (perfil(); as actual) {
+              @if (actual.plan; as plan) {
+                <span class="perfil-plan"
+                  ><i class="fa-solid {{ planes[plan].icono }}" aria-hidden="true"></i>
+                  {{ planes[plan].nombre }}</span
+                >
+              } @else {
+                <span class="perfil-rol">Sin plan asignado</span>
+              }
+              <span class="perfil-rol">{{
+                actual.rol === "ADMIN" ? "Administrador" : "Usuario"
+              }}</span>
+            } @else {
+              <span class="perfil-rol">Sin sesión</span>
+            }
+          </div>
+        </div>
+        <div class="perfil-fila">
+          <div>
+            <h3>Contraseña</h3>
+            <p class="pf-ayuda">Solicita un enlace para establecer una nueva contraseña.</p>
+          </div>
+          <a class="pf-boton" routerLink="/recuperar-contrasena"
+            ><i class="fa-solid fa-key" aria-hidden="true"></i> Recuperar contraseña</a
+          >
+        </div>
+        <div class="perfil-fila">
+          <div>
+            <h3>Cerrar sesión</h3>
+            <p class="pf-ayuda">Finaliza tu sesión en este navegador.</p>
+          </div>
+          <button
+            type="button"
+            class="pf-boton"
+            [disabled]="perfil() === null || guardando()"
+            (click)="cerrarSesion()"
+          >
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Cerrar sesión
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

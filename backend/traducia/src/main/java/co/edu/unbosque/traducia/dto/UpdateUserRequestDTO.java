@@ -2,6 +2,9 @@ package co.edu.unbosque.traducia.dto;
 
 import co.edu.unbosque.traducia.entity.PlanType;
 import co.edu.unbosque.traducia.entity.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * DTO (Data Transfer Object) utilizado para representar los datos enviados por
@@ -12,29 +15,56 @@ import co.edu.unbosque.traducia.entity.Role;
  * </p>
  *
  * @author
- * @version 1.0
+ * @version 1.0	
  */
 public class UpdateUserRequestDTO {
 
 	/**
 	 * Nombre que se asignará al usuario.
 	 */
+	@NotBlank(message = "El nombre de usuario es obligatorio")
 	private String nombre;
 
 	/**
 	 * Dirección de correo electrónico que se asignará al usuario.
 	 */
+	@NotBlank(message = "El correo electrónico es obligatorio")
+	@Email(message = "El formato del correo electrónico no es válido")
 	private String correo;
 
 	/**
 	 * Rol que se asignará al usuario dentro del sistema.
 	 */
+	@NotNull(message = "El rol es obligatorio")
 	private Role rol;
 
 	/**
 	 * Tipo de plan que se asociará al usuario.
 	 */
+	@NotNull(message = "El tipo de plan es obligatorio")
 	private PlanType planId;
+
+	/**
+	 * Construye un objeto UpdateUserRequestDTO sin inicializar sus atributos.
+	 */
+	public UpdateUserRequestDTO() {
+	}
+
+	/**
+	 * Construye un objeto UpdateUserRequestDTO con los datos que se desean
+	 * establecer durante la actualización de un usuario.
+	 *
+	 * @param nombre nombre que se asignará al usuario.
+	 * @param correo dirección de correo electrónico que se asignará al usuario.
+	 * @param rol    rol que se asignará al usuario dentro del sistema.
+	 * @param planId tipo de plan que se asociará al usuario.
+	 */
+	public UpdateUserRequestDTO(String nombre, String correo, Role rol, PlanType planId) {
+		this.nombre = nombre;
+		this.correo = correo;
+		this.rol = rol;
+		this.planId = planId;
+	}
 
 	/**
 	 * Obtiene el nombre del usuario.
@@ -106,27 +136,5 @@ public class UpdateUserRequestDTO {
 	 */
 	public void setPlanId(PlanType planId) {
 		this.planId = planId;
-	}
-
-	/**
-	 * Construye un objeto UpdateUserRequestDTO con los datos que se desean
-	 * establecer durante la actualización de un usuario.
-	 *
-	 * @param nombre nombre que se asignará al usuario.
-	 * @param correo dirección de correo electrónico que se asignará al usuario.
-	 * @param rol    rol que se asignará al usuario dentro del sistema.
-	 * @param planId tipo de plan que se asociará al usuario.
-	 */
-	public UpdateUserRequestDTO(String nombre, String correo, Role rol, PlanType planId) {
-		this.nombre = nombre;
-		this.correo = correo;
-		this.rol = rol;
-		this.planId = planId;
-	}
-
-	/**
-	 * Construye un objeto UpdateUserRequestDTO sin inicializar sus atributos.
-	 */
-	public UpdateUserRequestDTO() {
 	}
 }

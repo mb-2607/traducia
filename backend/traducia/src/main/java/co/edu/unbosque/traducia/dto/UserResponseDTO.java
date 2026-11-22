@@ -1,12 +1,14 @@
 package co.edu.unbosque.traducia.dto;
 
+import co.edu.unbosque.traducia.entity.PlanType;
+import co.edu.unbosque.traducia.entity.Role;
 
 /**
  * DTO (Data Transfer Object) utilizado para representar la información de un
  * usuario que se envía como respuesta desde la aplicación.
  * <p>
- * Contiene los datos básicos del usuario, incluyendo su nombre, correo
- * electrónico, identificador del plan asociado y rol dentro del sistema.
+ * Contiene los datos básicos del usuario, incluyendo su identificador, nombre,
+ * correo electrónico, identificador del plan asociado y rol dentro del sistema.
  * </p>
  *
  * @author
@@ -14,117 +16,153 @@ package co.edu.unbosque.traducia.dto;
  */
 public class UserResponseDTO {
 
-    /**
-     * Nombre del usuario.
-     */
-    private String nombre;
+	/**
+	 * Identificador único del usuario.
+	 */
+	private Long id;
 
-    /**
-     * Dirección de correo electrónico del usuario.
-     */
-    private String correo;
+	/**
+	 * Nombre del usuario.
+	 */
+	private String nombre;
 
-    /**
-     * Identificador del plan asociado al usuario.
-     */
-    private String planId;
+	/**
+	 * Dirección de correo electrónico del usuario.
+	 */
+	private String correo;
 
-    /**
-     * Rol asignado al usuario dentro del sistema.
-     */
-    private String rol;
+	/**
+	 * Identificador del plan asociado al usuario.
+	 */
+	private PlanType planId;
 
-    /**
-     * Obtiene el nombre del usuario.
-     *
-     * @return nombre del usuario.
-     */
-    public String getNombre() {
-        return nombre;
-    }
+	/**
+	 * Rol asignado al usuario dentro del sistema.
+	 */
+	private Role rol;
 
-    /**
-     * Establece el nombre del usuario.
-     *
-     * @param nombre nombre que se asignará al usuario.
-     */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+	/**
+	 * Construye un objeto UserResponseDTO sin inicializar sus atributos.
+	 */
+	public UserResponseDTO() {
+	}
 
-    /**
-     * Obtiene el correo electrónico del usuario.
-     *
-     * @return correo electrónico del usuario.
-     */
-    public String getCorreo() {
-        return correo;
-    }
+	/**
+	 * Construye un objeto UserResponseDTO sin identificador explícito.
+	 *
+	 * @param nombre nombre del usuario.
+	 * @param correo dirección de correo electrónico del usuario.
+	 * @param planId identificador del plan asociado al usuario.
+	 * @param rol    rol asignado al usuario dentro del sistema.
+	 */
+	public UserResponseDTO(String nombre, String correo, PlanType planId, Role rol) {
+		this(null, nombre, correo, planId, rol);
+	}
 
-    /**
-     * Establece el correo electrónico del usuario.
-     *
-     * @param correo dirección de correo electrónico que se asignará.
-     */
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
+	/**
+	 * Construye un objeto UserResponseDTO con todos sus atributos inicializados.
+	 *
+	 * @param id     identificador único del usuario.
+	 * @param nombre nombre del usuario.
+	 * @param correo dirección de correo electrónico del usuario.
+	 * @param planId identificador del plan asociado al usuario.
+	 * @param rol    rol asignado al usuario dentro del sistema.
+	 */
+	public UserResponseDTO(Long id, String nombre, String correo, PlanType planId, Role rol) {
+		this.id = id;
+		this.nombre = nombre;
+		this.correo = correo;
+		this.planId = planId;
+		this.rol = rol;
+	}
 
-    /**
-     * Obtiene el identificador del plan asociado al usuario.
-     *
-     * @return identificador del plan.
-     */
-    public String getPlanId() {
-        return planId;
-    }
+	/**
+	 * Obtiene el identificador único del usuario.
+	 *
+	 * @return identificador único del usuario.
+	 */
+	public Long getId() {
+		return id;
+	}
 
-    /**
-     * Establece el identificador del plan asociado al usuario.
-     *
-     * @param planId identificador del plan que se asignará.
-     */
-    public void setPlanId(String planId) {
-        this.planId = planId;
-    }
+	/**
+	 * Establece el identificador único del usuario.
+	 *
+	 * @param id identificador único que se asignará al usuario.
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    /**
-     * Obtiene el rol del usuario dentro del sistema.
-     *
-     * @return rol asignado al usuario.
-     */
-    public String getRol() {
-        return rol;
-    }
+	/**
+	 * Obtiene el nombre del usuario.
+	 *
+	 * @return nombre del usuario.
+	 */
+	public String getNombre() {
+		return nombre;
+	}
 
-    /**
-     * Establece el rol del usuario dentro del sistema.
-     *
-     * @param rol rol que se asignará al usuario.
-     */
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
+	/**
+	 * Establece el nombre del usuario.
+	 *
+	 * @param nombre nombre que se asignará al usuario.
+	 */
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 
-    /**
-     * Construye un objeto UserResponseDTO con todos sus atributos inicializados.
-     *
-     * @param nombre nombre del usuario.
-     * @param correo dirección de correo electrónico del usuario.
-     * @param planId identificador del plan asociado al usuario.
-     * @param rol rol asignado al usuario dentro del sistema.
-     */
-    public UserResponseDTO(String nombre, String correo, String planId, String rol) {
-        this.nombre = nombre;
-        this.correo = correo;
-        this.planId = planId;
-        this.rol = rol;
-    }
+	/**
+	 * Obtiene el correo electrónico del usuario.
+	 *
+	 * @return correo electrónico del usuario.
+	 */
+	public String getCorreo() {
+		return correo;
+	}
 
-    /**
-     * Construye un objeto UserResponseDTO sin inicializar sus atributos.
-     */
-    public UserResponseDTO() {
-    }
+	/**
+	 * Establece el correo electrónico del usuario.
+	 *
+	 * @param correo dirección de correo electrónico que se asignará.
+	 */
+	public void setCorreo(String correo) {
+		this.correo = correo;
+	}
+
+	/**
+	 * Obtiene el identificador del plan asociado al usuario.
+	 *
+	 * @return identificador del plan.
+	 */
+	public PlanType getPlanId() {
+		return planId;
+	}
+
+	/**
+	 * Establece el identificador del plan asociado al usuario.
+	 *
+	 * @param planId identificador del plan que se asignará.
+	 */
+	public void setPlanId(PlanType planId) {
+		this.planId = planId;
+	}
+
+	/**
+	 * Obtiene el rol del usuario dentro del sistema.
+	 *
+	 * @return rol asignado al usuario.
+	 */
+	public Role getRol() {
+		return rol;
+	}
+
+	/**
+	 * Establece el rol del usuario dentro del sistema.
+	 *
+	 * @param rol rol que se asignará al usuario.
+	 */
+	public void setRol(Role rol) {
+		this.rol = rol;
+	}
 }
-

@@ -2,35 +2,80 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  inline-size: 100%;
+  min-block-size: calc(100dvh - 6rem);
   min-inline-size: 0;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  padding-block-end: clamp(3rem, 10vh, 7rem);
+  box-sizing: border-box;
 }
 
 .encabezado {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-block: clamp(0.5rem, 2vh, 1.5rem);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  inline-size: 100%;
+  padding-block: 0;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-family: "Times New Roman", serif;
 }
 
 .encabezado p {
-  margin: 0.4rem 0 0;
+  margin: 0.6rem 0 0;
   color: var(--td-secundario);
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 .editor {
-  margin-block-start: auto;
-  margin-block-end: 7rem;
+  --glass-campo: color-mix(in srgb, currentColor 6%, transparent);
+  --glass-borde: color-mix(in srgb, currentColor 20%, transparent);
+  --glass-borde-fuerte: color-mix(in srgb, currentColor 38%, transparent);
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+}
+
+form.editor {
+  max-inline-size: 80rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+article.editor {
+  max-inline-size: 80rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--glass-borde);
+  border-radius: 2rem;
+  background: var(--glass-campo);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
 }
 
 .idiomas {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: end;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .idiomas > * {
@@ -38,16 +83,68 @@
 }
 
 .idiomas-flecha {
-  margin-block-end: 0.75rem;
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  margin-block-end: 0.3rem;
+  border: 1px solid var(--glass-borde);
+  border-radius: 50%;
+  background: var(--glass-campo);
   color: var(--td-secundario);
+  transition: transform 300ms ease, background-color 200ms ease;
+}
+
+.idiomas-flecha:hover {
+  transform: rotate(180deg);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.campo span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--td-secundario);
+  padding-inline-start: 0.5rem;
 }
 
 .campo textarea {
-  min-block-size: 4.5rem;
-  block-size: 5rem;
-  max-block-size: 15rem;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 8rem;
+  block-size: 10rem;
+  max-block-size: 20rem;
+  padding: 1.1rem 1.5rem;
   resize: vertical;
-  font-size: 1rem;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: inherit;
+  border: 1px solid var(--glass-borde);
+  border-radius: 1.75rem;
+  background: var(--glass-campo);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  outline: none;
+  transition: border-color 200ms ease,
+  box-shadow 200ms ease,
+  background-color 200ms ease;
+}
+
+.campo textarea::placeholder {
+  color: var(--td-secundario);
+  opacity: 0.85;
+}
+
+.campo textarea:focus {
+  border-color: var(--glass-borde-fuerte);
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 10%, transparent);
 }
 
 .herramientas,
@@ -56,18 +153,29 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.55rem;
+  gap: 0.75rem;
+}
+
+.editor-pie {
+  justify-content: flex-end;
 }
 
 .acciones {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .contador,
 .estado {
   color: var(--td-secundario);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
+}
+
+.contador {
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--glass-borde);
+  border-radius: 999px;
+  background: var(--glass-campo);
 }
 
 .estado:empty {
@@ -97,24 +205,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  min-block-size: 2.75rem;
-  padding-inline: 1rem;
+  gap: 0.6rem;
+  min-block-size: 3rem;
+  padding-inline: 1.9rem;
   border: 1px solid transparent;
   border-radius: 999px;
   background: var(--td-accion);
   color: var(--td-accion-texto);
   font: inherit;
   font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: background-color 160ms ease,
-  box-shadow 160ms ease,
-  transform 180ms ease;
+  transition: transform 180ms ease,
+  box-shadow 200ms ease,
+  filter 200ms ease;
+}
+
+.boton-traducir:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .boton-traducir:hover:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -122,7 +237,40 @@
   transform: scale(0.97);
 }
 
+section[aria-labelledby="titulo-resultados"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  inline-size: 100%;
+}
+
+section[aria-labelledby="titulo-resultados"] h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.editor h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.resultado-texto {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 28rem) {
+  article.editor {
+    border-radius: 1.5rem;
+  }
+
+  .campo textarea {
+    border-radius: 1.5rem;
+  }
+
   .idiomas {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -130,14 +278,21 @@
   .idiomas-flecha {
     display: none;
   }
+
+  .editor-pie .boton-traducir {
+    inline-size: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .boton-traducir {
+  .boton-traducir,
+  .idiomas-flecha,
+  .campo textarea {
     transition: none;
   }
 
-  .boton-traducir:is(:hover, :active):not(:disabled) {
+  .boton-traducir:is(:hover, :active):not(:disabled),
+  .idiomas-flecha:hover {
     transform: none;
   }
 }

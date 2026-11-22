@@ -1,4 +1,5 @@
-import {Injectable} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, inject } from '@angular/core';
 
 /**
  * Servicio de almacenamiento local.
@@ -12,6 +13,16 @@ import {Injectable} from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class StorageService {
+  private readonly documento = inject(DOCUMENT);
+
+  /**
+   * Obtiene el almacenamiento local de la ventana asociada al documento.
+   *
+   * @returns El almacenamiento local o `undefined` si no hay una ventana.
+   */
+  private get almacenamiento(): Storage | undefined {
+    return this.documento.defaultView?.localStorage;
+  }
 
   /**
    * Lee un valor del almacenamiento y lo deserializa desde JSON.
@@ -25,7 +36,7 @@ export class StorageService {
    */
   get<T>(key: string): T | null {
     try {
-      const value = localStorage.getItem(key);
+      const value = this.almacenamiento?.getItem(key);
       return value ? (JSON.parse(value) as T) : null;
     } catch {
       return null;
@@ -41,7 +52,7 @@ export class StorageService {
    * @param value Valor a guardar; debe ser serializable con `JSON.stringify`.
    */
   set<T>(key: string, value: T): void {
-    localStorage.setItem(key, JSON.stringify(value));
+    this.almacenamiento?.setItem(key, JSON.stringify(value));
   }
 
   /**
@@ -51,7 +62,7 @@ export class StorageService {
    * @param key Clave del valor a eliminar.
    */
   remove(key: string): void {
-    localStorage.removeItem(key);
+    this.almacenamiento?.removeItem(key);
   }
 
   /**
@@ -59,6 +70,6 @@ export class StorageService {
    * incluidas las que no haya creado este servicio.
    */
   clear(): void {
-    localStorage.clear();
+    this.almacenamiento?.clear();
   }
 }

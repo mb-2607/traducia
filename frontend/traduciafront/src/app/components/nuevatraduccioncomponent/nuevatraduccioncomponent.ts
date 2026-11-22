@@ -1,183 +1,241 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {FormBuilder, ValidatorFn, Validators} from '@angular/forms';
-import {IdiomaService} from '../../services/idiomaservice';
-import {Idioma} from '../../models/idiomamodel';
-import {ResultadoTraduccion} from '../../models/traduccionmodel';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NonNullableFormBuilder, Validators } from '@angular/forms';
+import type { ValidatorFn } from '@angular/forms';
+import { finalize } from 'rxjs';
+import type { Idioma } from '../../models/idiomamodel';
+import { PLANES } from '../../models/planmodel';
+import type { PlanId } from '../../models/planmodel';
+import type {
+  ProveedorTraduccion,
+  SolicitudTraduccion,
+  TraduccionResponseDTO,
+} from '../../models/traduccionmodel';
+import { AuthService } from '../../services/authservice';
+import { IdiomaService } from '../../services/idiomaservice';
+import { TraduccionService } from '../../services/traduccionservice';
 
-
-/**
- * Componente encargado de gestionar la creación de nuevas traducciones
- * dentro de TraducIA.
- *
- * Administra el formulario reactivo de traducción, la selección de idiomas,
- * la validación del texto ingresado y la recepción de archivos para
- * su posterior extracción de contenido.
- *
- * Controla los estados del proceso de traducción y extracción de archivos,
- * habilitando o deshabilitando el formulario según la operación en curso.
- *
- * Obtiene los idiomas disponibles mediante IdiomaService y proporciona
- * métodos para actualizar el contenido del formulario y establecer
- * los idiomas iniciales.
- */
-
-/**
- * Valida que el contenido del control no esté vacío ni contenga
- * únicamente espacios en blanco.
- *
- * @param control Control cuyo valor se desea validar.
- * @returns Un error de validación si el contenido está vacío; null en caso contrario.
- */
-const sinSoloEspacios: ValidatorFn = (control) =>
-  (control.value ?? '').trim().length === 0 ? { vacio: true } : null;
-
-/**
- * Valida que los idiomas de origen y destino sean diferentes.
- *
- * @param grupo Grupo de controles que contiene los idiomas de origen y destino.
- * @returns Un error de validación si ambos idiomas son iguales; null en caso contrario.
- */
-const idiomasDistintos: ValidatorFn = (grupo) => {
-  const origen = grupo.get('origen')?.value;
-  const destino = grupo.get('destino')?.value;
-  return origen && destino && origen === destino ? { mismosIdiomas: true } : null;
+/** Rechaza valores vacíos y contenido compuesto únicamente por espacios. */
+const sinSoloEspacios: ValidatorFn = (control) => {
+  const valor: unknown = control.value;
+  return typeof valor === 'string' && valor.trim().length > 0 ? null : { vacio: true };
 };
 
-/**
- * Estados posibles durante el proceso de creación de una traducción.
- * - reposo: no hay operaciones en ejecución.
- * - extrayendo: se está procesando un archivo.
- * - traduciendo: se está realizando una traducción.
- */
-type Estado = 'reposo' | 'extrayendo' | 'traduciendo';
+/** Comprueba que los códigos de origen y destino sean diferentes. */
+const idiomasDistintos: ValidatorFn = (grupo) => {
+  const origen: unknown = grupo.get('origen')?.value;
+  const destino: unknown = grupo.get('destino')?.value;
+  return typeof origen === 'string' && origen.length > 0 && origen === destino
+    ? { mismosIdiomas: true }
+    : null;
+};
 
+/** Estados de las operaciones actualmente contempladas por el componente. */
+type Estado = 'reposo' | 'traduciendo';
+
+/**
+ * Prepara y valida solicitudes de traducción.
+ *
+ * Aplica el límite de caracteres del usuario, gestiona los idiomas
+ * disponibles y presenta los resultados individuales por proveedor.
+ *
+ * Utiliza TraduccionService para enviar las solicitudes al backend.
+ */
 @Component({
   selector: 'app-nuevatraduccioncomponent',
   standalone: false,
-  styleUrl: './nuevatraduccioncomponent.css',
   templateUrl: './nuevatraduccioncomponent.html',
+  styleUrl: './nuevatraduccioncomponent.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Nuevatraduccioncomponent implements OnInit {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly idiomaService = inject(IdiomaService);
+  private readonly traductor = inject(TraduccionService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  /** Constructor de formularios reactivos de Angular. */
-  private fb = inject(FormBuilder);
+  /** Sin una sesión disponible se utiliza el límite del plan gratuito. */
+  private readonly planActual = signal<PlanId>('gratuito');
+  readonly estado = signal<Estado>('reposo');
+  readonly ocupado = computed(() => this.estado() === 'traduciendo');
 
-  /** Servicio encargado de proporcionar los idiomas disponibles. */
-  private idiomaService = inject(IdiomaService);
+  /** Indica que el servicio de traducción está disponible para enviar solicitudes. */
+  readonly traduccionDisponible = true;
+  readonly listaIdioma = signal<Idioma[]>([]);
+  readonly cargandoListaIdioma = signal(false);
+  readonly errorIdiomas = signal('');
+  readonly error = signal('');
+  readonly aviso = signal('');
+  readonly resultados = signal<readonly TraduccionResponseDTO[]>([]);
+  readonly limiteCaracteres = computed(() => PLANES[this.planActual()].caracteresPorSolicitud);
 
-  /** Estado actual del proceso de traducción o extracción de archivos. */
-  estado: Estado = 'reposo';
+  readonly nombresProveedores: Readonly<Record<ProveedorTraduccion, string>> = {
+    DEEPL: 'DeepL',
+    GEMMA: 'Gemma',
+    RIVA: 'Riva',
+  };
 
-  /** Indica si se encuentra activo el reconocimiento de voz. */
-  escuchando = false;
-
-  /** Indica si existe alguna operación en curso. */
-  ocupado = false;
-
-  /** Resultados obtenidos durante el proceso de traducción. */
-  resultadoLista: ResultadoTraduccion[] = [];
-
-  /** Mensaje de error asociado a las operaciones del componente. */
-  error = '';
-
-  /** Formulario reactivo que contiene el texto y los idiomas de traducción. */
-  readonly form = this.fb.nonNullable.group(
+  readonly form = this.fb.group(
     {
-      texto: ['', [sinSoloEspacios]],
+      texto: ['', [sinSoloEspacios, Validators.maxLength(PLANES.gratuito.caracteresPorSolicitud)]],
       origen: ['', Validators.required],
       destino: ['', Validators.required],
     },
     { validators: idiomasDistintos },
   );
 
-  /** Lista de idiomas disponibles para realizar traducciones. */
-  listaIdioma: Idioma[] = [];
+  /** Sincroniza el límite con la sesión y carga los idiomas disponibles. */
+  ngOnInit(): void {
+    this.auth
+      .getUserAsObservable()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((usuario) => {
+        const plan = usuario?.plan;
+        this.planActual.set(plan === 'oria' || plan === 'infinitia' ? plan : 'gratuito');
 
-  /** Indica si la lista de idiomas todavía se encuentra en proceso de carga. */
-  cargandoListaIdioma = true;
+        const texto = this.form.controls.texto;
+        texto.setValidators([sinSoloEspacios, Validators.maxLength(this.limiteCaracteres())]);
 
-  /**
-   * Inicializa la carga de los idiomas disponibles mediante IdiomaService.
-   * Actualiza la lista de idiomas y finaliza el estado de carga
-   * cuando se recibe la respuesta.
-   */
-  ngOnInit() {
-    this.idiomaService.getListaIdioma().subscribe(
-      listaIdioma => {
-        this.listaIdioma = listaIdioma;
-        this.cargandoListaIdioma = false;
-      }
-    );
+        texto.updateValueAndValidity({ emitEvent: false });
+      });
+
+    this.cargarIdiomas();
+  }
+
+  /** Permite cargar o reintentar la consulta de idiomas. */
+  cargarIdiomas(): void {
+    if (this.cargandoListaIdioma() || this.ocupado()) {
+      return;
+    }
+
+    this.errorIdiomas.set('');
+    this.cargandoListaIdioma.set(true);
+    this.idiomaService
+      .getListaIdioma()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.cargandoListaIdioma.set(false)),
+      )
+      .subscribe({
+        next: (idiomas) => {
+          this.listaIdioma.set(idiomas);
+          this.elegirIdiomasIniciales();
+          const cantidadIdiomas = new Set(idiomas.map((idioma) => idioma.id)).size;
+
+          if (cantidadIdiomas < 2) {
+            this.errorIdiomas.set('No hay suficientes idiomas disponibles para traducir.');
+          }
+        },
+        error: () => {
+          this.listaIdioma.set([]);
+          this.form.patchValue({ origen: '', destino: '' });
+          this.errorIdiomas.set('No fue posible cargar los idiomas. Inténtalo nuevamente.');
+        },
+      });
   }
 
   /**
-   * Inicia el proceso de traducción del texto introducido en el formulario.
-   * Actualmente se encuentra pendiente de implementar la integración
-   * con el servicio encargado de realizar las traducciones.
-   */
-  traducir() {
-    this.agregarTexto("Traduciendo")
-    // TODO: Implementar la integración con el servicio de traducción.
-  }
-
-  /**
-   * Recibe un archivo seleccionado desde el componente selector
-   * e inicia el proceso de extracción de su contenido.
+   * Valida el formulario y envía la solicitud mediante TraduccionService.
    *
-   * @param archivo Archivo seleccionado por el usuario.
+   * Conserva el texto original, incluidos espacios y saltos de línea.
+   * El backend deberá volver a validar el límite del usuario.
+   */
+  traducir(): void {
+    if (this.ocupado() || this.cargandoListaIdioma()) {
+      return;
+    }
+
+    this.error.set('');
+    this.aviso.set('');
+    this.form.markAllAsTouched();
+    if (this.form.invalid) {
+      this.error.set('Revisa el texto, su límite y los idiomas seleccionados.');
+      return;
+    }
+
+    const solicitud: SolicitudTraduccion = this.form.getRawValue();
+    this.resultados.set([]);
+    this.estado.set('traduciendo');
+    this.form.disable({ emitEvent: false });
+    this.traductor
+      .traducir(solicitud)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.estado.set('reposo');
+          this.form.enable({ emitEvent: false });
+        }),
+      )
+      .subscribe({
+        next: (respuesta) => {
+          this.resultados.set(respuesta.listaTraduccion);
+
+          if (respuesta.listaTraduccion.length === 0) {
+            this.error.set('No se recibieron resultados de traducción.');
+          }
+        },
+        error: () => {
+          this.error.set('No fue posible completar la traducción. Inténtalo nuevamente.');
+        },
+      });
+  }
+
+  /**
+   * Informa de la selección sin simular una extracción de contenido.
+   *
+   * La integración de archivos se incorporará cuando esté disponible.
    */
   alSeleccionarArchivo(archivo: File): void {
-    this.iniciar('extrayendo');
-    // TODO: Implementar la integración con el servicio de archivos.
+    if (this.ocupado()) {
+      return;
+    }
+
+    this.error.set('');
+    this.aviso.set(`La lectura de «${archivo.name}» aún no está disponible.`);
   }
 
   /**
-   * Incorpora nuevo contenido al texto existente en el formulario.
-   * Conserva el texto anterior y separa el contenido agregado
-   * mediante un espacio.
+   * Incorpora texto adicional sin recortarlo ni superar el límite del plan.
    *
-   * @param nuevo Texto que se desea incorporar al formulario.
+   * Puede utilizarse posteriormente para incorporar contenido extraído.
    */
   agregarTexto(nuevo: string): void {
+    if (this.ocupado() || nuevo.trim().length === 0) {
+      return;
+    }
+
     const control = this.form.controls.texto;
-    control.setValue([control.value.trimEnd(), nuevo.trim()].filter(Boolean).join(' '));
+    const combinado = control.value.length > 0 ? `${control.value} ${nuevo}` : nuevo;
+
+    if (combinado.length > this.limiteCaracteres()) {
+      this.error.set('El contenido adicional supera el límite de caracteres de tu plan.');
+      return;
+    }
+
+    this.error.set('');
+    control.setValue(combinado);
   }
 
-  /**
-   * Establece el estado de una operación e indica que el formulario
-   * debe permanecer deshabilitado mientras esta se ejecuta.
-   *
-   * También limpia cualquier mensaje de error anterior.
-   *
-   * @param estado Estado al que debe cambiar el componente.
-   */
-  private iniciar(estado: Estado): void {
-    this.estado = estado;
-    this.error = '';
-    this.form.disable();
-  }
-
-  /**
-   * Finaliza la operación actual, restablece el estado de reposo
-   * y habilita nuevamente el formulario.
-   */
-  private terminar(): void {
-    this.estado = 'reposo';
-    this.form.enable();
-  }
-
-  /**
-   * Establece los idiomas iniciales del formulario cuando todavía
-   * no se han seleccionado manualmente.
-   *
-   * Prioriza español como idioma de origen e inglés como destino.
-   * Si no están disponibles, utiliza los primeros idiomas de la lista.
-   */
+  /** Elige idiomas iniciales distintos y presentes en la lista disponible. */
   private elegirIdiomasIniciales(): void {
-    const ids = this.listaIdioma.map((i) => i.id);
+    const ids = this.listaIdioma().map((idioma) => idioma.id);
     const { origen, destino } = this.form.controls;
+    if (!ids.includes(origen.value)) {
+      origen.setValue(ids.includes('es') ? 'es' : (ids[0] ?? ''));
+    }
 
-    if (!origen.value) origen.setValue(ids.includes('es') ? 'es' : (ids[0] ?? ''));
-    if (!destino.value) destino.setValue(ids.includes('en') ? 'en' : (ids[1] ?? ''));
+    const destinos = ids.filter((id) => id !== origen.value);
+    if (!destinos.includes(destino.value)) {
+      destino.setValue(destinos.includes('en') ? 'en' : (destinos[0] ?? ''));
+    }
   }
 }

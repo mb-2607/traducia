@@ -1,5 +1,7 @@
 package co.edu.unbosque.traducia.configuration;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -10,8 +12,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import co.edu.unbosque.traducia.entity.Idioma;
 import co.edu.unbosque.traducia.entity.Role;
 import co.edu.unbosque.traducia.entity.User;
+import co.edu.unbosque.traducia.repository.IdiomaRepository;
 import co.edu.unbosque.traducia.repository.UserRepository;
 
 /**
@@ -64,8 +68,7 @@ public class LoadDatabase {
 	        @Value("${app.user.password}") String userPassword) {
 
 		return args -> {
-			Optional<User> found = userRepo.findByUsername("admin");
-			if (found.isPresent()) {
+			if (userRepo.existsByUsername("admin")||userRepo.existsByEmail("traducia687@gmail.com")) {
 				log.info("El administrador ya existe, omitiendo la creación del administrador...");
 			} else {
 				User adminUser = new User("admin", passwordEncoder.encode(adminPassword), "traducia687@gmail.com",
@@ -73,8 +76,7 @@ public class LoadDatabase {
 				userRepo.save(adminUser);
 				log.info("Precargando usuario administrador");
 			}
-			Optional<User> found2 = userRepo.findByUsername("normaluser");
-			if (found2.isPresent()) {
+			if (userRepo.existsByUsername("normaluser")||userRepo.existsByEmail("manuelbarros2007@gmail.com")) {
 				log.info("El usuario normal ya existe, omitiendo la creación del usuario normal...");
 			} else {
 				User normalUser = new User("normaluser", passwordEncoder.encode(userPassword),
@@ -82,6 +84,70 @@ public class LoadDatabase {
 				userRepo.save(normalUser);
 				log.info("Precargando usuario normal");
 			}
+		};
+	}
+	
+	/**
+	 * Define el proceso de inicialización de los idiomas predeterminados
+	 * que se ejecuta durante el arranque de la aplicación.
+	 * <p>
+	 * Registra los idiomas Español, Inglés, Francés, Alemán y Portugués
+	 * en la base de datos. Antes de insertar cada idioma, comprueba
+	 * si ya existe un registro con el código correspondiente para evitar
+	 * duplicados.
+	 * </p>
+	 *
+	 * @param idiomaRepo repositorio encargado de consultar y almacenar
+	 *                   los idiomas en la base de datos.
+	 * @return componente CommandLineRunner encargado de ejecutar
+	 *         la inicialización de los idiomas al iniciar la aplicación.
+	 */
+	@Bean
+	CommandLineRunner initIdiomas(IdiomaRepository idiomaRepo) {
+		return args -> {
+			Map<String, String> idiomas = new LinkedHashMap<>();
+			idiomas.put("es",    "Español");
+			idiomas.put("en-US", "Inglés (Estados Unidos)");
+			idiomas.put("en-GB", "Inglés (Reino Unido)");
+			idiomas.put("pt-BR", "Portugués (Brasil)");
+			idiomas.put("pt-PT", "Portugués (Portugal)");
+			idiomas.put("fr",    "Francés");
+			idiomas.put("de",    "Alemán");
+			idiomas.put("it",    "Italiano");
+			idiomas.put("nl",    "Neerlandés");
+			idiomas.put("pl",    "Polaco");
+			idiomas.put("ru",    "Ruso");
+			idiomas.put("uk",    "Ucraniano");
+			idiomas.put("tr",    "Turco");
+			idiomas.put("ar",    "Árabe");
+			idiomas.put("zh-CN", "Chino (simplificado)");
+			idiomas.put("zh-TW", "Chino (tradicional)");
+			idiomas.put("ja",    "Japonés");
+			idiomas.put("ko",    "Coreano");
+			idiomas.put("sv",    "Sueco");
+			idiomas.put("da",    "Danés");
+			idiomas.put("nb",    "Noruego (Bokmål)");
+			idiomas.put("fi",    "Finés");
+			idiomas.put("cs",    "Checo");
+			idiomas.put("sk",    "Eslovaco");
+			idiomas.put("sl",    "Esloveno");
+			idiomas.put("ro",    "Rumano");
+			idiomas.put("hu",    "Húngaro");
+			idiomas.put("el",    "Griego");
+			idiomas.put("bg",    "Búlgaro");
+			idiomas.put("id",    "Indonesio");
+			idiomas.put("et",    "Estonio");
+			idiomas.put("lv",    "Letón");
+			idiomas.put("lt",    "Lituano");
+
+			idiomas.forEach((codigo, nombre) -> {
+				if (idiomaRepo.findByCodigo(codigo).isPresent()) {
+					log.info("El idioma {} ya existe, omitiendo...", codigo);
+				} else {
+					idiomaRepo.save(new Idioma(codigo, nombre));
+					log.info("Precargando idioma {}", codigo);
+				}
+			});
 		};
 	}
 }

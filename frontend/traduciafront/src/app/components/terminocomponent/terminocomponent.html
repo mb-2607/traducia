@@ -1,0 +1,110 @@
+<dialog
+  #dialogo
+  class="tc-dialogo"
+  [class.tc-dialogo-error]="error()"
+  aria-labelledby="tc-titulo"
+  aria-describedby="tc-introduccion"
+  (cancel)="rechazar($event)"
+>
+  <header class="tc-cabecera">
+    <span class="tc-icono">
+      <i
+        class="fa-solid fa-file-contract"
+        aria-hidden="true"
+      ></i>
+    </span>
+
+    <p class="tc-marca">TraducIA</p>
+
+    <h2 id="tc-titulo" tabindex="-1" autofocus>
+      Términos y condiciones
+    </h2>
+
+    <p id="tc-introduccion">
+      Revisa y acepta estas condiciones para registrarte
+      o iniciar sesión.
+    </p>
+  </header>
+
+  <div
+    class="tc-contenido"
+    tabindex="0"
+    role="region"
+    aria-label="Contenido de los términos y condiciones"
+  >
+    <ol class="tc-lista">
+      <li>
+        <strong>Vigencia y uso de la cuenta.</strong>
+        El acuerdo rige desde el acceso a TraducIA y permanece
+        activo mientras utilices la plataforma o tu cuenta siga
+        habilitada.
+      </li>
+
+      <li>
+        <strong>Uso responsable de las traducciones.</strong>
+        Te comprometes a no enviar contenido ilegal, ofensivo,
+        difamatorio o que infrinja derechos de terceros a través
+        de los motores de traducción.
+      </li>
+
+      <li>
+        <strong>Precisión de los modelos de IA.</strong>
+        Las traducciones generadas mediante inteligencia artificial
+        pueden requerir revisión humana en textos técnicos,
+        legales, médicos o críticos.
+      </li>
+
+      <li>
+        <strong>Planes y límites.</strong>
+        El acceso a los motores de traducción, el máximo de
+        caracteres por solicitud y la disponibilidad de archivos
+        dependen de tu plan y de las funciones habilitadas
+        en la plataforma.
+      </li>
+
+      <li>
+        <strong>Procesamiento de contenido.</strong>
+        Los textos y documentos se procesan para brindar el
+        servicio de traducción. Evita incluir contraseñas,
+        claves o datos sensibles innecesarios.
+      </li>
+
+      <li>
+        <strong>Medidas ante abusos.</strong>
+        TraducIA puede restringir o suspender el acceso ante
+        usos automatizados no autorizados, intentos de eludir
+        límites o incumplimiento de estas normas.
+      </li>
+    </ol>
+  </div>
+
+  @if (error()) {
+    <p class="tc-error" role="alert">
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+      Debes aceptar los términos para registrarte o iniciar sesión.
+    </p>
+  }
+
+  <footer class="tc-acciones">
+    <button
+      type="button"
+      class="tc-boton tc-rechazar"
+      (click)="rechazar()"
+    >
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      No estoy de acuerdo
+    </button>
+
+    <button
+      type="button"
+      class="tc-boton tc-aceptar"
+      (click)="aceptar()"
+    >
+      <i class="fa-solid fa-check" aria-hidden="true"></i>
+      Sí, acepto los términos
+    </button>
+  </footer>
+</dialog>

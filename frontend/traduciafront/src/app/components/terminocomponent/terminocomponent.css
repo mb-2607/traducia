@@ -1,0 +1,202 @@
+/* El diálogo permanece oculto mientras no esté abierto. */
+:host {
+  display: contents;
+}
+
+.tc-dialogo {
+  --tc-texto: var(--td-texto, #f5f7ff);
+  --tc-fondo: var(--td-fondo, #101218);
+  --tc-secundario: var(--td-secundario, #b9c1d2);
+  --tc-acento: #bad2ff;
+  --tc-error: #ffb5b5;
+  --tc-borde: color-mix(in srgb, var(--tc-texto) 20%, transparent);
+
+  box-sizing: border-box;
+  inline-size: min(44rem, calc(100% - 2rem));
+  max-block-size: 90dvh;
+  margin: auto;
+  padding: clamp(1.2rem, 4vw, 2rem);
+  overflow: hidden;
+  border: 1px solid var(--tc-borde);
+  border-radius: 1.6rem;
+  background: linear-gradient(145deg, #ffffff14, #ffffff03),
+  var(--tc-fondo);
+  color: var(--tc-texto);
+  box-shadow: inset 0 1px 0 #ffffff50,
+  0 24px 80px #00000066;
+  font: inherit;
+}
+
+.tc-dialogo[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: tc-entrada 180ms ease-out;
+}
+
+.tc-dialogo::backdrop {
+  background: #060910cc;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.tc-cabecera {
+  text-align: center;
+}
+
+.tc-icono {
+  display: grid;
+  place-items: center;
+  inline-size: 3.4rem;
+  block-size: 3.4rem;
+  margin: 0 auto 0.8rem;
+  border: 1px solid var(--tc-borde);
+  border-radius: 1rem;
+  background: #a7c8ff12;
+  color: var(--tc-acento);
+  font-size: 1.4rem;
+}
+
+.tc-marca {
+  margin: 0 0 0.5rem;
+  color: var(--tc-acento);
+  font-weight: 700;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 4vw, 1.75rem);
+}
+
+.tc-cabecera > p:last-child {
+  margin: 0.7rem 0 0;
+  color: var(--tc-secundario);
+  line-height: 1.6;
+}
+
+/* El contenido se desplaza sin ocultar los botones del modal. */
+.tc-contenido {
+  min-block-size: 0;
+  padding: 1rem 1.2rem;
+  overflow-y: auto;
+  border: 1px solid var(--tc-borde);
+  border-radius: 1rem;
+  background: #8080800a;
+  scrollbar-width: thin;
+}
+
+.tc-lista {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+}
+
+.tc-lista li {
+  padding-inline-start: 0.3rem;
+  color: var(--tc-secundario);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.tc-lista li + li {
+  margin-block-start: 1rem;
+}
+
+.tc-lista strong {
+  color: var(--tc-texto);
+}
+
+.tc-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.tc-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-block-size: 2.9rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid var(--tc-borde);
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--tc-texto);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 160ms ease,
+  box-shadow 160ms ease;
+}
+
+.tc-aceptar {
+  background: var(--tc-acento);
+  color: #101b30;
+}
+
+.tc-boton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px #a7c8ff50;
+}
+
+.tc-boton:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 30px #a7c8ff70;
+}
+
+.tc-error {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  color: var(--tc-error);
+  font-size: 0.85rem;
+}
+
+.tc-dialogo-error {
+  border-color: var(--tc-error);
+}
+
+:where(button, [tabindex]):focus-visible {
+  outline: 2px solid var(--tc-acento);
+  outline-offset: 3px;
+}
+
+@keyframes tc-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 36rem) {
+  .tc-acciones {
+    flex-direction: column;
+  }
+
+  .tc-boton {
+    inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-dialogo[open] {
+    animation: none;
+  }
+
+  .tc-boton {
+    transition: none;
+  }
+
+  .tc-boton:hover,
+  .tc-boton:active {
+    transform: none;
+  }
+}

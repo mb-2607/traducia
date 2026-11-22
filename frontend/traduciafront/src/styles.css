@@ -221,3 +221,13 @@ h1 {
 .campo :is(textarea, input)::placeholder {
   color: var(--td-secundario);
 }
+
+/* Oculta la cabecera cuando se muestra el formulario de acceso o registro. */
+.app-shell:has(app-loggincomponent) .app-cabecera {
+  display: none;
+}
+
+/* Permite que el formulario ocupe el espacio completo de la página. */
+.app-shell:has(app-loggincomponent) .app-main {
+  margin-inline-start: 0;
+}

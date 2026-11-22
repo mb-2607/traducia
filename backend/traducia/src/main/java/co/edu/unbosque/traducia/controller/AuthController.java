@@ -1,12 +1,13 @@
 package co.edu.unbosque.traducia.controller;
 
-import org.springframework.security.core.AuthenticationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import co.edu.unbosque.traducia.dto.LoginRequestDTO;
+import co.edu.unbosque.traducia.dto.LoginResponseDTO;
+import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
+import co.edu.unbosque.traducia.dto.UserResponseDTO;
 import co.edu.unbosque.traducia.entity.User;
 import co.edu.unbosque.traducia.exception.EmailAlreadyExistsException;
 import co.edu.unbosque.traducia.exception.InvalidPasswordException;
@@ -21,10 +27,7 @@ import co.edu.unbosque.traducia.exception.UsernameAlreadyExistsException;
 import co.edu.unbosque.traducia.security.JwtUtil;
 import co.edu.unbosque.traducia.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import co.edu.unbosque.traducia.dto.LoginRequestDTO;
-import co.edu.unbosque.traducia.dto.LoginResponseDTO;
-import co.edu.unbosque.traducia.dto.RegisterRequestDTO;
-import co.edu.unbosque.traducia.dto.UserResponseDTO;
+import jakarta.validation.Valid;
 
 /**
  * Controlador REST encargado de gestionar los procesos de autenticación
@@ -51,31 +54,31 @@ import co.edu.unbosque.traducia.dto.UserResponseDTO;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-	
+
 	/**
 	 * Administrador encargado de autenticar las credenciales de los usuarios
 	 * mediante Spring Security.
 	 */
 	private final AuthenticationManager authenticationManager;
-	
+
 	/**
 	 * Utilidad encargada de generar y gestionar los tokens JWT
 	 * utilizados para la autenticación de los usuarios.
 	 */
 	private final JwtUtil jwtUtil;
-	
+
 	/**
 	 * Servicio encargado de gestionar las operaciones relacionadas
 	 * con los usuarios, como el registro de nuevas cuentas.
 	 */
 	private final UserService userService;
-	
+
 	/**
 	 * Componente encargado de convertir objetos entre diferentes tipos,
 	 * principalmente entre entidades y DTO.
 	 */
 	private final ModelMapper modelMapper;
-	
+
 	/**
 	 * Construye el controlador de autenticación e inicializa sus dependencias.
 	 *
@@ -91,7 +94,7 @@ public class AuthController {
 		this.userService = userService;
 		this.modelMapper = modelMapper;
 	}
-	
+
 	/**
 	 * Autentica a un usuario mediante sus credenciales y genera un token JWT
 	 * para permitir el acceso a los recursos protegidos de la aplicación.
@@ -106,7 +109,7 @@ public class AuthController {
 	 * @throws AuthenticationException si las credenciales proporcionadas no son válidas.
 	 */
 	@PostMapping(path = "login")
-	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
+	public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getNombre(), loginRequest.getPassword()));
 
@@ -121,7 +124,7 @@ public class AuthController {
 
 		return ResponseEntity.ok(new LoginResponseDTO(userResponse, jwt));
 	}
-	
+
 	/**
 	 * Registra un nuevo usuario en la aplicación.
 	 * <p>
@@ -136,11 +139,22 @@ public class AuthController {
 	 * @throws InvalidPasswordException si la contraseña no cumple con los requisitos establecidos.
 	 */
 	@PostMapping(path = "register")
-	public ResponseEntity<UserResponseDTO> register(@RequestBody RegisterRequestDTO registerRequest) {
+	public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO registerRequest) {
 		UserResponseDTO userResponse = userService.crear(registerRequest);
 		return new ResponseEntity<UserResponseDTO>(userResponse, HttpStatus.CREATED);
 	}
-	
+
+	/**
+	 * Gestiona el intento de inicio de sesión de un usuario que aún no ha verificado su correo.
+	 *
+	 * @return respuesta HTTP con estado FORBIDDEN (403) indicando que debe verificar su correo.
+	 */
+	@ExceptionHandler(DisabledException.class)
+	public ResponseEntity<String> manejarDisabledException() {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body("Debes verificar tu correo electrónico antes de iniciar sesión");
+	}
+
 	/**
 	 * Gestiona las excepciones producidas durante el proceso de autenticación.
 	 * <p>
@@ -155,7 +169,7 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 				.body("Contraseña inválido");
 	}
-	
+
 	/**
 	 * Gestiona las excepciones generadas cuando se intenta registrar
 	 * un usuario con un correo electrónico que ya está registrado.
@@ -168,7 +182,7 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.CONFLICT)
 				.body("El correo ya existe");
 	}
-	
+
 	/**
 	 * Gestiona las excepciones generadas cuando se intenta registrar
 	 * un usuario con un nombre de usuario que ya está registrado.
@@ -181,7 +195,7 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.CONFLICT)
 				.body("El usuario ya existe");
 	}
-	
+
 	/**
 	 * Gestiona las excepciones producidas cuando una contraseña no cumple
 	 * con los requisitos establecidos durante el registro de un usuario.
@@ -198,5 +212,4 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(e.getMessage());
 	}
-
 }

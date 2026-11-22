@@ -24,7 +24,7 @@ const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
 export class Archivoselectorcomponent {
 
   /** Indica si el selector de archivos debe permanecer deshabilitado. */
-  @Input() deshabilitado :boolean = false;
+  @Input() deshabilitado = false;
 
   /** Emite el archivo seleccionado cuando supera las validaciones establecidas. */
   @Output() readonly archivoSeleccionado :EventEmitter<File> = new EventEmitter<File>();

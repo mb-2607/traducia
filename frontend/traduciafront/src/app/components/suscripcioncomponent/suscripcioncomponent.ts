@@ -1,33 +1,22 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
+  DestroyRef,
   ElementRef,
   Injector,
+  OnInit,
   ViewChild,
   afterNextRender,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import type { AbstractControl, ValidatorFn } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PLANES } from '../../models/planmodel';
 import type { Planmodel } from '../../models/planmodel';
 import { SuscripcionService } from '../../services/suscripcionservice';
-
-/**
- * Componente encargado de gestionar la visualización, selección y
- * confirmación de planes de suscripción dentro de TraducIA.
- *
- * Proporciona información sobre los planes disponibles, permite
- * seleccionar una suscripción y administra el formulario de pago
- * con sus respectivas validaciones.
- *
- * Utiliza Angular Signals para gestionar los estados reactivos
- * de selección y confirmación de planes, y se comunica con
- * SuscripcionService para consultar y activar las suscripciones.
- *
- * También implementa gestión del foco para mejorar la accesibilidad
- * durante la selección, cancelación y confirmación de los planes.
- */
 
 /**
  * Formateador de valores monetarios según la configuración regional
@@ -42,10 +31,7 @@ const FORMATO_PESOS = new Intl.NumberFormat('es-CO', {
 /** Formateador de valores numéricos según la configuración regional colombiana. */
 const FORMATO_NUMERO = new Intl.NumberFormat('es-CO');
 
-/**
- * Lista de países disponibles para seleccionar en el formulario
- * de información de facturación.
- */
+/** Lista de países disponibles en el formulario de facturación. */
 const PAISES = [
   { codigo: 'CO', nombre: 'Colombia' },
   { codigo: 'MX', nombre: 'México' },
@@ -55,14 +41,14 @@ const PAISES = [
 ] as const;
 
 /**
- * Valida el formato y la vigencia de la fecha de vencimiento
- * de la tarjeta de pago.
+ * Valida el formato y la vigencia de la fecha de vencimiento.
  *
  * Comprueba que la fecha tenga el formato MM/AA, que el mes
- * sea válido y que no corresponda a una fecha anterior al mes actual.
+ * sea válido y que no sea anterior al mes actual. La obligatoriedad
+ * del campo se valida por separado.
  *
  * @param control Control cuyo valor contiene la fecha de vencimiento.
- * @returns Un error de validación si la fecha no es válida; null en caso contrario.
+ * @returns Un error de validación si la fecha no es válida, o `null` en caso contrario.
  */
 const validarVencimiento: ValidatorFn = (control) => {
   const valor = String(control.value ?? '');
@@ -90,50 +76,128 @@ const validarVencimiento: ValidatorFn = (control) => {
   return null;
 };
 
+/**
+ * Formatea un precio utilizando el formato monetario colombiano.
+ *
+ * @param precio Valor numérico que se desea formatear.
+ * @returns Precio representado en pesos colombianos.
+ */
+function precioFormateado(precio: number): string {
+  return FORMATO_PESOS.format(precio);
+}
+
+/**
+ * Describe el máximo de caracteres de entrada permitido por solicitud.
+ *
+ * @param plan Plan cuyo límite se desea mostrar.
+ * @returns Descripción del límite de caracteres.
+ */
+function limiteCaracteres(plan: Planmodel): string {
+  return `${FORMATO_NUMERO.format(plan.caracteresPorSolicitud)} caracteres por traducción`;
+}
+
+/**
+ * Obtiene la descripción del límite diario de traducciones de archivos.
+ * Un valor `null` en el plan indica que no hay un cupo diario.
+ *
+ * @param plan Plan del cual se desea consultar el límite de archivos.
+ * @returns Descripción del límite diario de traducciones de archivos.
+ */
+function limiteArchivos(plan: Planmodel): string {
+  if (plan.archivosPorDia === null) {
+    return 'Traducciones de archivos ilimitadas al día';
+  }
+
+  return `${plan.archivosPorDia} traducciones de archivos al día`;
+}
+
+/**
+ * Indica si se debe mostrar un error de validación para un control.
+ *
+ * @param control Control del formulario que se desea comprobar.
+ * @returns `true` si el control está marcado como tocado y es inválido.
+ */
+function campoInvalido(control: AbstractControl): boolean {
+  return control.touched && control.invalid;
+}
+
+/** Obtiene un mensaje legible a partir de un error HTTP al cambiar de plan. */
+function extraerMensajeError(error: unknown): string {
+  if (error instanceof HttpErrorResponse && typeof error.error === 'string' && error.error.trim()) {
+    return error.error;
+  }
+
+  return 'No fue posible actualizar tu plan en este momento. Inténtalo nuevamente.';
+}
+
+/**
+ * Gestiona la visualización, selección y confirmación de planes
+ * de suscripción dentro de TraducIA.
+ *
+ * Consulta los límites y el plan vigente desde el backend, valida el formulario
+ * y solicita al servicio el cambio de plan real de la cuenta autenticada.
+ */
 @Component({
   selector: 'app-suscripcioncomponent',
   standalone: false,
   templateUrl: './suscripcioncomponent.html',
   styleUrls: ['./suscripcioncomponent.css'],
 })
-export class Suscripcioncomponent {
-
-  /** Servicio encargado de consultar y gestionar las suscripciones. */
+export class Suscripcioncomponent implements OnInit {
+  /** Servicio encargado de consultar y actualizar el plan del usuario. */
   private readonly suscripcion = inject(SuscripcionService);
 
   /** Constructor utilizado para inicializar el formulario reactivo. */
   private readonly fb = inject(NonNullableFormBuilder);
 
-  /** Inyector utilizado para ejecutar operaciones posteriores al renderizado. */
+  /** Inyector utilizado para registrar operaciones posteriores al renderizado. */
   private readonly injector = inject(Injector);
 
-  /** Referencia al elemento HTML que recibirá el foco al mostrar un resultado. */
+  /** Referencia de destrucción para cancelar suscripciones activas. */
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Elemento que recibe el foco después de seleccionar o confirmar un plan. */
   @ViewChild('destinoFoco')
   private destinoFoco?: ElementRef<HTMLElement>;
 
-  /** Almacena el botón desde el cual se inició la selección de un plan. */
+  /** Botón al que se devuelve el foco al cancelar la selección. */
   private botonOrigen: HTMLButtonElement | null = null;
 
   /** Lista de planes disponibles para mostrar en la interfaz. */
-  readonly planes = Object.values(PLANES);
+  readonly planes = signal<Planmodel[]>(Object.values(PLANES));
 
   /** Lista de países disponibles para el formulario de pago. */
   readonly paises = PAISES;
 
-  /** Signal que representa el identificador del plan actualmente activo. */
+  /** Señal que contiene el identificador del plan activo. */
   readonly planActivo = this.suscripcion.planActivo;
 
-  /** Signal que almacena el plan seleccionado por el usuario. */
+  /** Señal que contiene el plan seleccionado por el usuario. */
   readonly planSeleccionado = signal<Planmodel | null>(null);
 
-  /** Signal que almacena el plan cuya confirmación se ha completado. */
+  /** Señal que contiene el plan cuya confirmación se ha completado. */
   readonly planConfirmado = signal<Planmodel | null>(null);
 
-  /** Signal que contiene los mensajes informativos o de validación del formulario. */
+  /** Señal que indica si hay una solicitud de cambio de plan en curso. */
+  readonly guardando = signal(false);
+
+  /** Señal que contiene el mensaje general de validación o error del formulario. */
   readonly mensajeFormulario = signal('');
 
   /** Ejemplo dinámico de fecha de vencimiento correspondiente al siguiente año. */
   readonly vencimientoEjemplo = `12/${String(new Date().getFullYear() + 1).slice(-2)}`;
+
+  /** Formatea los precios que se muestran en la plantilla. */
+  readonly precioFormateado = precioFormateado;
+
+  /** Describe el límite de caracteres de un plan en la plantilla. */
+  readonly limiteCaracteres = limiteCaracteres;
+
+  /** Describe el cupo diario de archivos de un plan en la plantilla. */
+  readonly limiteArchivos = limiteArchivos;
+
+  /** Determina cuándo debe mostrarse el error de un campo en la plantilla. */
+  readonly campoInvalido = campoInvalido;
 
   /** Formulario reactivo que contiene los datos de facturación y pago. */
   readonly pago = this.fb.group({
@@ -163,6 +227,32 @@ export class Suscripcioncomponent {
     confirmar: [false, Validators.requiredTrue],
   });
 
+  /** Sincroniza el catálogo de planes y el plan vigente desde el backend. */
+  ngOnInit(): void {
+    this.suscripcion
+      .listarPlanes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (planes) => {
+          if (planes.length > 0) {
+            this.planes.set(planes);
+          }
+        },
+        error: () => {
+          // Conserva el catálogo local de respaldo si falla la consulta inicial.
+        },
+      });
+
+    this.suscripcion
+      .obtenerPlanActual()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => {
+          // Conserva el plan cargado desde la sesión actual si falla la consulta.
+        },
+      });
+  }
+
   /**
    * Obtiene el nombre del plan que se encuentra actualmente activo.
    *
@@ -173,68 +263,16 @@ export class Suscripcioncomponent {
   }
 
   /**
-   * Formatea un precio utilizando el formato monetario colombiano.
-   *
-   * @param precio Valor numérico que se desea formatear.
-   * @returns Precio representado en pesos colombianos.
-   */
-  precioFormateado(precio: number): string {
-    return FORMATO_PESOS.format(precio);
-  }
-
-  /**
-   * Obtiene la descripción del límite de palabras permitido por un plan.
-   * Contempla los planes que ofrecen traducciones ilimitadas.
-   *
-   * @param plan Plan del cual se desea consultar el límite de palabras.
-   * @returns Descripción del límite de palabras por traducción.
-   */
-  limitePalabras(plan: Planmodel): string {
-    if (plan.palabras === null) {
-      return 'Palabras ilimitadas por traducción';
-    }
-
-    return `${FORMATO_NUMERO.format(plan.palabras)} palabras por traducción`;
-  }
-
-  /**
-   * Obtiene la descripción del límite diario de traducciones de archivos.
-   * Contempla los planes que ofrecen traducciones ilimitadas.
-   *
-   * @param plan Plan del cual se desea consultar el límite de archivos.
-   * @returns Descripción del límite diario de traducciones de archivos.
-   */
-  limiteArchivos(plan: Planmodel): string {
-    if (plan.archivosPorDia === null) {
-      return 'Traducciones de archivos ilimitadas al día';
-    }
-
-    return `${plan.archivosPorDia} traducciones de archivos al día`;
-  }
-
-  /**
-   * Comprueba si un control debe mostrar su estado de validación como inválido.
-   * Solo considera los controles que ya han sido marcados como modificados.
-   *
-   * @param control Control del formulario que se desea comprobar.
-   * @returns true si el control fue tocado y contiene errores de validación.
-   */
-  campoInvalido(control: AbstractControl): boolean {
-    return control.touched && control.invalid;
-  }
-
-  /**
    * Inicia la selección de un plan para su posterior confirmación.
    *
-   * Evita seleccionar nuevamente el plan que ya se encuentra activo,
-   * almacena el botón de origen, restablece el formulario y limpia
-   * los estados de confirmación anteriores.
+   * Evita seleccionar el plan que ya está activo, guarda el botón
+   * de origen y restablece el formulario y la confirmación anterior.
    *
    * @param plan Plan seleccionado por el usuario.
-   * @param boton Botón HTML desde el cual se inició la selección.
+   * @param boton Botón desde el cual se inició la selección.
    */
   seleccionarPlan(plan: Planmodel, boton: HTMLButtonElement): void {
-    if (plan.id === this.planActivo()) {
+    if (this.guardando() || plan.id === this.planActivo()) {
       return;
     }
 
@@ -247,12 +285,16 @@ export class Suscripcioncomponent {
   }
 
   /**
-   * Cancela la selección actual de un plan y restablece el formulario.
+   * Cancela la selección actual y restablece el formulario.
    *
    * Limpia los mensajes y el plan seleccionado, devuelve el foco
    * al botón que inició la operación y libera su referencia.
    */
   cancelar(): void {
+    if (this.guardando()) {
+      return;
+    }
+
     this.pago.reset();
     this.mensajeFormulario.set('');
     this.planSeleccionado.set(null);
@@ -261,18 +303,15 @@ export class Suscripcioncomponent {
   }
 
   /**
-   * Valida y confirma la selección de un plan de suscripción.
+   * Valida y confirma la selección de un plan de suscripción contra el backend.
    *
-   * Comprueba que exista un plan seleccionado y que el formulario
-   * sea válido cuando se trata de un plan de pago.
-   *
-   * Si las validaciones se cumplen, solicita la activación del plan
-   * mediante SuscripcionService y actualiza los estados de la interfaz.
+   * Los planes de pago requieren un formulario válido. Cuando se cumplen las
+   * validaciones, solicita al servicio actualizar el plan del usuario autenticado.
    */
   confirmarSuscripcion(): void {
     const plan = this.planSeleccionado();
 
-    if (!plan || plan.id === this.planActivo()) {
+    if (this.guardando() || !plan || plan.id === this.planActivo()) {
       return;
     }
 
@@ -282,22 +321,33 @@ export class Suscripcioncomponent {
       return;
     }
 
-    this.suscripcion.activarPlanDemo(plan.id);
-
-    this.pago.reset();
+    this.guardando.set(true);
     this.mensajeFormulario.set('');
-    this.planSeleccionado.set(null);
-    this.planConfirmado.set(plan);
-    this.botonOrigen = null;
-    this.enfocarResultado();
+
+    this.suscripcion
+      .cambiarPlan(plan.id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.guardando.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.pago.reset();
+          this.mensajeFormulario.set('');
+          this.planSeleccionado.set(null);
+          this.planConfirmado.set(plan);
+          this.botonOrigen = null;
+          this.enfocarResultado();
+        },
+        error: (error: unknown) => {
+          this.mensajeFormulario.set(extraerMensajeError(error));
+        },
+      });
   }
 
   /**
-   * Programa el desplazamiento del foco hacia el elemento de destino
-   * una vez Angular haya completado el siguiente renderizado.
-   *
-   * Utiliza el inyector del componente para ejecutar afterNextRender
-   * dentro del contexto de inyección correspondiente.
+   * Mueve el foco al elemento de destino después del siguiente renderizado.
+   * Usa el inyector del componente para registrar la operación.
    */
   private enfocarResultado(): void {
     afterNextRender(() => this.destinoFoco?.nativeElement.focus(), {

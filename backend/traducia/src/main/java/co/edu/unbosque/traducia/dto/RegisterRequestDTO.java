@@ -1,5 +1,9 @@
 package co.edu.unbosque.traducia.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * DTO (Data Transfer Object) utilizado para representar los datos enviados por
  * el cliente durante el proceso de registro de un nuevo usuario.
@@ -16,17 +20,42 @@ public class RegisterRequestDTO {
 	/**
 	 * Nombre del usuario que desea registrarse.
 	 */
+	@NotBlank(message = "El nombre de usuario es obligatorio")
 	private String nombre;
 
 	/**
 	 * Dirección de correo electrónico del usuario.
 	 */
+	@NotBlank(message = "El correo electrónico es obligatorio")
+	@Email(message = "El formato del correo electrónico no es válido")
 	private String correo;
 
 	/**
 	 * Contraseña proporcionada para crear la cuenta del usuario.
 	 */
+	@NotBlank(message = "La contraseña es obligatoria")
+	@Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
 	private String password;
+
+	/**
+	 * Construye un objeto RegisterRequestDTO sin inicializar sus atributos.
+	 */
+	public RegisterRequestDTO() {
+	}
+
+	/**
+	 * Construye un objeto RegisterRequestDTO con los datos necesarios para
+	 * registrar un nuevo usuario.
+	 *
+	 * @param nombre   nombre del usuario que desea registrarse.
+	 * @param correo   dirección de correo electrónico del usuario.
+	 * @param password contraseña proporcionada para crear la cuenta.
+	 */
+	public RegisterRequestDTO(String nombre, String correo, String password) {
+		this.nombre = nombre;
+		this.correo = correo;
+		this.password = password;
+	}
 
 	/**
 	 * Obtiene el nombre del usuario.
@@ -80,25 +109,5 @@ public class RegisterRequestDTO {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	/**
-	 * Construye un objeto RegisterRequestDTO con los datos necesarios para
-	 * registrar un nuevo usuario.
-	 *
-	 * @param nombre   nombre del usuario que desea registrarse.
-	 * @param correo   dirección de correo electrónico del usuario.
-	 * @param password contraseña proporcionada para crear la cuenta.
-	 */
-	public RegisterRequestDTO(String nombre, String correo, String password) {
-		this.nombre = nombre;
-		this.correo = correo;
-		this.password = password;
-	}
-
-	/**
-	 * Construye un objeto RegisterRequestDTO sin inicializar sus atributos.
-	 */
-	public RegisterRequestDTO() {
 	}
 }

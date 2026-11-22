@@ -1,0 +1,187 @@
+<section class="recuperacion container" aria-labelledby="recuperacion-titulo">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+      <div class="recuperacion-glass">
+        <header class="recuperacion-cabecera">
+          <a class="rc-marca" routerLink="/login">TraducIA</a>
+          <span class="recuperacion-icono"
+            ><i
+              class="fa-solid"
+              [class.fa-lock]="restableciendo"
+              [class.fa-key]="!restableciendo"
+              aria-hidden="true"
+            ></i
+          ></span>
+          <h1 id="recuperacion-titulo">{{ titulo() }}</h1>
+          <p>
+            {{
+              restableciendo
+                ? 'Elige una contraseña para volver a acceder a tu cuenta.'
+                : 'Ingresa tu correo y te ayudaremos a recuperar el acceso.'
+            }}
+          </p>
+        </header>
+
+        @if (!disponible) {
+          <p class="rc-mensaje" role="status">La recuperación de acceso aún no está disponible.</p>
+        }
+        @if (error()) {
+          <p class="rc-mensaje rc-error" role="alert">{{ error() }}</p>
+        }
+
+        @if (completado()) {
+          <div class="recuperacion-confirmacion" role="status">
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            <h2>{{ restableciendo ? 'Contraseña actualizada' : 'Revisa tu correo' }}</h2>
+            <p>
+              {{
+                restableciendo
+                  ? 'Ya puedes iniciar sesión con tu nueva contraseña.'
+                  : 'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.'
+              }}
+            </p>
+          </div>
+          @if (!restableciendo) {
+            <button type="button" class="rc-boton" (click)="volverASolicitar()">
+              <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Volver a solicitar
+            </button>
+          }
+        } @else if (restableciendo) {
+          @if (!enlaceValido()) {
+            <p class="rc-mensaje rc-error" role="alert">
+              El enlace está incompleto o no es válido. Abre el enlace de tu correo o solicita uno
+              nuevo.
+            </p>
+            <a class="rc-boton rc-principal" routerLink="/recuperar-contrasena"
+              ><i class="fa-regular fa-envelope" aria-hidden="true"></i> Solicitar otro enlace</a
+            >
+          } @else {
+            <form
+              [formGroup]="nueva"
+              (ngSubmit)="restablecer()"
+              novalidate
+              [attr.aria-busy]="enviando()"
+            >
+              <fieldset [disabled]="enviando()">
+                <legend class="rc-oculto">Nueva contraseña y confirmación</legend>
+                <div class="rc-campo-cabecera">
+                  <label for="recuperacion-password">Nueva contraseña</label
+                  ><button
+                    type="button"
+                    class="rc-visibilidad"
+                    [attr.aria-pressed]="visible()"
+                    (click)="alternarVisibilidad()"
+                  >
+                    <i
+                      class="fa-solid"
+                      [class.fa-eye]="!visible()"
+                      [class.fa-eye-slash]="visible()"
+                      aria-hidden="true"
+                    ></i>
+                    {{ visible() ? 'Ocultar' : 'Mostrar' }}
+                  </button>
+                </div>
+                <input
+                  id="recuperacion-password"
+                  class="rc-campo"
+                  [type]="visible() ? 'text' : 'password'"
+                  formControlName="password"
+                  autocomplete="new-password"
+                  maxlength="128"
+                  [attr.aria-invalid]="
+                    nueva.controls.password.touched && nueva.controls.password.invalid
+                  "
+                  aria-describedby="recuperacion-password-ayuda recuperacion-password-error"
+                />
+                <p id="recuperacion-password-ayuda" class="rc-ayuda">
+                  Entre 8 y 128 caracteres. No puede contener únicamente espacios.
+                </p>
+                <span id="recuperacion-password-error" class="rc-error-campo">
+                  @if (nueva.controls.password.touched && nueva.controls.password.invalid) {
+                    Revisa los requisitos de la nueva contraseña.
+                  }
+                </span>
+                <label for="recuperacion-confirmacion">Confirmar contraseña</label>
+                <input
+                  id="recuperacion-confirmacion"
+                  class="rc-campo"
+                  [type]="visible() ? 'text' : 'password'"
+                  formControlName="confirmacion"
+                  autocomplete="new-password"
+                  maxlength="128"
+                  [attr.aria-invalid]="
+                    nueva.controls.confirmacion.touched &&
+                    (nueva.controls.confirmacion.invalid || nueva.hasError('contrasenasDistintas'))
+                  "
+                  aria-describedby="recuperacion-confirmacion-error"
+                />
+                <span id="recuperacion-confirmacion-error" class="rc-error-campo">
+                  @if (
+                    nueva.controls.confirmacion.touched &&
+                    (nueva.controls.confirmacion.invalid || nueva.hasError('contrasenasDistintas'))
+                  ) {
+                    Completa la confirmación y verifica que las contraseñas coincidan.
+                  }
+                </span>
+              </fieldset>
+              <button
+                type="submit"
+                class="rc-boton rc-principal"
+                [disabled]="!disponible || enviando()"
+              >
+                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                {{ enviando() ? 'Guardando…' : 'Guardar contraseña' }}
+              </button>
+            </form>
+          }
+        } @else {
+          <form
+            [formGroup]="solicitud"
+            (ngSubmit)="solicitarEnlace()"
+            novalidate
+            [attr.aria-busy]="enviando()"
+          >
+            <fieldset [disabled]="enviando()">
+              <legend class="rc-oculto">Correo de recuperación</legend>
+              <label for="recuperacion-correo">Correo electrónico</label>
+              <input
+                id="recuperacion-correo"
+                class="rc-campo"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                maxlength="254"
+                placeholder="Tu correo electrónico"
+                [attr.aria-invalid]="
+                  solicitud.controls.correo.touched && solicitud.controls.correo.invalid
+                "
+                aria-describedby="recuperacion-correo-error"
+              />
+              <span id="recuperacion-correo-error" class="rc-error-campo">
+                @if (solicitud.controls.correo.touched && solicitud.controls.correo.invalid) {
+                  Ingresa un correo electrónico válido.
+                }
+              </span>
+            </fieldset>
+            <button
+              type="submit"
+              class="rc-boton rc-principal"
+              [disabled]="!disponible || enviando()"
+            >
+              <i class="fa-regular fa-paper-plane" aria-hidden="true"></i>
+              {{ enviando() ? 'Procesando…' : 'Enviar enlace' }}
+            </button>
+            <p class="rc-ayuda recuperacion-nota">
+              Si no ves el mensaje, revisa también la carpeta de correo no deseado.
+            </p>
+          </form>
+        }
+        <footer class="recuperacion-pie">
+          <a class="rc-volver" routerLink="/login"
+            ><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver al inicio de sesión</a
+          >
+        </footer>
+      </div>
+    </div>
+  </div>
+</section>

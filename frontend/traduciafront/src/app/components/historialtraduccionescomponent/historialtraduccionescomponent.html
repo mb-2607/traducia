@@ -1,0 +1,156 @@
+<section class="historial" aria-labelledby="titulo-historial">
+  <header class="historial-cabecera">
+    <div>
+      <h1 id="titulo-historial">Historial</h1>
+      <p>Consulta tus traducciones anteriores.</p>
+    </div>
+
+    <a class="historial-nuevo" routerLink="/dashboard/new">
+      <i class="fa-solid fa-plus" aria-hidden="true"></i>
+      Nueva traducción
+    </a>
+  </header>
+
+  <div class="historial-herramientas">
+    <div class="campo-busqueda">
+      <label for="buscar-historial">Buscar por título</label>
+      <div class="campo-icono">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          #buscador
+          id="buscar-historial"
+          type="search"
+          placeholder="Buscar traducciones"
+          (input)="actualizarBusqueda(buscador.value)"
+        />
+      </div>
+    </div>
+
+    <div class="campo-filtro">
+      <label for="tipo-historial">Tipo</label>
+      <select
+        #selectorTipo
+        id="tipo-historial"
+        (change)="actualizarFiltro(selectorTipo.value)"
+      >
+        <option value="todos">Todos</option>
+        <option value="texto">Texto</option>
+        <option value="archivo">Archivos</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="historial-contador" role="status">
+    Resultados: {{ traduccionesVisibles().length }}
+    @if (totalElementos() > 0) {
+      <span>de {{ totalElementos() }}</span>
+    }
+  </p>
+
+  @if (error(); as mensajeError) {
+    <div class="historial-vacio" role="alert">
+      <h2>Ocurrió un problema</h2>
+      <p>{{ mensajeError }}</p>
+      <button type="button" class="historial-nuevo" (click)="cargarHistorial(paginaActual())">
+        Reintentar
+      </button>
+    </div>
+  } @else if (cargando()) {
+    <div class="historial-vacio" role="status">
+      <p>Cargando historial...</p>
+    </div>
+  } @else if (traduccionesVisibles().length > 0) {
+    <ul class="historial-lista">
+      @for (traduccion of traduccionesVisibles(); track traduccion.id) {
+        <li>
+          <details class="traduccion" (toggle)="alAlternarDetalle($event, traduccion.id)">
+            <summary class="traduccion-fila">
+              @if (traduccion.tipo === 'archivo') {
+                <i class="fa-solid fa-file-lines traduccion-icono" aria-hidden="true"></i>
+              } @else {
+                <i class="fa-solid fa-align-left traduccion-icono" aria-hidden="true"></i>
+              }
+
+              <span class="traduccion-info">
+                <strong>{{ traduccion.titulo }}</strong>
+                <span>
+                  {{ traduccion.origen }}
+                  <span aria-hidden="true">→</span>
+                  <span class="visually-hidden">a</span>
+                  {{ traduccion.destino }}
+                </span>
+              </span>
+
+              <time [attr.datetime]="traduccion.fecha">
+                {{ traduccion.fechaVisible }}
+              </time>
+
+              <i class="fa-solid fa-chevron-down traduccion-flecha" aria-hidden="true"></i>
+            </summary>
+
+            <div class="traduccion-detalle">
+              <div>
+                <h2>Texto original</h2>
+                <p>{{ traduccion.original }}</p>
+              </div>
+
+              <div>
+                <h2>Traducción</h2>
+                @if (cargandoDetalleId() === traduccion.id) {
+                  <p>Cargando detalle...</p>
+                } @else {
+                  @if (detallesPorId()[traduccion.id]; as detalle) {
+                    @for (item of detalle.listaTraduccion; track item.proveedorTraduccion) {
+                      <div>
+                        <strong>{{ item.proveedorTraduccion }}</strong>
+                        @if (item.estado === 'EXITOSA' && item.textoTraducido) {
+                          <p>{{ item.textoTraducido }}</p>
+                        } @else {
+                          <p>No fue posible generar la traducción con este proveedor.</p>
+                        }
+                      </div>
+                    }
+                  } @else {
+                    <p>{{ traduccion.resultado }}</p>
+                  }
+                }
+              </div>
+            </div>
+          </details>
+        </li>
+      }
+    </ul>
+
+    @if (totalPaginas() > 1) {
+      <nav class="historial-paginacion" aria-label="Paginación del historial">
+        <button
+          type="button"
+          (click)="paginaAnterior()"
+          [disabled]="!puedeRetroceder() || cargando()"
+        >
+          Anterior
+        </button>
+
+        <span>Página {{ paginaActual() + 1 }} de {{ totalPaginas() }}</span>
+
+        <button
+          type="button"
+          (click)="paginaSiguiente()"
+          [disabled]="!puedeAvanzar() || cargando()"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  } @else {
+    <div class="historial-vacio">
+      @if (tieneTraducciones()) {
+        <h2>No encontramos coincidencias</h2>
+        <p>Prueba otro título o cambia el tipo de traducción.</p>
+      } @else {
+        <h2>Aún no tienes traducciones</h2>
+        <p>Cuando guardes una traducción, aparecerá aquí.</p>
+      }
+    </div>
+  }
+</section>

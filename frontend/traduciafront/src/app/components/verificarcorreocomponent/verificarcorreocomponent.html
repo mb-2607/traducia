@@ -1,0 +1,185 @@
+<section class="vc-pagina" aria-labelledby="vc-titulo">
+  <div class="vc-tarjeta">
+    <header class="vc-cabecera">
+      <a class="vc-marca" routerLink="/landing">
+        TraducIA
+      </a>
+
+      <span
+        class="vc-icono"
+        [class.vc-icono-exito]="verificado()"
+        [class.vc-icono-error]="
+          estado() === 'error' ||
+          estado() === 'enlace-invalido'
+        "
+      >
+        <i
+          class="fa-solid"
+          [class]="presentacion().icono"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <span class="vc-etiqueta">
+        Seguridad de tu cuenta
+      </span>
+
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        [attr.aria-busy]="verificando()"
+      >
+        <h1 id="vc-titulo">
+          {{ presentacion().titulo }}
+        </h1>
+
+        <p class="vc-descripcion">
+          {{ presentacion().descripcion }}
+        </p>
+      </div>
+    </header>
+
+    @if (!disponible) {
+      <p class="vc-aviso" role="status">
+        La verificación y el reenvío de correos aún no están disponibles.
+      </p>
+    }
+
+    @if (puedeReintentar()) {
+      <button
+        type="button"
+        class="vc-boton vc-principal"
+        (click)="reintentarVerificacion()"
+        [disabled]="!disponible || ocupado()"
+      >
+        <i
+          class="fa-solid fa-rotate-right"
+          aria-hidden="true"
+        ></i>
+        Reintentar verificación
+      </button>
+    }
+
+    @if (!verificado()) {
+      <section
+        class="vc-reenvio"
+        aria-labelledby="vc-reenvio-titulo"
+      >
+        <h2 id="vc-reenvio-titulo">
+          ¿Necesitas otro enlace?
+        </h2>
+
+        <p class="vc-ayuda" id="vc-correo-ayuda">
+          Ingresa el correo de tu cuenta. Revisa también la carpeta
+          de correo no deseado.
+        </p>
+
+        <form
+          [formGroup]="formulario"
+          (ngSubmit)="reenviarEnlace()"
+          novalidate
+          [attr.aria-busy]="reenviando()"
+        >
+          <fieldset [disabled]="ocupado() || !disponible">
+            <legend class="vc-oculto">
+              Solicitar otro enlace de verificación
+            </legend>
+
+            <label for="vc-correo">
+              Correo electrónico
+            </label>
+
+            <input
+              id="vc-correo"
+              class="vc-campo"
+              type="email"
+              formControlName="correo"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="nombre@correo.com"
+              [attr.aria-invalid]="
+                formulario.controls.correo.touched &&
+                formulario.controls.correo.invalid
+              "
+              aria-describedby="vc-correo-ayuda vc-correo-error"
+            />
+
+            <span
+              id="vc-correo-error"
+              class="vc-error-campo"
+            >
+              @if (formulario.controls.correo.touched &&
+              formulario.controls.correo.invalid) {
+                @if (formulario.controls.correo.hasError('required')) {
+                  Ingresa el correo de tu cuenta.
+                } @else {
+                  Ingresa un correo válido de hasta 254 caracteres.
+                }
+              }
+            </span>
+
+            <button
+              type="submit"
+              class="vc-boton vc-principal"
+              [disabled]="
+                formulario.invalid ||
+                ocupado() ||
+                !disponible
+              "
+            >
+              <i
+                class="fa-solid fa-paper-plane"
+                aria-hidden="true"
+              ></i>
+
+              {{
+                reenviando()
+                  ? 'Solicitando enlace…'
+                  : 'Solicitar nuevo enlace'
+              }}
+            </button>
+          </fieldset>
+        </form>
+
+        @if (errorReenvio()) {
+          <p
+            class="vc-aviso vc-aviso-error"
+            role="alert"
+          >
+            {{ errorReenvio() }}
+          </p>
+        }
+
+        @if (reenviado()) {
+          <p
+            class="vc-aviso vc-aviso-exito"
+            role="status"
+          >
+            La solicitud se completó. Revisa tu correo para continuar
+            con la verificación.
+          </p>
+        }
+      </section>
+    }
+
+    <footer class="vc-pie">
+      <a
+        class="vc-boton"
+        [class.vc-principal]="verificado()"
+        routerLink="/login"
+      >
+        <i
+          class="fa-solid fa-arrow-right-to-bracket"
+          aria-hidden="true"
+        ></i>
+
+        {{
+          verificado()
+            ? 'Iniciar sesión'
+            : 'Volver al inicio de sesión'
+        }}
+      </a>
+    </footer>
+  </div>
+</section>
