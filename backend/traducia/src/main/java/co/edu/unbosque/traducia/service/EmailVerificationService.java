@@ -52,7 +52,7 @@ public class EmailVerificationService {
 	/**
 	 * Ruta del frontend encargada de procesar la verificación del correo.
 	 */
-	@Value("${front.verify-email-path:/verify-email}")
+	@Value("${front.verify-email-path:/verificar-correo}")
 	private String verifyEmailPath;
 
 	/**
