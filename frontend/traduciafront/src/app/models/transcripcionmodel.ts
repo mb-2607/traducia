@@ -1,4 +1,4 @@
-/** Resultado de la transcripción de un archivo de audio. */
+/** Transcripción devuelta por `POST /traductor/transcribir`. */
 export interface TranscripcionResponse {
   readonly texto: string;
   readonly caracteres: number;
