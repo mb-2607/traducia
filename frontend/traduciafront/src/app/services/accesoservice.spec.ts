@@ -2,11 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { AccesoService } from './accesoservice';
 
 describe('Accesoservice', () => {
-  let service: Accesoservice;
+  let service: AccesoService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Accesoservice);
+    service = TestBed.inject(AccesoService);
   });
 
   it('should be created', () => {

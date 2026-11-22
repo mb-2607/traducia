@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-config';
-import type { DocumentoExtraidoResponse } from '../../../../../../../../../Downloads/Traducia_Front_Documentos_Audio/Traducia_Front_Documentos_Audio/src/app/models/documentomodel';
+import type { DocumentoExtraidoResponse} from '../models/documentomodel';
 import type { SolicitudTraduccionResponseDTO } from '../models/traduccionmodel';
 import { AuthService } from './authservice';
 

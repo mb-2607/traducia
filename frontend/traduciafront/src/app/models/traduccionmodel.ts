@@ -7,7 +7,7 @@
 export type EstadoTraduccion = 'EXITOSA' | 'FALLIDA';
 
 /** Proveedores reconocidos por el backend. */
-export type ProveedorTraduccion = 'DEEPL' | 'GEMMA' | 'RIVA';
+export type ProveedorTraduccion = 'DEEPL' | 'GEMMA' | 'RIVA' | 'NEMOTRON';
 
 /** Clasificación del proveedor según el backend. */
 export type TipoProveedor = 'TRADICIONAL' | 'IA';
