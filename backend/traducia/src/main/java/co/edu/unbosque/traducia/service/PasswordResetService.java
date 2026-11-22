@@ -181,7 +181,7 @@ public class PasswordResetService {
 	private String construirEnlace(String token) {
 		String base = frontUrl.endsWith("/") ? frontUrl.substring(0, frontUrl.length() - 1) : frontUrl;
 		return UriComponentsBuilder.fromUriString(base)
-				.path("/reset-password")
+				.path("/restablecer-contrasena")
 				.queryParam("token", token)
 				.toUriString();
 	}

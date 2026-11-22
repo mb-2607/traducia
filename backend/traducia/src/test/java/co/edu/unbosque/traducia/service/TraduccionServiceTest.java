@@ -1,4 +1,4 @@
-package co.edu.unbosque.traducia.service;
+ package co.edu.unbosque.traducia.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;

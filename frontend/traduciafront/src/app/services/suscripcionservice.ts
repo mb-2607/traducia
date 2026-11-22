@@ -1,74 +1,131 @@
-import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
+import { map, tap } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { PLANES } from '../models/planmodel';
-import type { PlanId } from '../models/planmodel';
-/** Clave de `localStorage` donde se guarda el plan de demostración. */
-const CLAVE_PLAN_DEMO = 'traducia.plan-demo';
+import type {
+  ChangePlanRequestDTO,
+  PlanId,
+  PlanResponseDTO,
+  Planmodel,
+} from '../models/planmodel';
+import type { PlanApi, User, UserResponseDTO } from '../models/usermodel';
+import { API_URL_BASE, AuthService } from './authservice';
+
+/** Mapa de planes del backend al identificador interno del frontend. */
+const PLAN_API_A_ID: Readonly<Record<PlanApi, PlanId>> = {
+  FREE: 'gratuito',
+  ORIA: 'oria',
+  INFINITIA: 'infinitia',
+};
+
+/** Mapa de identificadores internos del frontend al enum esperado por el backend. */
+const PLAN_ID_A_API: Readonly<Record<PlanId, PlanApi>> = {
+  gratuito: 'FREE',
+  oria: 'ORIA',
+  infinitia: 'INFINITIA',
+};
+
+/** Convierte el nombre de plan devuelto por el backend a un `PlanId` válido. */
+function adaptarPlanId(plan: string): PlanId | null {
+  if (Object.prototype.hasOwnProperty.call(PLAN_API_A_ID, plan)) {
+    return PLAN_API_A_ID[plan as PlanApi];
+  }
+  return null;
+}
+
+/** Combina los límites devueltos por el backend con los metadatos visuales locales. */
+function adaptarDetallePlan(dto: PlanResponseDTO): Planmodel | null {
+  const id = adaptarPlanId(dto.plan);
+  if (id === null) {
+    return null;
+  }
+
+  const base = PLANES[id];
+  return {
+    ...base,
+    caracteresPorSolicitud: dto.numeroCaracterPorSolicitud,
+    ias: dto.proveedores.length > 0 ? dto.proveedores.length : base.ias,
+  };
+}
 
 /**
- * Servicio de suscripción (versión provisional).
+ * Servicio de suscripciones y planes conectado a `/plan`.
  *
- * Mantiene el plan activo del usuario como una señal (`signal`) de solo lectura
- * y lo persiste en `localStorage` para que se conserve al recargar la página.
- *
- * **Provisional:** no hay pasarela de pago ni validación en el backend.
- * El plan se "activa" solo en el navegador, con fines de demostración, y debe
- * reemplazarse cuando exista una integración real de suscripciones.
- *
- * Si no hay un plan guardado, o el valor guardado no es un plan válido,
- * se usa el plan `'gratuito'`.
- *
- * Está disponible globalmente (`providedIn: 'root'`).
+ * Mantiene el plan activo sincronizado con la sesión autenticada en {@link AuthService}
+ * y expone las operaciones de consulta y cambio de plan contra el backend.
  */
 @Injectable({ providedIn: 'root' })
 export class SuscripcionService {
-  /** Acceso al `document`, usado para llegar a `localStorage` de forma segura. */
-  private readonly documento = inject(DOCUMENT);
+  /** Cliente HTTP para comunicarse con el controlador de planes. */
+  private readonly http = inject(HttpClient);
 
-  /** Estado interno y modificable del plan; se inicializa con el plan guardado. */
-  private readonly estadoPlan = signal<PlanId>(this.leerPlanDemo());
+  /** Servicio de autenticación que conserva la sesión del usuario. */
+  private readonly authService = inject(AuthService);
+
+  /** URL base del controlador de planes en el backend. */
+  private readonly urlBase = `${API_URL_BASE}/plan`;
+
+  /** Estado interno del plan activo del usuario autenticado. */
+  private readonly estadoPlan = signal<PlanId>(this.authService.getUser()?.plan ?? 'gratuito');
 
   /** Plan actualmente activo, expuesto como señal de solo lectura. */
   readonly planActivo = this.estadoPlan.asReadonly();
 
-  /**
-   * Activa un plan de demostración.
-   *
-   * Actualiza la señal `planActivo` y trata de guardar el plan en `localStorage`.
-   * Si el almacenamiento no está disponible (modo privado, cuota llena, SSR),
-   * el error se ignora y el plan solo vive en memoria durante la sesión.
-   *
-   * @param plan Identificador del plan a activar.
-   */
-  activarPlanDemo(plan: PlanId): void {
-    this.estadoPlan.set(plan);
-
-    try {
-      this.documento.defaultView?.localStorage.setItem(CLAVE_PLAN_DEMO, plan);
-    } catch {
-      // Bloque vacío a propósito: el plan ya se actualizó en memoria.
-    }
+  /** Sincroniza el plan activo con los cambios de sesión del usuario. */
+  constructor() {
+    this.authService.getUserAsObservable().subscribe((usuario) => {
+      this.estadoPlan.set(usuario?.plan ?? 'gratuito');
+    });
   }
 
   /**
-   * Lee el plan guardado en `localStorage`.
+   * Consulta el catálogo de planes disponibles y aplica los límites del backend.
    *
-   * Solo acepta el valor si corresponde a una clave existente en `PLANES`;
-   * así se descartan valores corruptos o de planes que ya no existen.
-   *
-   * @returns El plan guardado si es válido; `'gratuito'` en cualquier otro caso.
+   * @returns Lista de planes listos para mostrarse en la interfaz.
    */
-  private leerPlanDemo(): PlanId {
-    try {
-      const planGuardado = this.documento.defaultView?.localStorage.getItem(CLAVE_PLAN_DEMO);
+  listarPlanes(): Observable<Planmodel[]> {
+    return this.http.get<PlanResponseDTO[]>(this.urlBase).pipe(
+      map((respuesta) =>
+        respuesta
+          .map((item) => adaptarDetallePlan(item))
+          .filter((plan): plan is Planmodel => plan !== null),
+      ),
+    );
+  }
 
-      if (planGuardado && Object.prototype.hasOwnProperty.call(PLANES, planGuardado)) {
-        return planGuardado as PlanId;
-      }
-    } catch {
-      return 'oria';
-    }
+  /**
+   * Consulta el plan vigente del usuario autenticado y actualiza la señal local.
+   *
+   * @returns Detalle del plan activo devuelto por el backend.
+   */
+  obtenerPlanActual(): Observable<PlanResponseDTO> {
+    return this.http.get<PlanResponseDTO>(`${this.urlBase}/actual`).pipe(
+      tap((respuesta) => {
+        const plan = adaptarPlanId(respuesta.plan);
+        if (plan !== null) {
+          this.estadoPlan.set(plan);
+        }
+      }),
+    );
+  }
 
-    return 'gratuito';
+  /**
+   * Solicita al backend el cambio de plan del usuario autenticado y sincroniza la sesión.
+   *
+   * @param plan Identificador del nuevo plan elegido.
+   * @returns Usuario actualizado con el nuevo plan activo.
+   */
+  cambiarPlan(plan: PlanId): Observable<User> {
+    const solicitud: ChangePlanRequestDTO = {
+      plan: PLAN_ID_A_API[plan],
+    };
+
+    return this.http.put<UserResponseDTO>(`${this.urlBase}/cambiar`, solicitud).pipe(
+      map((respuesta) => this.authService.actualizarUsuario(respuesta)),
+      tap((usuario) => {
+        this.estadoPlan.set(usuario.plan);
+      }),
+    );
   }
 }

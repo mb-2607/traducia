@@ -1,7 +1,7 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
@@ -23,6 +23,7 @@ import { Landingpagecomponent } from './components/landingpagecomponent/landingp
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 import { Terminocomponent } from './components/terminocomponent/terminocomponent';
 import { Verificarcorreocomponent } from './components/verificarcorreocomponent/verificarcorreocomponent';
+import { authInterceptor } from './interceptors/authinterceptor';
 
 /**
  * Módulo principal de la aplicación.
@@ -58,7 +59,10 @@ import { Verificarcorreocomponent } from './components/verificarcorreocomponent/
     Verificarcorreocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
-  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([authInterceptor])),
+  ],
   bootstrap: [App],
 })
 // skipcq: JS-0327

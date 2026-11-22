@@ -21,6 +21,7 @@ export interface User {
 
 /** Datos del usuario devueltos por el backend. */
 export interface UserResponseDTO {
+  id?: number;
   nombre: string;
   correo: string;
   planId: PlanApi;
@@ -48,4 +49,12 @@ export interface RegisterRequest {
 export interface AuthResponse {
   userResponse: UserResponseDTO;
   jwt: string;
+}
+
+/** Datos enviados a PUT /user/me. */
+export interface UpdateUserRequestDTO {
+  nombre: string;
+  correo: string;
+  rol: Rol;
+  planId: PlanApi;
 }

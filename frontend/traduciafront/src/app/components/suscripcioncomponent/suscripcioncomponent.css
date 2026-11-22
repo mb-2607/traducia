@@ -6,6 +6,11 @@
 
 .suscripciones {
   padding-block: clamp(2rem, 6vw, 4rem);
+  background:
+    radial-gradient(ellipse at 20% 8%, rgba(109, 86, 246, 0.06), transparent 48%),
+    linear-gradient(180deg, rgba(5, 6, 10, 0.72) 0%, rgba(7, 8, 12, 0.86) 55%, rgba(5, 6, 10, 0.96) 100%),
+    url('../../../../public/assets/TraducIA.jpg') center / cover no-repeat;
+  border-radius: 1.5rem;
 }
 
 .planes-cabecera {
@@ -64,12 +69,12 @@
   gap: 1rem;
   inline-size: 100%;
   padding: clamp(1.15rem, 2.5vw, 1.6rem);
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1.35rem;
   background: var(--fondo-card);
   color: #f8f8fc;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
-  0 16px 36px rgb(0 0 0 / 18%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+  0 16px 36px rgba(0, 0, 0, 0.18);
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 
@@ -88,11 +93,11 @@
   --boton-inicio: #d5b8ff;
   --boton-fin: #9bb9ff;
   --boton-texto: #18102c;
-  --fondo-card: radial-gradient(circle at 9% 19%, #ffffffab 0 1px, transparent 1.6px),
-  radial-gradient(circle at 71% 9%, #c7cfff 0 1px, transparent 1.8px),
-  radial-gradient(circle at 90% 29%, #fff 0 1px, transparent 1.8px),
-  radial-gradient(circle at 81% 63%, #f1ccff 0 1px, transparent 1.8px),
-  radial-gradient(circle at 30% 94%, #ffffffab 0 1px, transparent 1.8px),
+  --fondo-card: radial-gradient(circle at 9% 19%, rgba(255, 255, 255, 0.67) 1px, transparent 1.6px),
+  radial-gradient(circle at 71% 9%, #c7cfff 1px, transparent 1.8px),
+  radial-gradient(circle at 90% 29%, #ffffff 1px, transparent 1.8px),
+  radial-gradient(circle at 81% 63%, #f1ccff 1px, transparent 1.8px),
+  radial-gradient(circle at 30% 94%, rgba(255, 255, 255, 0.67) 1px, transparent 1.8px),
   radial-gradient(ellipse at 93% 100%, #53266b, transparent 66%),
   radial-gradient(ellipse at 0 85%, #203e70, transparent 61%),
   #151023;
@@ -105,8 +110,10 @@
   padding: 1px;
   border-radius: inherit;
   pointer-events: none;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-image: linear-gradient(to bottom, #ffffff, #ffffff), linear-gradient(to bottom, #ffffff, #ffffff);
+  mask-image: linear-gradient(#ffffff, #ffffff), linear-gradient(#ffffff, #ffffff);
+  -webkit-mask-clip: content-box, border-box;
+  mask-clip: content-box, border-box;
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -142,9 +149,9 @@
   place-items: center;
   inline-size: 3.25rem;
   block-size: 3.25rem;
-  border: 1px solid rgb(255 255 255 / 24%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 1rem;
-  background: rgb(255 255 255 / 10%);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--acento);
   font-size: 1.45rem;
 }
@@ -184,7 +191,7 @@
 .plan-linea {
   margin: 0;
   border: 0;
-  border-block-start: 1px solid rgb(255 255 255 / 21%);
+  border-block-start: 1px solid rgba(255, 255, 255, 0.21);
   opacity: 1;
 }
 
@@ -233,8 +240,8 @@
 }
 
 .boton-plan:disabled {
-  border-color: rgb(255 255 255 / 23%);
-  background: rgb(255 255 255 / 8%);
+  border-color: rgba(255, 255, 255, 0.23);
+  background: rgba(255, 255, 255, 0.08);
   color: #f1edf6;
   cursor: default;
 }
@@ -252,8 +259,8 @@
   padding: clamp(1rem, 3vw, 1.5rem);
   border: 1px solid var(--td-borde, #515151);
   border-radius: 1.2rem;
-  background: var(--td-vidrio, rgb(255 255 255 / 6%));
-  box-shadow: inset 0 1px 0 var(--td-reflejo, rgb(255 255 255 / 14%));
+  background: var(--td-vidrio, rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 1px 0 var(--td-reflejo, rgba(255, 255, 255, 0.14));
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }

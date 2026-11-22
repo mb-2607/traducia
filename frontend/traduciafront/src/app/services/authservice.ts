@@ -17,6 +17,30 @@ const USER_KEY = 'user';
 /** Clave bajo la cual se guarda el token JWT en el almacenamiento. */
 const TOKEN_KEY = 'token';
 
+/** URL base del backend de TraducIA. */
+export const API_URL_BASE = 'http://localhost:8080';
+
+/**
+ * Convierte los datos del backend al modelo interno del frontend.
+ *
+ * Mantiene los identificadores visuales utilizados por las
+ * tarjetas de suscripción y el perfil.
+ */
+function adaptarUsuario(datos: UserResponseDTO): User {
+  const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
+    FREE: 'gratuito',
+    ORIA: 'oria',
+    INFINITIA: 'infinitia',
+  };
+
+  return {
+    nombre: datos.nombre,
+    correo: datos.correo,
+    rol: datos.rol,
+    plan: planes[datos.planId],
+  };
+}
+
 /**
  * Servicio de autenticación.
  *
@@ -25,7 +49,6 @@ const TOKEN_KEY = 'token';
  * mediante {@link StorageService}, por lo que se restaura al recargar la aplicación.
  *
  * Está disponible globalmente (`providedIn: 'root'`).
- *
  */
 @Injectable({
   providedIn: 'root',
@@ -37,8 +60,8 @@ export class AuthService {
   /** Servicio para almacenar en el LocalStorage. */
   private storageService: StorageService = inject(StorageService);
 
-  /** URL base de la API de autenticación. Pendiente de configurar. */
-  private readonly URL_BASE = 'TODO';
+  /** URL base de la API de autenticación. */
+  private readonly URL_BASE = `${API_URL_BASE}/auth`;
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */
   private readonly HEADER: HttpHeaders = new HttpHeaders({
@@ -96,7 +119,7 @@ export class AuthService {
       .post<AuthResponse>(`${this.URL_BASE}/login`, credenciales, { headers: this.HEADER })
       .pipe(
         map((respuesta) => ({
-          usuario: this.adaptarUsuario(respuesta.userResponse),
+          usuario: adaptarUsuario(respuesta.userResponse),
           token: respuesta.jwt,
         })),
         tap(({ usuario, token }) => {
@@ -111,10 +134,24 @@ export class AuthService {
   }
 
   /**
+   * Sincroniza en memoria y almacenamiento los cambios confirmados del usuario
+   * tras actualizar el perfil o cambiar de plan.
+   *
+   * @param datos Respuesta actualizada del backend.
+   * @returns Usuario adaptado al modelo interno del frontend.
+   */
+  actualizarUsuario(datos: UserResponseDTO): User {
+    const usuario = adaptarUsuario(datos);
+    this.storageService.set(USER_KEY, usuario);
+    this.userSubject.next(usuario);
+    return usuario;
+  }
+
+  /**
    * Cierra la sesión: limpia el token y el usuario en memoria,
    * notifica a los suscriptores y elimina los datos del almacenamiento.
    */
-  cerrarSesion() {
+  cerrarSesion(): void {
     this.jwt = null;
     this.userSubject.next(null);
     this.storageService.remove(USER_KEY);
@@ -136,7 +173,7 @@ export class AuthService {
 
     return this.cliente
       .post<UserResponseDTO>(`${this.URL_BASE}/register`, solicitud, { headers: this.HEADER })
-      .pipe(map((respuesta) => this.adaptarUsuario(respuesta)));
+      .pipe(map((respuesta) => adaptarUsuario(respuesta)));
   }
 
   /**
@@ -146,26 +183,5 @@ export class AuthService {
    */
   haySesion(): boolean {
     return this.jwt !== null && this.userSubject.value !== null;
-  }
-
-  /**
-   * Convierte los datos del backend al modelo interno del frontend.
-   *
-   * Mantiene los identificadores visuales utilizados por las
-   * tarjetas de suscripción y el perfil.
-   */
-  private adaptarUsuario(datos: UserResponseDTO): User {
-    const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
-      FREE: 'gratuito',
-      ORIA: 'oria',
-      INFINITIA: 'infinitia',
-    };
-
-    return {
-      nombre: datos.nombre,
-      correo: datos.correo,
-      rol: datos.rol,
-      plan: planes[datos.planId],
-    };
   }
 }
