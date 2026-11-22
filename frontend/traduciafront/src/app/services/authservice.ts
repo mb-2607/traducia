@@ -25,7 +25,6 @@ const TOKEN_KEY = 'token';
  * mediante {@link StorageService}, por lo que se restaura al recargar la aplicación.
  *
  * Está disponible globalmente (`providedIn: 'root'`).
- *
  */
 @Injectable({
   providedIn: 'root',
@@ -37,7 +36,7 @@ export class AuthService {
   /** Servicio para almacenar en el LocalStorage. */
   private storageService: StorageService = inject(StorageService);
 
-  /** URL base de la API de autenticación. Pendiente de configurar. */
+  /** URL base de la API de autenticación. */
   private readonly URL_BASE = 'http://localhost:8080/auth';
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */
@@ -96,7 +95,7 @@ export class AuthService {
       .post<AuthResponse>(`${this.URL_BASE}/login`, credenciales, { headers: this.HEADER })
       .pipe(
         map((respuesta) => ({
-          usuario: this.adaptarUsuario(respuesta.userResponse),
+          usuario: AuthService.adaptarUsuario(respuesta.userResponse),
           token: respuesta.jwt,
         })),
         tap(({ usuario, token }) => {
@@ -114,7 +113,7 @@ export class AuthService {
    * Cierra la sesión: limpia el token y el usuario en memoria,
    * notifica a los suscriptores y elimina los datos del almacenamiento.
    */
-  cerrarSesion() {
+  cerrarSesion(): void {
     this.jwt = null;
     this.userSubject.next(null);
     this.storageService.remove(USER_KEY);
@@ -136,7 +135,7 @@ export class AuthService {
 
     return this.cliente
       .post<UserResponseDTO>(`${this.URL_BASE}/register`, solicitud, { headers: this.HEADER })
-      .pipe(map((respuesta) => this.adaptarUsuario(respuesta)));
+      .pipe(map((respuesta) => AuthService.adaptarUsuario(respuesta)));
   }
 
   /**
@@ -154,7 +153,7 @@ export class AuthService {
    * Mantiene los identificadores visuales utilizados por las
    * tarjetas de suscripción y el perfil.
    */
-  private adaptarUsuario(datos: UserResponseDTO): User {
+  private static adaptarUsuario(datos: UserResponseDTO): User {
     const planes: Readonly<Record<UserResponseDTO['planId'], PlanId>> = {
       FREE: 'gratuito',
       ORIA: 'oria',
