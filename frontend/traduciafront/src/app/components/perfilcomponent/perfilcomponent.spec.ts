@@ -435,6 +435,8 @@ describe('Perfilcomponent', () => {
 
     /** Verifica que una dirección `javascript:` no se use como imagen. */
     it('no usa direcciones de imagen inseguras', async () => {
+      // La URL insegura es justamente lo que se prueba: el componente debe descartarla.
+      // skipcq: JS-0087
       servicio.obtener.mockReturnValue(of({ ...perfilLaura, fotoUrl: 'javascript:alert(1)' }));
 
       await crearComponente();
@@ -467,7 +469,7 @@ describe('Perfilcomponent', () => {
     });
 
     /** Verifica que cerrar sesión limpie la sesión y navegue al login. */
-    it('cierra la sesión y lleva al login', async () => {
+    it('cierra la sesión y lleva al login', () => {
       boton('Cerrar sesión').click();
 
       expect(auth.cerrarSesion).toHaveBeenCalled();
