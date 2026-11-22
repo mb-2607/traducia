@@ -43,7 +43,7 @@ const routes: Routes = [
   {
     path: 'landing',
     component: Landingpagecomponent,
-    title: 'TraducIA',
+    title: 'Conoce TraducIA',
   },
   {
     path: 'login',
@@ -83,8 +83,8 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: Userpagecomponent,
-   // canActivate: [autenticacionGuard],
-   // canActivateChild: [autenticacionGuard],
+    canActivate: [autenticacionGuard],
+    canActivateChild: [autenticacionGuard],
     children: [
       {
         path: '',

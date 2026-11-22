@@ -3,33 +3,69 @@
   padding: 0.65rem clamp(0.65rem, 2vw, 1.25rem);
   color: var(--td-texto);
 }
-.marquee{
-  width: 100%;
+
+.marquee {
+  flex: 1;
+  min-inline-size: 0;
   overflow: hidden;
 }
 
-.marquee-track{
+.marquee-track {
   display: flex;
-  width: max-content;
-  animation: scroll 13s linear infinite;
+  inline-size: 100%;
+  animation: marquee-scroll 20s linear infinite;
 }
 
-.marquee-track span{
-  flex-shrink: 0;
+.marquee-track > span {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  padding-inline: 2rem;
   white-space: nowrap;
-  padding-right: 2rem;
-  font-size: 3rem;
-  font-weight: 800;
+  text-align: center;
+  font-size: 1.17rem;
+  font-weight: 500;
+  opacity: 1;
+  color: #c8cdd5;
+  background-image: linear-gradient(
+    110deg,
+    #777e88 0%,
+    #c5cad2 25%,
+    #ffffff 45%,
+    #ffffff 50%,
+    #c5cad2 60%,
+    #777e88 80%,
+    #c5cad2 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 6px rgb(220 228 240 / 30%),
+  0 0 16px rgb(220 228 240 / 15%);
+
+  animation: brillo-plateado 5s linear infinite;
 }
 
-@keyframes scroll {
+@keyframes marquee-scroll {
   from {
     transform: translateX(0);
   }
-  to{
-    transform: translateX(-50%);
+
+  to {
+    transform: translateX(-100%);
   }
 }
+
+@keyframes brillo-plateado {
+  from {
+    background-position: 200% center;
+  }
+
+  to {
+    background-position: -200% center;
+  }
+}
+
 .navbar-glass {
   box-sizing: border-box;
   display: flex;
