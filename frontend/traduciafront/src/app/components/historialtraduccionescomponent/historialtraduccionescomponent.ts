@@ -96,6 +96,7 @@ export class Historialtraduccionescomponent implements OnInit {
       }));
   });
 
+  /** Carga la primera página del historial al inicializar el componente. */
   ngOnInit(): void {
     this.cargarHistorial(0);
   }
@@ -181,6 +182,7 @@ export class Historialtraduccionescomponent implements OnInit {
     }
   }
 
+  /** Adapta el DTO del backend al modelo visual que usa la lista del historial. */
   private adaptarEntrada(solicitud: SolicitudTraduccionResponseDTO): EntradaHistorial {
     const textoLimpio = solicitud.textoOriginal.trim();
     const titulo =
@@ -204,6 +206,7 @@ export class Historialtraduccionescomponent implements OnInit {
     };
   }
 
+  /** Formatea una fecha ISO a formato legible en español de Colombia. */
   private formatearFecha(fechaIso: string): string {
     const fecha = new Date(fechaIso);
     return Number.isNaN(fecha.getTime()) ? fechaIso : FORMATO_FECHA.format(fecha);
