@@ -330,7 +330,7 @@ describe('Perfilcomponent', () => {
       // jsdom no crea URLs de objetos ni decodifica imágenes.
       URL.createObjectURL = vi.fn(() => 'blob:vista-previa');
       URL.revokeObjectURL = vi.fn();
-      HTMLImageElement.prototype.decode = vi.fn().mockResolvedValue(undefined);
+      HTMLImageElement.prototype.decode = vi.fn(() => Promise.resolve());
       await crearComponente();
     });
 

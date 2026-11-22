@@ -115,7 +115,7 @@ describe('GrabacionService', () => {
 
     /** Verifica el mensaje cuando el navegador no tiene `MediaRecorder`. */
     it('avisa si el navegador no puede grabar', async () => {
-      vi.stubGlobal('MediaRecorder', undefined);
+      Reflect.deleteProperty(globalThis, 'MediaRecorder');
 
       await expect(servicio.iniciar()).rejects.toThrow('Este navegador no permite grabar audio.');
     });

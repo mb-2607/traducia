@@ -129,7 +129,7 @@ describe('AsideUserComponent', () => {
    * Pantallas móviles: se simula `matchMedia` para que la consulta `(max-width: 44rem)` coincida.
    */
   describe('en pantallas pequeñas', () => {
-    const ventana = document.defaultView!;
+    const ventana = document.defaultView as Window;
 
     beforeEach(async () => {
       Object.defineProperty(ventana, 'matchMedia', {

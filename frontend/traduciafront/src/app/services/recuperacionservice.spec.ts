@@ -43,7 +43,8 @@ describe('RecuperacionService', () => {
     expect(peticion.request.responseType).toBe('text');
     peticion.flush('Si el correo existe, se envió un enlace.');
 
-    expect(completado).toHaveBeenCalledWith(undefined);
+    expect(completado).toHaveBeenCalledTimes(1);
+    expect(completado.mock.calls[0][0]).toBeUndefined();
   });
 
   /** Verifica el cuerpo de la petición a `reset-password`. */

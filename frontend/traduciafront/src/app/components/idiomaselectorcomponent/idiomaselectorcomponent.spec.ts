@@ -34,7 +34,7 @@ describe('Idiomaselectorcomponent', () => {
 
     fixture = TestBed.createComponent(Idiomaselectorcomponent);
     fixture.componentRef.setInput('titulo', 'Idioma de origen');
-    fixture.componentRef.setInput('control', control);
+    fixture.componentRef.setInput('control', null);
     fixture.componentRef.setInput('listaIdioma', IDIOMAS);
     fixture.componentRef.setInput('cargando', false);
     html = fixture.nativeElement;

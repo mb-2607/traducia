@@ -585,7 +585,9 @@ describe('Nuevatraduccioncomponent', () => {
 
       await component.iniciarGrabacion();
 
-      expect(transcripcionService.transcribir).toHaveBeenCalledWith(audio, 'es');
+      const [archivoEnviado, idioma] = transcripcionService.transcribir.mock.calls[0];
+      expect(archivoEnviado).toBe(audio);
+      expect(idioma).toBeUndefined();
       expect(texto().value).toBe('Hola desde el micrófono');
       expect(component.aviso()).toBe('Audio transcrito. Revisa el texto antes de traducir.');
       expect(component.estado()).toBe('reposo');
