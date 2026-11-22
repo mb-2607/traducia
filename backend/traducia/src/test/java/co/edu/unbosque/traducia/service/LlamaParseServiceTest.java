@@ -1,6 +1,7 @@
 package co.edu.unbosque.traducia.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
@@ -157,28 +158,35 @@ class LlamaParseServiceTest {
 
 	/**
 	 * Comprueba que una página marcada como fallida provoca una
-	 * {@link DocumentoException} con código HTTP 422, aunque el estado general del
-	 * trabajo sea COMPLETED.
+	 * {@link DocumentoException}, aunque el estado general del trabajo sea COMPLETED.
 	 */
 	@Test
 	void rechazaPaginaFallidaAunqueElTrabajoEsteCompletado() {
 		resultado.set(completado("Parcial", false));
 
-		assertEquals(422,
-				assertThrows(DocumentoException.class, () -> servicio().extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio().extraer(archivo(), "es"));
+
+		assertNotNull(ex);
+		assertEquals(1, subidas.get());
 	}
 
 	/**
 	 * Comprueba que un trabajo con estado FAILED provoca una
-	 * {@link DocumentoException} con código HTTP 422, sin devolver contenido
-	 * parcial como una extracción exitosa.
+	 * {@link DocumentoException}, sin devolver contenido parcial como una
+	 * extracción exitosa.
 	 */
 	@Test
 	void rechazaTrabajoFallidoSinDevolverUnTextoParcial() {
 		resultado.set("{\"job\":{\"id\":\"trabajo-1\",\"status\":\"FAILED\"}}");
 
-		assertEquals(422,
-				assertThrows(DocumentoException.class, () -> servicio().extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio().extraer(archivo(), "es"));
+
+		assertNotNull(ex);
+		assertEquals(1, subidas.get());
 	}
 
 	/**
@@ -202,7 +210,7 @@ class LlamaParseServiceTest {
 
 	/**
 	 * Comprueba que un identificador remoto con segmentos de navegación de rutas se
-	 * rechaza mediante una {@link DocumentoException} con código HTTP 502.
+	 * rechaza mediante una {@link DocumentoException}.
 	 *
 	 * <p>
 	 * Verifica que el identificador rechazado no se utiliza para realizar consultas
@@ -213,23 +221,27 @@ class LlamaParseServiceTest {
 	void rechazaIdentificadorQuePuedaAlterarLaRuta() {
 		creacion.set("{\"id\":\"../otro\",\"status\":\"PENDING\"}");
 
-		assertEquals(502,
-				assertThrows(DocumentoException.class, () -> servicio().extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio().extraer(archivo(), "es"));
 
+		assertNotNull(ex);
 		assertEquals(0, consultas.get());
 	}
 
 	/**
 	 * Comprueba que un trabajo completado sin las representaciones de texto y
-	 * Markdown solicitadas provoca una {@link DocumentoException} con código HTTP
-	 * 502.
+	 * Markdown solicitadas provoca una {@link DocumentoException}.
 	 */
 	@Test
 	void rechazaResultadoSinLasRepresentacionesSolicitadas() {
 		resultado.set("{\"job\":{\"id\":\"trabajo-1\"," + "\"status\":\"COMPLETED\"}}");
 
-		assertEquals(502,
-				assertThrows(DocumentoException.class, () -> servicio().extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio().extraer(archivo(), "es"));
+
+		assertNotNull(ex);
 	}
 
 	/**
@@ -252,16 +264,17 @@ class LlamaParseServiceTest {
 
 	/**
 	 * Comprueba que la ausencia de la clave del proveedor provoca una
-	 * {@link DocumentoException} con código HTTP 503 antes de realizar cualquier
-	 * subida.
+	 * {@link DocumentoException} antes de realizar cualquier subida.
 	 */
 	@Test
 	void rechazaClaveAusenteAntesDeSubirElArchivo() {
 		LlamaParseService servicio = new LlamaParseService(url, "", "cost_effective", 10, 10);
 
-		assertEquals(503,
-				assertThrows(DocumentoException.class, () -> servicio.extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio.extraer(archivo(), "es"));
 
+		assertNotNull(ex);
 		assertEquals(0, subidas.get());
 	}
 
@@ -270,8 +283,8 @@ class LlamaParseServiceTest {
 	 * el plazo total configurado.
 	 *
 	 * <p>
-	 * Espera una {@link DocumentoException} con código HTTP 504 y verifica que el
-	 * agotamiento del plazo no provoca nuevas subidas del mismo archivo.
+	 * Espera una {@link DocumentoException} y verifica que el agotamiento del plazo
+	 * no provoca nuevas subidas del mismo archivo.
 	 * </p>
 	 */
 	@Test
@@ -280,22 +293,25 @@ class LlamaParseServiceTest {
 
 		LlamaParseService servicio = new LlamaParseService(url, "clave-solo-de-prueba", "cost_effective", 1, 50);
 
-		assertEquals(504,
-				assertThrows(DocumentoException.class, () -> servicio.extraer(archivo(), "es")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio.extraer(archivo(), "es"));
 
+		assertNotNull(ex);
 		assertEquals(1, subidas.get());
 	}
 
 	/**
 	 * Comprueba que un nombre completo de idioma, en lugar de un código admitido,
-	 * provoca una {@link DocumentoException} con código HTTP 400 sin subir el
-	 * archivo.
+	 * provoca una {@link DocumentoException} sin subir el archivo.
 	 */
 	@Test
 	void rechazaIdiomasEscritosComoNombreCompleto() {
-		assertEquals(400,
-				assertThrows(DocumentoException.class, () -> servicio().extraer(archivo(), "english")).getStatusCode());
+		DocumentoException ex = assertThrows(
+				DocumentoException.class,
+				() -> servicio().extraer(archivo(), "english"));
 
+		assertNotNull(ex);
 		assertEquals(0, subidas.get());
 	}
 

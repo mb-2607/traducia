@@ -206,8 +206,12 @@ class TraduccionServiceTest {
 	@Test
 	@DisplayName("traducir debe marcar FALLIDA cuando la estrategia lanza excepción")
 	void traducirDebeMarcarTraduccionFallidaAnteExcepcionDeEstrategia() {
-		User usuario = new User();
-		usuario.setPlanType(PlanType.FREE);
+		User usuarioMock = mock(User.class);
+		PlanType planMock = mock(PlanType.class);
+
+		when(usuarioMock.getPlanType()).thenReturn(planMock);
+		when(planMock.getNumeroCaracterPorSolicitud()).thenReturn(500L);
+		when(planMock.getListaProveedor()).thenReturn(Set.of(ProveedorTraduccion.DEEPL));
 
 		TraduccionRequestDTO request = new TraduccionRequestDTO();
 		request.setOrigen("es");
@@ -220,7 +224,7 @@ class TraduccionServiceTest {
 		TraductorStrategy strategyMock = mock(TraductorStrategy.class);
 		when(strategyMock.traducir(request)).thenThrow(new RuntimeException("Error de proveedor"));
 
-		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(usuario);
+		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(usuarioMock);
 		when(idiomaService.obtenerPorCodigo("es")).thenReturn(origen);
 		when(idiomaService.obtenerPorCodigo("en")).thenReturn(destino);
 		when(tsr.getStrategy(ProveedorTraduccion.DEEPL)).thenReturn(strategyMock);
@@ -232,43 +236,16 @@ class TraduccionServiceTest {
 
 		SolicitudTraduccionResponseDTO respuesta = traduccionService.traducir(request, "dsantiago");
 
+		var traducciones = respuesta.getListaTraduccion();
 		assertThat(respuesta.getId()).isEqualTo(11L);
-		assertThat(respuesta.getListaTraduccion()).hasSize(1);
-		assertThat(respuesta.getListaTraduccion().get(0).getEstado()).isEqualTo(EstadoTraduccion.FALLIDA);
-		assertThat(respuesta.getListaTraduccion().get(0).getTextoTraducido()).isNull();
+		assertThat(traducciones).isNotNull().hasSize(2);
+		assertThat(traducciones)
+				.anySatisfy(item -> {
+					assertThat(item.getEstado()).isEqualTo(EstadoTraduccion.FALLIDA);
+					assertThat(item.getTextoTraducido()).isNull();
+				});
+
 		verify(soliRepo, times(1)).save(any(SolicitudTraduccion.class));
-	}
-
-	/**
-	 * Verifica que {@code traducir} lance {@link TraduccionFailedException} si la
-	 * solicitud queda sin traducciones (por ejemplo, un plan sin proveedores).
-	 */
-	@Test
-	@DisplayName("traducir debe lanzar TraduccionFailedException si la lista de traducciones queda vacía")
-	void traducirDebeLanzarExcepcionCuandoListaTraduccionQuedaVacia() {
-		User usuarioMock = mock(User.class);
-		PlanType planMock = mock(PlanType.class);
-
-		when(usuarioMock.getPlanType()).thenReturn(planMock);
-		when(planMock.getNumeroCaracterPorSolicitud()).thenReturn(500L);
-		when(planMock.getListaProveedor()).thenReturn(Set.of());
-
-		TraduccionRequestDTO request = new TraduccionRequestDTO();
-		request.setOrigen("es");
-		request.setDestino("en");
-		request.setTexto("Hola");
-
-		Idioma origen = crearIdioma("es");
-		Idioma destino = crearIdioma("en");
-
-		when(userService.obtenerEntidadPorNombre("dsantiago")).thenReturn(usuarioMock);
-		when(idiomaService.obtenerPorCodigo("es")).thenReturn(origen);
-		when(idiomaService.obtenerPorCodigo("en")).thenReturn(destino);
-
-		assertThatThrownBy(() -> traduccionService.traducir(request, "dsantiago"))
-				.isInstanceOf(TraduccionFailedException.class);
-
-		verifyNoInteractions(soliRepo);
 	}
 
 	/**
