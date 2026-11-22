@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-config';
-import type { TranscripcionResponse } from '../../../../../../../../../Downloads/Traducia_Front_Documentos_Audio/Traducia_Front_Documentos_Audio/src/app/models/transcripcionmodel';
+import type { TranscripcionResponse } from '../models/transcripcionmodel';
 import { AuthService } from './authservice';
 
 /** Envía audio al backend; la clave de Groq permanece en el servidor. */
