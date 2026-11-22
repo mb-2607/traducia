@@ -69,14 +69,30 @@ describe('Historialtraduccionescomponent', () => {
 
   const titulos = () =>
     Array.from(html.querySelectorAll('.traduccion-info strong')).map((s) => s.textContent);
-  const botonPorTexto = (texto: string) =>
-    Array.from(html.querySelectorAll('button')).find((b) => b.textContent?.trim() === texto)!;
+  const botonPorTexto = (texto: string): HTMLButtonElement => {
+    const encontrado = Array.from(html.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === texto,
+    );
+    if (!encontrado) {
+      throw new Error(`No hay un botón «${texto}» en pantalla`);
+    }
+    return encontrado;
+  };
 
   /** Crea el componente y espera la carga inicial. */
   async function abrirHistorial(): Promise<void> {
     fixture = TestBed.createComponent(Historialtraduccionescomponent);
     html = fixture.nativeElement;
     await fixture.whenStable();
+  }
+
+  /** Devuelve la primera entrada del historial o falla si la lista está vacía. */
+  function primeraEntrada(): Element {
+    const entrada = html.querySelector('.historial-lista li');
+    if (!entrada) {
+      throw new Error('El historial no muestra ninguna entrada');
+    }
+    return entrada;
   }
 
   /** Abre o cierra el `<details>` de una entrada y dispara el evento `toggle`. */
@@ -335,9 +351,9 @@ describe('Historialtraduccionescomponent', () => {
      * cada proveedor, incluido el que falló.
      */
     it('consulta el detalle al desplegar una traducción', async () => {
-      await desplegar(html.querySelector('.historial-lista li')!);
+      await desplegar(primeraEntrada());
 
-      const detalle = html.querySelector('.traduccion-detalle')!.textContent;
+      const detalle = html.querySelector('.traduccion-detalle')?.textContent;
       expect(servicio.obtenerPorId).toHaveBeenCalledWith(7);
       expect(detalle).toContain('DEEPL');
       expect(detalle).toContain('Good morning');
@@ -349,7 +365,7 @@ describe('Historialtraduccionescomponent', () => {
      * abrir.
      */
     it('no repite la consulta si el detalle ya se cargó', async () => {
-      const entrada = html.querySelector('.historial-lista li')!;
+      const entrada = primeraEntrada();
 
       await desplegar(entrada);
       await desplegar(entrada, false);
@@ -360,7 +376,7 @@ describe('Historialtraduccionescomponent', () => {
 
     /** Verifica que cerrar una entrada no genere peticiones. */
     it('no consulta nada al cerrar una traducción', async () => {
-      await desplegar(html.querySelector('.historial-lista li')!, false);
+      await desplegar(primeraEntrada(), false);
 
       expect(servicio.obtenerPorId).not.toHaveBeenCalled();
     });
@@ -372,9 +388,9 @@ describe('Historialtraduccionescomponent', () => {
     it('mantiene el resumen si falla la consulta del detalle', async () => {
       servicio.obtenerPorId.mockReturnValue(throwError(() => new Error('500')));
 
-      await desplegar(html.querySelector('.historial-lista li')!);
+      await desplegar(primeraEntrada());
 
-      expect(html.querySelector('.traduccion-detalle')!.textContent).toContain('Good morning');
+      expect(html.querySelector('.traduccion-detalle')?.textContent).toContain('Good morning');
       expect(html.textContent).not.toContain('Cargando detalle...');
     });
   });

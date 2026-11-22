@@ -32,10 +32,15 @@ describe('Suscripcioncomponent', () => {
     cambiarPlan: Mock;
   };
 
-  const boton = (texto: string) =>
-    Array.from(html.querySelectorAll<HTMLButtonElement>('button')).find(
+  const boton = (texto: string): HTMLButtonElement => {
+    const encontrado = Array.from(html.querySelectorAll<HTMLButtonElement>('button')).find(
       (b) => b.textContent?.trim() === texto,
-    )!;
+    );
+    if (!encontrado) {
+      throw new Error(`No hay un botón «${texto}» en pantalla`);
+    }
+    return encontrado;
+  };
 
   /** Ejecuta la detección de cambios y espera a que termine. */
   async function actualizar(): Promise<void> {

@@ -36,7 +36,7 @@ describe('Loggincomponent', () => {
   let navegar: Mock;
 
   const mensaje = () => html.querySelector('.acceso-mensaje')?.textContent?.trim();
-  const enviar = () => html.querySelector<HTMLButtonElement>('.boton-acceso')!;
+  const enviar = () => html.querySelector('.boton-acceso') as HTMLButtonElement;
 
   /** Escribe en un campo del formulario como lo haría el usuario. */
   async function escribir(id: string, valor: string): Promise<void> {

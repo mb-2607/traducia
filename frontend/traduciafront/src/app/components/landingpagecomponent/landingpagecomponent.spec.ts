@@ -13,10 +13,15 @@ describe('Landingpagecomponent', () => {
   let component: Landingpagecomponent;
   let html: HTMLElement;
 
-  const botonIdioma = (texto: string) =>
-    Array.from(html.querySelectorAll<HTMLButtonElement>('.demo-header button')).find(
-      (boton) => boton.textContent?.trim() === texto,
-    )!;
+  const botonIdioma = (texto: string): HTMLButtonElement => {
+    const encontrado = Array.from(
+      html.querySelectorAll<HTMLButtonElement>('.demo-header button'),
+    ).find((b) => b.textContent?.trim() === texto);
+    if (!encontrado) {
+      throw new Error(`No hay un botón «${texto}» en pantalla`);
+    }
+    return encontrado;
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

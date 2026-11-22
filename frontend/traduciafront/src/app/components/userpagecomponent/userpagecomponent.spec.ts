@@ -5,6 +5,7 @@ import { Userpagecomponent } from './userpagecomponent';
 
 /** Reemplaza el panel lateral real. */
 @Component({ selector: 'app-asideusercomponent', standalone: false, template: '' })
+// skipcq: JS-0327
 class PanelLateralFalso {}
 
 /**

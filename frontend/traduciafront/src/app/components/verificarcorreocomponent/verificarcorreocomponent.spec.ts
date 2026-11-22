@@ -19,7 +19,9 @@ describe('Verificarcorreocomponent', () => {
   let fixture: ComponentFixture<Verificarcorreocomponent>;
   let component: Verificarcorreocomponent;
   let html: HTMLElement;
-  let servicio: { verificar: Mock; reenviar: Mock } | null;
+  let servicio: { verificar: Mock; reenviar: Mock };
+  /** En `false`, la prueba simula que no hay un proveedor de VerificacionCorreoService. */
+  let servicioDisponible: boolean;
   let parametros$: BehaviorSubject<ParamMap>;
   let reemplazarUrl: Mock;
 
@@ -49,7 +51,7 @@ describe('Verificarcorreocomponent', () => {
       imports: [ReactiveFormsModule, RouterModule.forRoot([])],
       declarations: [Verificarcorreocomponent],
       providers: [
-        { provide: VerificacionCorreoService, useValue: servicio },
+        { provide: VerificacionCorreoService, useValue: servicioDisponible ? servicio : null },
         { provide: ActivatedRoute, useValue: { queryParamMap: parametros$, snapshot: {} } },
       ],
     }).compileComponents();
@@ -62,6 +64,7 @@ describe('Verificarcorreocomponent', () => {
   }
 
   beforeEach(() => {
+    servicioDisponible = true;
     servicio = {
       verificar: vi.fn().mockReturnValue(of(undefined)),
       reenviar: vi.fn().mockReturnValue(of(undefined)),
@@ -77,7 +80,7 @@ describe('Verificarcorreocomponent', () => {
     await abrir();
 
     expect(titulo()).toBe('Verifica tu correo');
-    expect(servicio!.verificar).not.toHaveBeenCalled();
+    expect(servicio.verificar).not.toHaveBeenCalled();
     expect(reemplazarUrl).not.toHaveBeenCalled();
   });
 
@@ -87,7 +90,7 @@ describe('Verificarcorreocomponent', () => {
   it('verifica el token del enlace y lo quita de la barra de direcciones', async () => {
     await abrir(conToken('token-123'));
 
-    expect(servicio!.verificar).toHaveBeenCalledWith('token-123');
+    expect(servicio.verificar).toHaveBeenCalledWith('token-123');
     expect(reemplazarUrl).toHaveBeenCalledTimes(1);
     expect(reemplazarUrl.mock.calls[0][0]).not.toContain('token');
     expect(titulo()).toBe('Correo verificado');
@@ -114,12 +117,12 @@ describe('Verificarcorreocomponent', () => {
     await abrir(parametros);
 
     expect(titulo()).toBe('Enlace incompleto');
-    expect(servicio!.verificar).not.toHaveBeenCalled();
+    expect(servicio.verificar).not.toHaveBeenCalled();
   });
 
   /** Verifica el estado «verificando» mientras el servicio no responde. */
   it('muestra el estado de carga mientras el backend responde', async () => {
-    servicio!.verificar.mockReturnValue(new Subject());
+    servicio.verificar.mockReturnValue(new Subject());
 
     await abrir(conToken('token-123'));
 
@@ -131,7 +134,7 @@ describe('Verificarcorreocomponent', () => {
   /** Errores del backend al verificar. */
   describe('cuando la verificación falla', () => {
     beforeEach(async () => {
-      servicio!.verificar.mockReturnValue(throwError(() => new Error('410')));
+      servicio.verificar.mockReturnValue(throwError(() => new Error('410')));
       await abrir(conToken('token-123'));
     });
 
@@ -143,25 +146,25 @@ describe('Verificarcorreocomponent', () => {
 
     /** Verifica que reintentar use el mismo token y pueda terminar en éxito. */
     it('vuelve a intentar con el mismo token', async () => {
-      servicio!.verificar.mockReturnValue(of(undefined));
+      servicio.verificar.mockReturnValue(of(undefined));
 
-      botonReintentar()!.click();
+      botonReintentar()?.click();
       await fixture.whenStable();
 
-      expect(servicio!.verificar).toHaveBeenCalledTimes(2);
-      expect(servicio!.verificar).toHaveBeenLastCalledWith('token-123');
+      expect(servicio.verificar).toHaveBeenCalledTimes(2);
+      expect(servicio.verificar).toHaveBeenLastCalledWith('token-123');
       expect(titulo()).toBe('Correo verificado');
     });
   });
 
   /** Verifica que no se lance otra verificación mientras la primera sigue pendiente. */
   it('no permite reintentar mientras una verificación sigue en curso', async () => {
-    servicio!.verificar.mockReturnValue(new Subject());
+    servicio.verificar.mockReturnValue(new Subject());
     await abrir(conToken('token-123'));
 
     component.reintentarVerificacion();
 
-    expect(servicio!.verificar).toHaveBeenCalledTimes(1);
+    expect(servicio.verificar).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -170,7 +173,7 @@ describe('Verificarcorreocomponent', () => {
    */
   it('cancela la verificación anterior si llega un enlace nuevo', async () => {
     const primera = new Subject<void>();
-    servicio!.verificar.mockReturnValueOnce(primera).mockReturnValueOnce(of(undefined));
+    servicio.verificar.mockReturnValueOnce(primera).mockReturnValueOnce(of(undefined));
     await abrir(conToken('token-viejo'));
 
     parametros$.next(conToken('token-nuevo'));
@@ -178,7 +181,7 @@ describe('Verificarcorreocomponent', () => {
     primera.error(new Error('respuesta tardía'));
     await fixture.whenStable();
 
-    expect(servicio!.verificar).toHaveBeenLastCalledWith('token-nuevo');
+    expect(servicio.verificar).toHaveBeenLastCalledWith('token-nuevo');
     expect(component.estado()).toBe('verificado');
   });
 
@@ -193,7 +196,7 @@ describe('Verificarcorreocomponent', () => {
       component.reenviarEnlace();
       await fixture.whenStable();
 
-      expect(servicio!.reenviar).not.toHaveBeenCalled();
+      expect(servicio.reenviar).not.toHaveBeenCalled();
       expect(html.querySelector('#vc-correo-error')?.textContent?.trim()).toBe(
         'Ingresa el correo de tu cuenta.',
       );
@@ -205,7 +208,7 @@ describe('Verificarcorreocomponent', () => {
       component.reenviarEnlace();
       await fixture.whenStable();
 
-      expect(servicio!.reenviar).not.toHaveBeenCalled();
+      expect(servicio.reenviar).not.toHaveBeenCalled();
       expect(html.querySelector('#vc-correo-error')?.textContent?.trim()).toBe(
         'Ingresa un correo válido de hasta 254 caracteres.',
       );
@@ -218,7 +221,7 @@ describe('Verificarcorreocomponent', () => {
       component.reenviarEnlace();
       await fixture.whenStable();
 
-      expect(servicio!.reenviar).toHaveBeenCalledWith('ana@correo.com');
+      expect(servicio.reenviar).toHaveBeenCalledWith('ana@correo.com');
       expect(html.querySelector('.vc-aviso-exito')?.textContent).toContain(
         'Revisa tu correo para continuar con la verificación.',
       );
@@ -227,7 +230,7 @@ describe('Verificarcorreocomponent', () => {
 
     /** Verifica el mensaje cuando falla el reenvío. */
     it('muestra un error si no se pudo reenviar', async () => {
-      servicio!.reenviar.mockReturnValue(throwError(() => new Error('429')));
+      servicio.reenviar.mockReturnValue(throwError(() => new Error('429')));
       await escribirCorreo('ana@correo.com');
 
       component.reenviarEnlace();
@@ -244,7 +247,7 @@ describe('Verificarcorreocomponent', () => {
    * VerificacionCorreoService}.
    */
   it('desactiva todo cuando el servicio no está disponible', async () => {
-    servicio = null;
+    servicioDisponible = false;
 
     await abrir(conToken('token-123'));
 

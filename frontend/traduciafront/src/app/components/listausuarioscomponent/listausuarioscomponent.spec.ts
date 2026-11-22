@@ -47,14 +47,23 @@ describe('Listausuarioscomponent', () => {
   let fixture: ComponentFixture<Listausuarioscomponent>;
   let component: Listausuarioscomponent;
   let html: HTMLElement;
-  let servicio: { listar: Mock; ejecutar: Mock } | null;
+  let servicio: { listar: Mock; ejecutar: Mock };
+  /** En `false`, la prueba simula que no hay un proveedor de UsuariosAdminService. */
+  let servicioDisponible: boolean;
 
   const filas = () => Array.from(html.querySelectorAll('tbody tr'));
   const nombres = () =>
     Array.from(html.querySelectorAll('.enlace-usuario')).map((b) => b.textContent?.trim());
   const modal = () => html.querySelector('dialog') as HTMLDialogElement;
-  const botonModal = (texto: string) =>
-    Array.from(modal().querySelectorAll('button')).find((b) => b.textContent?.trim() === texto)!;
+  const botonModal = (texto: string): HTMLButtonElement => {
+    const encontrado = Array.from(modal().querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === texto,
+    );
+    if (!encontrado) {
+      throw new Error(`No hay un botón «${texto}» en pantalla`);
+    }
+    return encontrado;
+  };
 
   /** Ejecuta la detección de cambios y espera a que termine. */
   async function actualizar(): Promise<void> {
@@ -75,7 +84,9 @@ describe('Listausuarioscomponent', () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, RouterModule.forRoot([])],
       declarations: [Listausuarioscomponent],
-      providers: [{ provide: UsuariosAdminService, useValue: servicio }],
+      providers: [
+        { provide: UsuariosAdminService, useValue: servicioDisponible ? servicio : null },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Listausuarioscomponent);
@@ -85,6 +96,7 @@ describe('Listausuarioscomponent', () => {
   }
 
   beforeEach(() => {
+    servicioDisponible = true;
     servicio = { listar: vi.fn().mockReturnValue(of(USUARIOS)), ejecutar: vi.fn() };
   });
 
@@ -96,7 +108,7 @@ describe('Listausuarioscomponent', () => {
 
     /** Verifica que los usuarios se consulten una vez al iniciar y aparezcan en la tabla. */
     it('carga los usuarios al abrir la página', () => {
-      expect(servicio!.listar).toHaveBeenCalledTimes(1);
+      expect(servicio.listar).toHaveBeenCalledTimes(1);
       expect(nombres()).toEqual(['laura', 'andres', 'sofia', 'mateo']);
     });
 
@@ -169,7 +181,7 @@ describe('Listausuarioscomponent', () => {
   describe('paginación', () => {
     beforeEach(async () => {
       const muchos = Array.from({ length: 23 }, (_, i) => usuario(i + 1, `usuario${i + 1}`));
-      servicio!.listar.mockReturnValue(of(muchos));
+      servicio.listar.mockReturnValue(of(muchos));
       await crearComponente();
     });
 
@@ -226,7 +238,7 @@ describe('Listausuarioscomponent', () => {
   describe('carga fallida o no disponible', () => {
     /** Verifica el mensaje de error cuando falla la consulta. */
     it('informa si no se pudieron cargar los usuarios', async () => {
-      servicio!.listar.mockReturnValue(throwError(() => new Error('500')));
+      servicio.listar.mockReturnValue(throwError(() => new Error('500')));
 
       await crearComponente();
 
@@ -240,7 +252,7 @@ describe('Listausuarioscomponent', () => {
      * UsuariosAdminService}.
      */
     it('desactiva la gestión cuando no hay servicio', async () => {
-      servicio = null;
+      servicioDisponible = false;
 
       await crearComponente();
 
@@ -332,7 +344,7 @@ describe('Listausuarioscomponent', () => {
      */
     it('actualiza la fila con la respuesta del servidor', async () => {
       const actualizado = usuario(1, 'laura.m', { planType: 'ORIA' });
-      servicio!.ejecutar.mockReturnValue(
+      servicio.ejecutar.mockReturnValue(
         of<ResultadoAdministracion>({ tipo: 'actualizado', usuario: actualizado }),
       );
       component['editar'](USUARIOS[0]);
@@ -343,7 +355,7 @@ describe('Listausuarioscomponent', () => {
       botonModal('Confirmar').click();
       await actualizar();
 
-      expect(servicio!.ejecutar).toHaveBeenCalledWith({
+      expect(servicio.ejecutar).toHaveBeenCalledWith({
         accion: 'actualizar',
         usuarioId: 1,
         cambios: { username: 'laura.m', email: 'laura.m@correo.com' },
@@ -360,7 +372,7 @@ describe('Listausuarioscomponent', () => {
      * confirmarse.
      */
     it('quita al usuario eliminado de la tabla', async () => {
-      servicio!.ejecutar.mockReturnValue(
+      servicio.ejecutar.mockReturnValue(
         of<ResultadoAdministracion>({ tipo: 'eliminado', usuarioId: 3 }),
       );
       component['prepararAccion'](USUARIOS[2], 'eliminar');
@@ -378,7 +390,7 @@ describe('Listausuarioscomponent', () => {
 
     /** Verifica que un error del servidor se muestre dentro del modal sin modificar la tabla. */
     it('mantiene el modal abierto y la tabla intacta si la operación falla', async () => {
-      servicio!.ejecutar.mockReturnValue(throwError(() => new Error('403')));
+      servicio.ejecutar.mockReturnValue(throwError(() => new Error('403')));
       component['prepararAccion'](USUARIOS[1], 'eliminar');
       await actualizar();
 
@@ -394,7 +406,7 @@ describe('Listausuarioscomponent', () => {
 
     /** Verifica que el modal no se pueda cerrar mientras la operación sigue pendiente. */
     it('no deja cerrar el modal mientras la operación está en curso', async () => {
-      servicio!.ejecutar.mockReturnValue(new Subject());
+      servicio.ejecutar.mockReturnValue(new Subject());
       component['prepararAccion'](USUARIOS[1], 'bloquear');
       await actualizar();
 

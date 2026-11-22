@@ -73,7 +73,11 @@ describe('GrabacionService', () => {
   }> {
     const resultado = servicio.iniciar();
     await vi.waitUntil(() => servicio.estado() === 'grabando');
-    return { resultado, grabador: GrabadorFalso.instancias.at(-1)! };
+    const grabador = GrabadorFalso.instancias.at(-1);
+    if (!grabador) {
+      throw new Error('El servicio no creó el grabador');
+    }
+    return { resultado, grabador };
   }
 
   beforeEach(() => {
@@ -217,7 +221,9 @@ describe('GrabacionService', () => {
   });
 
   describe('límites', () => {
-    /** Verifica que al pasar de 10 MB la grabación se corte con un error y se libere el micrófono. */
+    /**
+     * Verifica que al pasar de 10 MB la grabación se corte con un error y se libere el micrófono.
+     */
     it('corta la grabación si el audio supera los 10 MB', async () => {
       const { resultado, grabador } = await empezarGrabacion();
       grabador.entregar(new Uint8Array(MAX_ARCHIVO_BYTES));
@@ -272,7 +278,7 @@ describe('GrabacionService', () => {
      * cree un grabador.
      */
     it('apaga un permiso que llega tarde después de cancelar', async () => {
-      let concederPermiso!: (flujo: MediaStream) => void;
+      let concederPermiso: (flujo: MediaStream) => void = () => undefined;
       getUserMedia.mockReturnValue(new Promise((resolver) => (concederPermiso = resolver)));
       const resultado = servicio.iniciar();
 

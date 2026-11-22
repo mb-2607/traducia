@@ -44,7 +44,7 @@ describe('TerminosService', () => {
     servicio.aceptar();
 
     expect(servicio.aceptados()).toBe(true);
-    expect(JSON.parse(localStorage.getItem(CLAVE)!)).toEqual({
+    expect(JSON.parse(localStorage.getItem(CLAVE) ?? 'null')).toEqual({
       version: '1.0',
       aceptadoEn: '2026-05-10T15:00:00.000Z',
     });
@@ -67,7 +67,10 @@ describe('TerminosService', () => {
     const servicio = crearServicio();
 
     expect(servicio.aceptados()).toBe(true);
-    expect(JSON.parse(localStorage.getItem(CLAVE)!)).toEqual({ version: '1.0', aceptadoEn: null });
+    expect(JSON.parse(localStorage.getItem(CLAVE) ?? 'null')).toEqual({
+      version: '1.0',
+      aceptadoEn: null,
+    });
   });
 
   /** Verifica que un registro de otra versión no cuente como aceptado. */

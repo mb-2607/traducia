@@ -4,11 +4,13 @@ import { Router, RouterModule } from '@angular/router';
 import { App } from './app';
 
 /** Página mínima usada como destino de las rutas de prueba. */
-@Component({ template: '<p>login</p>' })
+@Component({ selector: 'app-pagina-falsa', template: '<p>login</p>' })
+// skipcq: JS-0327
 class PaginaFalsa {}
 
 /** Reemplaza la barra de navegación real para no depender de sus enlaces ni estilos. */
 @Component({ selector: 'app-navbarcomponent', standalone: false, template: '' })
+// skipcq: JS-0327
 class NavbarFalso {}
 
 /**

@@ -41,12 +41,21 @@ describe('Perfilcomponent', () => {
   let html: HTMLElement;
   let sesion$: BehaviorSubject<User | null>;
   let auth: { getUserAsObservable: () => unknown; cerrarSesion: Mock };
-  let servicio: { obtener: Mock; guardar: Mock } | null;
+  let servicio: { obtener: Mock; guardar: Mock };
+  /** En `false`, la prueba simula que no hay un proveedor de PerfilService. */
+  let servicioDisponible: boolean;
   let navegar: Mock;
 
   const campo = (id: string) => html.querySelector(`#${id}`) as HTMLInputElement;
-  const boton = (texto: string) =>
-    Array.from(html.querySelectorAll('button')).find((b) => b.textContent?.trim() === texto)!;
+  const boton = (texto: string): HTMLButtonElement => {
+    const encontrado = Array.from(html.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === texto,
+    );
+    if (!encontrado) {
+      throw new Error(`No hay un botón «${texto}» en pantalla`);
+    }
+    return encontrado;
+  };
 
   /** Espera a que Angular termine de aplicar los cambios pendientes. */
   async function actualizar(): Promise<void> {
@@ -77,7 +86,7 @@ describe('Perfilcomponent', () => {
       declarations: [Perfilcomponent],
       providers: [
         { provide: AuthService, useValue: auth },
-        { provide: PerfilService, useValue: servicio },
+        { provide: PerfilService, useValue: servicioDisponible ? servicio : null },
       ],
     }).compileComponents();
 
@@ -91,6 +100,7 @@ describe('Perfilcomponent', () => {
   beforeEach(() => {
     sesion$ = new BehaviorSubject<User | null>(sesionLaura);
     auth = { getUserAsObservable: () => sesion$.asObservable(), cerrarSesion: vi.fn() };
+    servicioDisponible = true;
     servicio = {
       obtener: vi.fn().mockReturnValue(of(perfilLaura)),
       guardar: vi.fn((solicitud) =>
@@ -109,7 +119,7 @@ describe('Perfilcomponent', () => {
     it('muestra los datos completos del perfil', async () => {
       await crearComponente();
 
-      expect(servicio!.obtener).toHaveBeenCalledTimes(1);
+      expect(servicio.obtener).toHaveBeenCalledTimes(1);
       expect(campo('perfil-nombre').value).toBe('Laura Martínez');
       expect(campo('perfil-ciudad').value).toBe('Bogotá');
       expect(campo('perfil-edad').value).toBe('28');
@@ -121,7 +131,7 @@ describe('Perfilcomponent', () => {
      * carga.
      */
     it('usa los datos de la sesión mientras llega la respuesta', async () => {
-      servicio!.obtener.mockReturnValue(new Subject());
+      servicio.obtener.mockReturnValue(new Subject());
 
       await crearComponente();
 
@@ -144,7 +154,7 @@ describe('Perfilcomponent', () => {
       await crearComponente();
       expect(html.querySelector('.perfil-cabecera a')?.getAttribute('href')).toBe('/dashboard');
 
-      servicio!.obtener.mockReturnValue(of({ ...perfilLaura, rol: 'ADMIN' }));
+      servicio.obtener.mockReturnValue(of({ ...perfilLaura, rol: 'ADMIN' }));
       component['reintentarCarga']();
       await actualizar();
 
@@ -156,7 +166,7 @@ describe('Perfilcomponent', () => {
      * perfil completo.
      */
     it('si falla la carga conserva los datos de la sesión y permite reintentar', async () => {
-      servicio!.obtener.mockReturnValue(throwError(() => new Error('500')));
+      servicio.obtener.mockReturnValue(throwError(() => new Error('500')));
       await crearComponente();
 
       expect(html.querySelector('[role="alert"]')?.textContent).toContain(
@@ -164,11 +174,11 @@ describe('Perfilcomponent', () => {
       );
       expect(campo('perfil-nombre').value).toBe('Laura Martínez');
 
-      servicio!.obtener.mockReturnValue(of(perfilLaura));
+      servicio.obtener.mockReturnValue(of(perfilLaura));
       boton('Reintentar').click();
       await actualizar();
 
-      expect(servicio!.obtener).toHaveBeenCalledTimes(2);
+      expect(servicio.obtener).toHaveBeenCalledTimes(2);
       expect(campo('perfil-ciudad').value).toBe('Bogotá');
       expect(html.querySelector('[role="alert"]')).toBeNull();
     });
@@ -179,7 +189,7 @@ describe('Perfilcomponent', () => {
 
       await crearComponente();
 
-      expect(servicio!.obtener).not.toHaveBeenCalled();
+      expect(servicio.obtener).not.toHaveBeenCalled();
       expect(html.textContent).toContain('Inicia sesión para consultar tu perfil.');
     });
 
@@ -189,14 +199,14 @@ describe('Perfilcomponent', () => {
      */
     it('recarga el perfil si cambia la cuenta de la sesión', async () => {
       await crearComponente();
-      servicio!.obtener.mockReturnValue(
+      servicio.obtener.mockReturnValue(
         of({ ...perfilLaura, nombre: 'Andrés Gómez', correo: 'andres@correo.com', ciudad: null }),
       );
 
       sesion$.next({ ...sesionLaura, nombre: 'Andrés Gómez', correo: 'andres@correo.com' });
       await actualizar();
 
-      expect(servicio!.obtener).toHaveBeenCalledTimes(2);
+      expect(servicio.obtener).toHaveBeenCalledTimes(2);
       expect(campo('perfil-nombre').value).toBe('Andrés Gómez');
       expect(campo('perfil-ciudad').value).toBe('');
     });
@@ -205,7 +215,7 @@ describe('Perfilcomponent', () => {
      * Verifica el aviso y los datos de sesión cuando no hay un proveedor de {@link PerfilService}.
      */
     it('muestra solo los datos de la sesión si no hay servicio de perfil', async () => {
-      servicio = null;
+      servicioDisponible = false;
 
       await crearComponente();
 
@@ -222,10 +232,10 @@ describe('Perfilcomponent', () => {
 
     /** Verifica que enviar el formulario sin cambios no llame al servidor. */
     it('no llama al servidor si no hay cambios', async () => {
-      html.querySelector('form')!.dispatchEvent(new Event('submit'));
+      html.querySelector('form')?.dispatchEvent(new Event('submit'));
       await actualizar();
 
-      expect(servicio!.guardar).not.toHaveBeenCalled();
+      expect(servicio.guardar).not.toHaveBeenCalled();
     });
 
     /** Verifica que los datos se recorten y que una edad vacía se envíe como `null`. */
@@ -234,10 +244,10 @@ describe('Perfilcomponent', () => {
       await escribir('perfil-ciudad', ' Medellín ');
       await escribir('perfil-edad', '');
 
-      html.querySelector('form')!.dispatchEvent(new Event('submit'));
+      html.querySelector('form')?.dispatchEvent(new Event('submit'));
       await actualizar();
 
-      expect(servicio!.guardar).toHaveBeenCalledWith({
+      expect(servicio.guardar).toHaveBeenCalledWith({
         datos: { nombre: 'Laura M.', ciudad: 'Medellín', edad: null },
         foto: null,
         quitarFoto: false,
@@ -271,7 +281,7 @@ describe('Perfilcomponent', () => {
       component['guardar']();
       await actualizar();
 
-      expect(servicio!.guardar).not.toHaveBeenCalled();
+      expect(servicio.guardar).not.toHaveBeenCalled();
       if (mensaje) {
         expect(html.querySelector('#perfil-nombre-error')?.textContent?.trim()).toBe(mensaje);
       }
@@ -279,7 +289,7 @@ describe('Perfilcomponent', () => {
 
     /** Verifica que un error al guardar conserve lo que escribió el usuario. */
     it('conserva lo escrito si el servidor rechaza los cambios', async () => {
-      servicio!.guardar.mockReturnValue(throwError(() => new Error('400')));
+      servicio.guardar.mockReturnValue(throwError(() => new Error('400')));
       await escribir('perfil-nombre', 'Laura M.');
 
       component['guardar']();
@@ -299,19 +309,19 @@ describe('Perfilcomponent', () => {
       await actualizar();
 
       expect(campo('perfil-nombre').value).toBe('Laura Martínez');
-      expect(servicio!.guardar).not.toHaveBeenCalled();
+      expect(servicio.guardar).not.toHaveBeenCalled();
     });
   });
 
   /** Verifica que no se pueda guardar mientras el perfil completo sigue cargando. */
   it('no permite guardar antes de que termine la carga del perfil', async () => {
-    servicio!.obtener.mockReturnValue(new Subject());
+    servicio.obtener.mockReturnValue(new Subject());
     await crearComponente();
     component['formulario'].controls.nombre.setValue('Laura M.');
 
     component['guardar']();
 
-    expect(servicio!.guardar).not.toHaveBeenCalled();
+    expect(servicio.guardar).not.toHaveBeenCalled();
   });
 
   /** Selección y vista previa de una foto nueva. */
@@ -363,7 +373,7 @@ describe('Perfilcomponent', () => {
 
       component['guardar']();
 
-      expect(servicio!.guardar).toHaveBeenCalledWith(
+      expect(servicio.guardar).toHaveBeenCalledWith(
         expect.objectContaining({ foto, quitarFoto: false }),
       );
     });
@@ -405,7 +415,7 @@ describe('Perfilcomponent', () => {
      * guardar.
      */
     it('muestra la foto del servidor y permite quitarla', async () => {
-      servicio!.obtener.mockReturnValue(
+      servicio.obtener.mockReturnValue(
         of({ ...perfilLaura, fotoUrl: 'https://cdn.traducia.com/laura.png' }),
       );
       await crearComponente();
@@ -418,14 +428,14 @@ describe('Perfilcomponent', () => {
       await actualizar();
       component['guardar']();
 
-      expect(servicio!.guardar).toHaveBeenCalledWith(
+      expect(servicio.guardar).toHaveBeenCalledWith(
         expect.objectContaining({ foto: null, quitarFoto: true }),
       );
     });
 
     /** Verifica que una dirección `javascript:` no se use como imagen. */
     it('no usa direcciones de imagen inseguras', async () => {
-      servicio!.obtener.mockReturnValue(of({ ...perfilLaura, fotoUrl: 'javascript:alert(1)' }));
+      servicio.obtener.mockReturnValue(of({ ...perfilLaura, fotoUrl: 'javascript:alert(1)' }));
 
       await crearComponente();
 
@@ -435,12 +445,15 @@ describe('Perfilcomponent', () => {
 
     /** Verifica que, si la imagen falla al cargar, se vuelvan a mostrar las iniciales. */
     it('vuelve a las iniciales si la imagen no carga', async () => {
-      servicio!.obtener.mockReturnValue(
+      servicio.obtener.mockReturnValue(
         of({ ...perfilLaura, fotoUrl: 'https://cdn.traducia.com/x.png' }),
       );
       await crearComponente();
 
-      html.querySelector('.perfil-avatar img')!.dispatchEvent(new Event('error'));
+      const imagen = html.querySelector('.perfil-avatar img');
+      expect(imagen).not.toBeNull();
+
+      imagen?.dispatchEvent(new Event('error'));
       await actualizar();
 
       expect(html.querySelector('.perfil-avatar img')).toBeNull();

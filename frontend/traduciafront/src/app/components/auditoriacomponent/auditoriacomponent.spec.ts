@@ -80,7 +80,9 @@ describe('Auditoriacomponent', () => {
   let fixture: ComponentFixture<Auditoriacomponent>;
   let component: Auditoriacomponent;
   let html: HTMLElement;
-  let servicio: { listar: Mock } | null;
+  let servicio: { listar: Mock };
+  /** En `false`, la prueba simula que no hay un proveedor de AuditoriaService. */
+  let servicioDisponible: boolean;
 
   const ids = () =>
     Array.from(html.querySelectorAll('tbody th.auditoria-id')).map((th) => th.textContent?.trim());
@@ -96,7 +98,7 @@ describe('Auditoriacomponent', () => {
     await TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([])],
       declarations: [Auditoriacomponent],
-      providers: [{ provide: AuditoriaService, useValue: servicio }],
+      providers: [{ provide: AuditoriaService, useValue: servicioDisponible ? servicio : null }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Auditoriacomponent);
@@ -106,6 +108,7 @@ describe('Auditoriacomponent', () => {
   }
 
   beforeEach(() => {
+    servicioDisponible = true;
     servicio = { listar: vi.fn().mockReturnValue(of(EVENTOS)) };
   });
 
@@ -153,9 +156,9 @@ describe('Auditoriacomponent', () => {
       await crearComponente();
       const fila = Array.from(html.querySelectorAll('tbody tr')).find((tr) =>
         tr.textContent?.includes('104'),
-      )!;
+      );
 
-      expect(fila.querySelector('.au-hora')?.textContent?.trim()).toBe('22:00:00');
+      expect(fila?.querySelector('.au-hora')?.textContent?.trim()).toBe('22:00:00');
     });
 
     /**
@@ -163,7 +166,7 @@ describe('Auditoriacomponent', () => {
      * responde.
      */
     it('muestra un estado de carga mientras espera la respuesta', async () => {
-      servicio!.listar.mockReturnValue(new Subject());
+      servicio.listar.mockReturnValue(new Subject());
 
       await crearComponente();
 
@@ -174,7 +177,7 @@ describe('Auditoriacomponent', () => {
 
     /** Verifica el mensaje de error cuando la primera consulta falla y no hay datos previos. */
     it('informa el error cuando nunca se pudo consultar la auditoría', async () => {
-      servicio!.listar.mockReturnValue(throwError(() => new Error('500')));
+      servicio.listar.mockReturnValue(throwError(() => new Error('500')));
 
       await crearComponente();
 
@@ -189,7 +192,7 @@ describe('Auditoriacomponent', () => {
      */
     it('conserva los datos anteriores si falla una actualización', async () => {
       await crearComponente();
-      servicio!.listar.mockReturnValue(throwError(() => new Error('500')));
+      servicio.listar.mockReturnValue(throwError(() => new Error('500')));
 
       component['cargarRegistros']();
       await actualizar();
@@ -205,7 +208,7 @@ describe('Auditoriacomponent', () => {
      * un aviso.
      */
     it('avisa cuando la consulta no está disponible', async () => {
-      servicio = null;
+      servicioDisponible = false;
 
       await crearComponente();
 
@@ -220,10 +223,15 @@ describe('Auditoriacomponent', () => {
       await crearComponente();
     });
 
-    const filaDe = (id: string) =>
-      Array.from(html.querySelectorAll('tbody tr')).find((tr) =>
+    const filaDe = (id: string): Element => {
+      const fila = Array.from(html.querySelectorAll('tbody tr')).find((tr) =>
         tr.querySelector('th')?.textContent?.includes(id),
-      )!;
+      );
+      if (!fila) {
+        throw new Error(`No hay una fila para el evento ${id}`);
+      }
+      return fila;
+    };
 
     /** Verifica que el plan `ORIA` se muestre como «orIA» y se use como color del actor. */
     it('muestra el nombre comercial del plan del usuario', () => {
@@ -238,7 +246,7 @@ describe('Auditoriacomponent', () => {
      * registro traiga uno.
      */
     it('presenta los procesos automáticos sin plan de usuario', () => {
-      const actor = filaDe('103').querySelector('.auditoria-actor-datos')!.textContent;
+      const actor = filaDe('103').querySelector('.auditoria-actor-datos')?.textContent;
 
       expect(actor).toContain('Sistema');
       expect(actor).toContain('Proceso automático');
@@ -347,7 +355,7 @@ describe('Auditoriacomponent', () => {
       await actualizar();
 
       expect(ids()).toHaveLength(4);
-      expect(servicio!.listar).toHaveBeenCalledTimes(1);
+      expect(servicio.listar).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -357,7 +365,7 @@ describe('Auditoriacomponent', () => {
       const muchos = Array.from({ length: 12 }, (_, i) =>
         evento(String(i + 1), `2026-05-${String(i + 1).padStart(2, '0')}T10:00:00-05:00`),
       );
-      servicio!.listar.mockReturnValue(of(muchos));
+      servicio.listar.mockReturnValue(of(muchos));
       await crearComponente();
     });
 
@@ -418,7 +426,7 @@ describe('Auditoriacomponent', () => {
      * Verifica el texto alternativo del detalle cuando el evento no tiene información adicional.
      */
     it('indica cuando el evento no trae información adicional', async () => {
-      servicio!.listar.mockReturnValue(
+      servicio.listar.mockReturnValue(
         of([evento('200', '2026-05-10T10:00:00Z', laura, { detalle: null })]),
       );
       component['cargarRegistros']();

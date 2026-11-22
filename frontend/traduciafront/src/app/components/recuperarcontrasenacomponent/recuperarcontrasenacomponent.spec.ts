@@ -18,7 +18,9 @@ import { Recuperarcontrasenacomponent } from './recuperarcontrasenacomponent';
 describe('Recuperarcontrasenacomponent', () => {
   let fixture: ComponentFixture<Recuperarcontrasenacomponent>;
   let html: HTMLElement;
-  let servicio: { solicitarEnlace: Mock; restablecer: Mock } | null;
+  let servicio: { solicitarEnlace: Mock; restablecer: Mock };
+  /** En `false`, la prueba simula que no hay un proveedor de RecuperacionService. */
+  let servicioDisponible: boolean;
   let auth: { cerrarSesion: Mock };
   let navegar: Mock;
 
@@ -36,7 +38,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
   /** Envía el formulario visible. */
   async function enviarFormulario(): Promise<void> {
-    html.querySelector('form')!.dispatchEvent(new Event('submit'));
+    html.querySelector('form')?.dispatchEvent(new Event('submit'));
     await fixture.whenStable();
   }
 
@@ -53,7 +55,7 @@ describe('Recuperarcontrasenacomponent', () => {
       imports: [ReactiveFormsModule, RouterModule.forRoot([])],
       declarations: [Recuperarcontrasenacomponent],
       providers: [
-        { provide: RecuperacionService, useValue: servicio },
+        { provide: RecuperacionService, useValue: servicioDisponible ? servicio : null },
         { provide: AuthService, useValue: auth },
         {
           provide: ActivatedRoute,
@@ -73,6 +75,7 @@ describe('Recuperarcontrasenacomponent', () => {
   }
 
   beforeEach(() => {
+    servicioDisponible = true;
     servicio = {
       solicitarEnlace: vi.fn().mockReturnValue(of(undefined)),
       restablecer: vi.fn().mockReturnValue(of(undefined)),
@@ -102,7 +105,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
       await enviarFormulario();
 
-      expect(servicio!.solicitarEnlace).not.toHaveBeenCalled();
+      expect(servicio.solicitarEnlace).not.toHaveBeenCalled();
       expect(html.querySelector('#recuperacion-correo-error')?.textContent?.trim()).toBe(
         'Ingresa un correo electrónico válido.',
       );
@@ -114,7 +117,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
       await enviarFormulario();
 
-      expect(servicio!.solicitarEnlace).toHaveBeenCalledWith('ana@correo.com');
+      expect(servicio.solicitarEnlace).toHaveBeenCalledWith('ana@correo.com');
       expect(html.querySelector('.recuperacion-confirmacion h2')?.textContent).toBe(
         'Revisa tu correo',
       );
@@ -133,7 +136,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
     /** Verifica el mensaje de error cuando la solicitud falla. */
     it('muestra un error si la solicitud falla', async () => {
-      servicio!.solicitarEnlace.mockReturnValue(throwError(() => new Error('500')));
+      servicio.solicitarEnlace.mockReturnValue(throwError(() => new Error('500')));
       await escribir('recuperacion-correo', 'ana@correo.com');
 
       await enviarFormulario();
@@ -146,13 +149,13 @@ describe('Recuperarcontrasenacomponent', () => {
 
     /** Verifica que no se envíe otra solicitud mientras la primera sigue pendiente. */
     it('evita enviar dos veces mientras espera respuesta', async () => {
-      servicio!.solicitarEnlace.mockReturnValue(new Subject());
+      servicio.solicitarEnlace.mockReturnValue(new Subject());
       await escribir('recuperacion-correo', 'ana@correo.com');
 
       await enviarFormulario();
       await enviarFormulario();
 
-      expect(servicio!.solicitarEnlace).toHaveBeenCalledTimes(1);
+      expect(servicio.solicitarEnlace).toHaveBeenCalledTimes(1);
       expect(botonEnviar().textContent).toContain('Procesando…');
       expect(botonEnviar().disabled).toBe(true);
     });
@@ -219,7 +222,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
         await enviarFormulario();
 
-        expect(servicio!.restablecer).not.toHaveBeenCalled();
+        expect(servicio.restablecer).not.toHaveBeenCalled();
         expect(html.querySelector('#recuperacion-confirmacion-error')?.textContent?.trim()).toBe(
           'Completa la confirmación y verifica que las contraseñas coincidan.',
         );
@@ -232,7 +235,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
         await enviarFormulario();
 
-        expect(servicio!.restablecer).not.toHaveBeenCalled();
+        expect(servicio.restablecer).not.toHaveBeenCalled();
         expect(html.querySelector('#recuperacion-password-error')?.textContent?.trim()).toBe(
           'Revisa los requisitos de la nueva contraseña.',
         );
@@ -248,7 +251,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
         await enviarFormulario();
 
-        expect(servicio!.restablecer).toHaveBeenCalledWith('token-123', 'NuevaClave2026');
+        expect(servicio.restablecer).toHaveBeenCalledWith('token-123', 'NuevaClave2026');
         expect(auth.cerrarSesion).toHaveBeenCalled();
         expect(html.querySelector('.recuperacion-confirmacion h2')?.textContent).toBe(
           'Contraseña actualizada',
@@ -257,7 +260,7 @@ describe('Recuperarcontrasenacomponent', () => {
 
       /** Verifica el mensaje de enlace vencido y que la sesión no se cierre si el cambio falla. */
       it('explica qué hacer si el enlace venció', async () => {
-        servicio!.restablecer.mockReturnValue(throwError(() => new Error('400')));
+        servicio.restablecer.mockReturnValue(throwError(() => new Error('400')));
         await escribir('recuperacion-password', 'NuevaClave2026');
         await escribir('recuperacion-confirmacion', 'NuevaClave2026');
 
@@ -286,7 +289,7 @@ describe('Recuperarcontrasenacomponent', () => {
    * RecuperacionService}.
    */
   it('avisa cuando la recuperación no está disponible', async () => {
-    servicio = null;
+    servicioDisponible = false;
 
     await abrir('solicitar');
 

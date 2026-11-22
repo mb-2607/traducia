@@ -116,8 +116,8 @@ describe('AuthService', () => {
       expect(usuario).toEqual(usuarioLaura);
       expect(servicio.getUser()).toEqual(usuarioLaura);
       expect(servicio.getJwt()).toBe('jwt-laura');
-      expect(JSON.parse(localStorage.getItem('user')!)).toEqual(usuarioLaura);
-      expect(JSON.parse(localStorage.getItem('token')!)).toBe('jwt-laura');
+      expect(JSON.parse(localStorage.getItem('user') ?? 'null')).toEqual(usuarioLaura);
+      expect(JSON.parse(localStorage.getItem('token') ?? 'null')).toBe('jwt-laura');
     });
 
     /** Verifica que un error de login no deje datos de sesión. */
@@ -187,7 +187,7 @@ describe('AuthService', () => {
 
     expect(actualizado.plan).toBe('infinitia');
     expect(emitidos).toEqual([null, actualizado]);
-    expect(JSON.parse(localStorage.getItem('user')!).plan).toBe('infinitia');
+    expect(JSON.parse(localStorage.getItem('user') ?? 'null').plan).toBe('infinitia');
   });
 
   /**
