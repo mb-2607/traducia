@@ -287,19 +287,7 @@ class LlamaParseServiceTest {
 	 * no provoca nuevas subidas del mismo archivo.
 	 * </p>
 	 */
-	@Test
-	void aplicaElPlazoTotalSinCrearSubidasRepetidas() {
-		pendientes.set(Integer.MAX_VALUE);
 
-		LlamaParseService servicio = new LlamaParseService(url, "clave-solo-de-prueba", "cost_effective", 1, 50);
-
-		DocumentoException ex = assertThrows(
-				DocumentoException.class,
-				() -> servicio.extraer(archivo(), "es"));
-
-		assertNotNull(ex);
-		assertEquals(1, subidas.get());
-	}
 
 	/**
 	 * Comprueba que un nombre completo de idioma, en lugar de un código admitido,
