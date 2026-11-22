@@ -8,6 +8,11 @@ package co.edu.unbosque.traducia.dto;
 public class GroqTranscripcionResponseDTO {
 	private String text;
 
+	
+	/**
+	 * Crea una respuesta vacía para representar los datos
+	 * deserializados desde el JSON del proveedor Groq.
+	 */
 	public GroqTranscripcionResponseDTO() {
 	}
 

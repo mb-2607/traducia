@@ -30,6 +30,13 @@ public class TranscripcionService {
 	private final String apiKey;
 	private final String modelo;
 
+	/**
+	 * Construye el servicio con la configuración del proveedor de transcripción.
+	 *
+	 * @param apiKey clave de acceso a Groq, suministrada por la configuración del
+	 *               backend
+	 * @param modelo identificador del modelo utilizado para transcribir el audio
+	 */
 	public TranscripcionService(@Value("${groq.api.key:}") String apiKey,
 			@Value("${groq.transcripcion.model:whisper-large-v3-turbo}") String modelo) {
 
@@ -83,6 +90,18 @@ public class TranscripcionService {
 		return new TranscripcionResponseDTO(texto);
 	}
 
+	/**
+	 * Valida la presencia, el tamaño, el nombre y la extensión del archivo de
+	 * audio.
+	 *
+	 * @param archivo archivo recibido para su posterior transcripción
+	 * @return extensión admitida del archivo, normalizada a minúsculas
+	 * @throws IllegalArgumentException       si el archivo es null, está vacío, no
+	 *                                        tiene nombre o su extensión no es
+	 *                                        válida o no está admitida
+	 * @throws MaxUploadSizeExceededException si el tamaño supera el máximo
+	 *                                        permitido
+	 */
 	private String validarArchivo(MultipartFile archivo) {
 		if (archivo == null || archivo.isEmpty()) {
 			throw new IllegalArgumentException("Debes enviar un archivo de audio");
