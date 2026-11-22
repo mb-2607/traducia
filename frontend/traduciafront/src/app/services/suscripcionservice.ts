@@ -10,7 +10,8 @@ import type {
   Planmodel,
 } from '../models/planmodel';
 import type { PlanApi, User, UserResponseDTO } from '../models/usermodel';
-import { API_URL_BASE, AuthService } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
+import { AuthService } from './authservice';
 
 /** Mapa de planes del backend al identificador interno del frontend. */
 const PLAN_API_A_ID: Readonly<Record<PlanApi, PlanId>> = {

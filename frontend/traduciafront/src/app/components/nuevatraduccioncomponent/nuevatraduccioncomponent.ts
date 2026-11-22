@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import type { ValidatorFn } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../api-config';
+import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../models/globalsettingsmodel';
 import type { Idioma } from '../../models/idiomamodel';
 import { PLANES } from '../../models/planmodel';
 import type { PlanId } from '../../models/planmodel';

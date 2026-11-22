@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { API_URL_BASE } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 
 /** Cuerpo enviado al backend para solicitar el enlace de recuperación. */
 interface ForgotPasswordRequestDTO {

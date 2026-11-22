@@ -1,6 +1,5 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
-import { MAX_ARCHIVO_BYTES } from '../api-config';
-
+import { MAX_ARCHIVO_BYTES } from '../models/globalsettingsmodel';
 /** Estados locales del dispositivo de grabación; no son estados del backend. */
 type EstadoGrabacion = 'inactivo' | 'solicitando' | 'grabando' | 'deteniendo';
 

@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { API_URL_BASE } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 
 /**
  * Servicio para verificar correos electrónicos y solicitar nuevos enlaces de

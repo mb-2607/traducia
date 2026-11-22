@@ -10,15 +10,14 @@ import type {
 } from '../models/usermodel';
 import type { PlanId } from '../models/planmodel';
 import { StorageService } from './storageservice';
-
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 /** Clave bajo la cual se guarda el usuario autenticado en el almacenamiento. */
 const USER_KEY = 'user';
 
 /** Clave bajo la cual se guarda el token JWT en el almacenamiento. */
 const TOKEN_KEY = 'token';
 
-/** URL base del backend de TraducIA. */
-export const API_URL_BASE = 'http://localhost:8080';
+
 
 /**
  * Convierte los datos del backend al modelo interno del frontend.

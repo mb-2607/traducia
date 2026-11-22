@@ -6,7 +6,8 @@ import type {
   SolicitudTraduccion,
   SolicitudTraduccionResponseDTO,
 } from '../models/traduccionmodel';
-import { API_URL_BASE, AuthService } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
+import { AuthService } from './authservice';
 
 /**
  * Servicio HTTP encargado de ejecutar traducciones y consultar el historial

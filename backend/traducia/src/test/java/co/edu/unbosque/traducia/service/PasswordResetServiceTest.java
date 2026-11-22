@@ -104,7 +104,7 @@ class PasswordResetServiceTest {
 		assertThat(tokenGuardado.getUser()).isSameAs(usuario);
 		assertThat(tokenGuardado.isUsado()).isFalse();
 		assertThat(tokenGuardado.estaExpirado()).isFalse();
-		assertThat(enlaceCaptor.getValue()).startsWith("http://localhost:4200/reset-password?token=");
+		assertThat(enlaceCaptor.getValue()).startsWith("http://localhost:4200/restablecer-contrasena?token=");
 	}
 
 	/**
