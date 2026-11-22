@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.unbosque.traducia.dto.SolicitudTraduccionResponseDTO;
 import co.edu.unbosque.traducia.dto.TraduccionRequestDTO;
@@ -90,6 +91,7 @@ public class TraduccionService {
 	 * @throws IdiomaEqualsException si el idioma de origen y el de destino son iguales
 	 * @throws TraduccionFailedException si la solicitud queda sin traducciones
 	 */
+	@Transactional
 	public SolicitudTraduccionResponseDTO traducir(TraduccionRequestDTO traduccion, String nombreUsuario) {
 		User usuario = userService.obtenerEntidadPorNombre(nombreUsuario);
 
@@ -132,6 +134,7 @@ public class TraduccionService {
 	 * @param pageable      configuración de paginación solicitada
 	 * @return página de solicitudes de traducción en formato DTO
 	 */
+	@Transactional(readOnly = true)
 	public Page<SolicitudTraduccionResponseDTO> listarPorUsuario(String nombreUsuario, Pageable pageable) {
 		User usuario = userService.obtenerEntidadPorNombre(nombreUsuario);
 		List<SolicitudTraduccion> filtradas = new ArrayList<>();
@@ -170,6 +173,7 @@ public class TraduccionService {
 	 * @return detalle de la solicitud de traducción en formato DTO
 	 * @throws TraduccionFailedException si la solicitud no existe o no pertenece al usuario
 	 */
+	@Transactional(readOnly = true)
 	public SolicitudTraduccionResponseDTO obtenerPorIdYUsuario(Long id, String nombreUsuario) {
 		User usuario = userService.obtenerEntidadPorNombre(nombreUsuario);
 		SolicitudTraduccion solicitud = soliRepo.findById(id)

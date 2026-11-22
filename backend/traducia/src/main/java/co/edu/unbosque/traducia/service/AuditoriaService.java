@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.unbosque.traducia.dto.AuditoriaLogDTO;
 import co.edu.unbosque.traducia.entity.AuditoriaLog;
@@ -38,6 +39,7 @@ public class AuditoriaService {
 	 *
 	 * @param log registro de auditoría que se desea almacenar
 	 */
+	@Transactional
 	public void registrar(AuditoriaLog log) {
 		try {
 			auditRepo.save(log);
@@ -55,6 +57,7 @@ public class AuditoriaService {
 	 * @return página de registros de auditoría convertidos a
 	 *         {@link AuditoriaLogDTO}
 	 */
+	@Transactional(readOnly = true)
 	public Page<AuditoriaLogDTO> listar(Pageable pageable) {
 		Page<AuditoriaLog> audiPage = auditRepo.findAll(pageable);
 		return audiPage.map((AuditoriaLog al) -> {

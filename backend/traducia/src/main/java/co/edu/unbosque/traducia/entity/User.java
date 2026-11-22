@@ -1,5 +1,6 @@
 package co.edu.unbosque.traducia.entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,6 +17,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
 
 /**
  * Clase que representa un usuario en el sistema.
@@ -89,6 +93,15 @@ public class User implements UserDetails{
 	 */
 	private boolean debeCambiarPassword;
 	
+	/**
+	 * Representa las solicitudes de traducciones hechas por el usuario.
+	 */
+	@OneToMany(
+		    mappedBy = "usuario",
+		    cascade = CascadeType.REMOVE,
+		    fetch = FetchType.LAZY
+		)
+		private List<SolicitudTraduccion> solicitudes = new ArrayList<>();
 	/**
 	 * Constructor por defecto
 	 * Inicializa un usuario con los valores predeterminados:

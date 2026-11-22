@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.unbosque.traducia.dto.IdiomaResponseDTO;
 import co.edu.unbosque.traducia.entity.Idioma;
@@ -44,6 +45,7 @@ public class IdiomaService {
 	 *
 	 * @return lista de idiomas convertidos a {@link IdiomaResponseDTO}
 	 */
+	@Transactional(readOnly = true)
 	public List<IdiomaResponseDTO> listarIdioma() {
 		List<IdiomaResponseDTO> listaIdioma = new ArrayList<>();
 		idiomaRepo.findAll().forEach((Idioma i) -> {listaIdioma.add(modelMapper.map(i, IdiomaResponseDTO.class));});
@@ -57,6 +59,7 @@ public class IdiomaService {
 	 * @return el idioma encontrado
 	 * @throws IdiomaNotFoundException si no existe un idioma con ese código
 	 */
+	@Transactional(readOnly = true)
 	public Idioma obtenerPorCodigo(String codigo) {
 		return idiomaRepo.findByCodigo(codigo)
 				.orElseThrow(() -> new IdiomaNotFoundException(codigo));
@@ -68,6 +71,7 @@ public class IdiomaService {
 	 * @param codigo código del idioma
 	 * @return {@code true} si el idioma existe, {@code false} en caso contrario
 	 */
+	@Transactional(readOnly = true)
 	public boolean existePorCodigo(String codigo) {
 		return idiomaRepo.existsByCodigo(codigo);
 	}
