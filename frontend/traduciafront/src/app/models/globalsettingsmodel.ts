@@ -1,5 +1,5 @@
 /** URL base del backend de TraducIA. */
-export const API_URL_BASE = 'http://localhost:8080';
+export const API_URL_BASE = 'https://gpcueb.org/traduciaback';
 
 /** Límites de carga locales, alineados con el máximo de 10 MiB del backend. */
 export const MAX_ARCHIVO_BYTES = 10 * 1024 * 1024;

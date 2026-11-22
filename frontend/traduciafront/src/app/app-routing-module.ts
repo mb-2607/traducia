@@ -37,7 +37,7 @@ import { Verificarcorreocomponent } from './components/verificarcorreocomponent/
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {
