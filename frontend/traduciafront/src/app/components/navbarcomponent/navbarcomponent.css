@@ -3,7 +3,33 @@
   padding: 0.65rem clamp(0.65rem, 2vw, 1.25rem);
   color: var(--td-texto);
 }
+.marquee{
+  width: 100%;
+  overflow: hidden;
+}
 
+.marquee-track{
+  display: flex;
+  width: max-content;
+  animation: scroll 13s linear infinite;
+}
+
+.marquee-track span{
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-right: 2rem;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to{
+    transform: translateX(-50%);
+  }
+}
 .navbar-glass {
   box-sizing: border-box;
   display: flex;
