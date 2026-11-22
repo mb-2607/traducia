@@ -5,7 +5,7 @@ import type { Observable } from 'rxjs';
 import type { GuardarPerfil, PerfilUsuario } from '../models/perfilmodel';
 import type { PlanId } from '../models/planmodel';
 import type { PlanApi, UpdateUserRequestDTO, UserResponseDTO } from '../models/usermodel';
-import { AuthService } from './authservice';
+import { API_URL_BASE, AuthService } from './authservice';
 
 /** Convierte el identificador de plan del backend al formato interno del frontend. */
 function planApiAPlanId(plan: PlanApi): PlanId {
@@ -41,25 +41,17 @@ function adaptarPerfil(datos: UserResponseDTO): PerfilUsuario {
 }
 
 /**
- * Contrato de acceso al perfil de la cuenta autenticada.
+ * Servicio HTTP de acceso al perfil de la cuenta autenticada conectado a `/user/me`.
+ *
  * Cada método emite una respuesta y completa, o propaga el error de la operación.
  * El servidor identifica la cuenta a partir de la sesión y valida los archivos.
- */
-export abstract class PerfilService {
-  /** Obtiene los datos actuales, incluida la URL de la imagen guardada. */
-  abstract obtener(): Observable<PerfilUsuario>;
-
-  /** Guarda los cambios y devuelve el perfil definitivo confirmado por el servidor. */
-  abstract guardar(solicitud: GuardarPerfil): Observable<PerfilUsuario>;
-}
-
-/**
- * Implementación HTTP de {@link PerfilService} conectada a `/user/me`.
+ *
+ * Está disponible globalmente (`providedIn: 'root'`).
  */
 @Injectable({
   providedIn: 'root',
 })
-export class PerfilHttpService extends PerfilService {
+export class PerfilService {
   /** Cliente HTTP para comunicarse con el backend. */
   private readonly http = inject(HttpClient);
 
@@ -67,13 +59,13 @@ export class PerfilHttpService extends PerfilService {
   private readonly authService = inject(AuthService);
 
   /** URL del endpoint de perfil del usuario autenticado. */
-  private readonly urlPerfil = 'http://localhost:8080/user/me';
+  private readonly urlPerfil = `${API_URL_BASE}/user/me`;
 
   /** Última respuesta confirmada por el servidor para conservar correo, rol y plan. */
   private ultimoPerfil: UserResponseDTO | null = null;
 
   /** Consulta el perfil del usuario autenticado en el backend. */
-  override obtener(): Observable<PerfilUsuario> {
+  obtener(): Observable<PerfilUsuario> {
     return this.http.get<UserResponseDTO>(this.urlPerfil).pipe(
       tap((respuesta) => {
         this.ultimoPerfil = respuesta;
@@ -83,7 +75,7 @@ export class PerfilHttpService extends PerfilService {
   }
 
   /** Envía los datos actualizados del perfil preservando correo, rol y plan actuales. */
-  override guardar(solicitud: GuardarPerfil): Observable<PerfilUsuario> {
+  guardar(solicitud: GuardarPerfil): Observable<PerfilUsuario> {
     const base = this.obtenerDatosBase();
     if (base === null) {
       return throwError(() => new Error('No hay una sesión activa para actualizar el perfil.'));
