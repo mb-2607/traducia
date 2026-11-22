@@ -1,10 +1,16 @@
 <nav class="navbar-glass" aria-label="Navegación principal de TraducIA">
-  <img
-    class="navbar-logo"
-    [src]="logoSrc"
-    alt="TraducIA"
-    decoding="async"
-  />
+  <a
+    class="navbar-logo-link"
+    routerLink="/"
+    aria-label="Ir al inicio de TraducIA"
+  >
+    <img
+      class="navbar-logo"
+      [src]="logoSrc"
+      alt="TraducIA"
+      decoding="async"
+    />
+  </a>
 
   <div class="marquee">
     <div class="marquee-track">
