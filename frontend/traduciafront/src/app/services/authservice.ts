@@ -134,7 +134,7 @@ export class AuthService {
    * Cierra la sesión: limpia el token y el usuario en memoria,
    * notifica a los suscriptores y elimina los datos del almacenamiento.
    */
-  cerrarSesion() {
+  cerrarSesion(): void {
     this.jwt = null;
     this.userSubject.next(null);
     this.storageService.remove(USER_KEY);
