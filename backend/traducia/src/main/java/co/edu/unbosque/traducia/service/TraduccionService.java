@@ -53,7 +53,12 @@ public class TraduccionService {
 	 * Servicio que consulta idiomas.
 	 */
 	private IdiomaService idiomaService;
-
+	
+	/**
+	 * Proovedor de reemplazo en caso en que falle alguno.
+	 */
+	private ProveedorTraduccion reemplazo = ProveedorTraduccion.GEMMA;
+	
 	/**
 	 * Crea el componente con sus dependencias inyectadas por Spring.
 	 *
@@ -114,6 +119,9 @@ public class TraduccionService {
 
 		usuario.getPlanType().getListaProveedor().forEach((ProveedorTraduccion pt) -> {
 			solicitud.addTraduccion(enviarSolicitud(traduccion, pt));
+			if(solicitud.getListaTraduccion().getLast().getEstado()==EstadoTraduccion.FALLIDA) {
+				solicitud.addTraduccion(enviarSolicitudReemplazo(traduccion));
+			}
 		});
 
 		if (solicitud.getListaTraduccion().stream()
@@ -197,5 +205,18 @@ public class TraduccionService {
 		respuesta.setTextoTraducido(traduccion.getTextoTraducido());
 		respuesta.setTipoProveedor(traduccion.getProveedorTraduccion().getTipoProveedor());
 		return respuesta;
+	}
+	
+	/**
+	 * Envía el texto al proveedor de reemplazo y registra el resultado.
+	 *
+	 * Si el proveedor funciona, la traducción queda {@code EXITOSA}; si lanza cualquier
+	 * excepción, queda {@code FALLIDA} sin texto.
+	 *
+	 * @param traduccion petición con el texto a traducir
+	 * @return la traducción con su estado
+	 */
+	private Traduccion enviarSolicitudReemplazo(TraduccionRequestDTO traduccion) {
+		return enviarSolicitud(traduccion, reemplazo);
 	}
 }
