@@ -6,12 +6,12 @@
 
     <span class="plan-actual">
       <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-      Planmodel activo: <strong>{{ nombrePlanActivo }}</strong>
+      Plan activo: <strong>{{ nombrePlanActivo }}</strong>
     </span>
   </header>
 
   <div class="row g-4 justify-content-center">
-    @for (plan of planes; track plan.id) {
+    @for (plan of planes(); track plan.id) {
       <div class="col-12 col-md-6 col-lg-4 d-flex">
         <article
           class="plan-card"
@@ -29,7 +29,7 @@
             </span>
 
             @if (plan.id === planActivo()) {
-              <span class="distintivo">Planmodel activo</span>
+              <span class="distintivo">Plan activo</span>
             } @else if (planSeleccionado()?.id === plan.id) {
               <span class="distintivo">Seleccionado</span>
             }
@@ -70,7 +70,7 @@
             #botonPlan
             type="button"
             class="boton-plan"
-            [disabled]="plan.id === planActivo()"
+            [disabled]="plan.id === planActivo() || guardando()"
             [attr.aria-expanded]="planSeleccionado()?.id === plan.id"
             (click)="seleccionarPlan(plan, botonPlan)"
           >
@@ -245,7 +245,7 @@
 
               <dl>
                 <div>
-                  <dt>Planmodel seleccionado</dt>
+                  <dt>Plan seleccionado</dt>
                   <dd>{{ elegido.nombre }}</dd>
                 </div>
 
@@ -287,11 +287,20 @@
                 <p class="error-campo" role="alert">{{ mensajeFormulario() }}</p>
               }
 
-              <button type="submit" class="boton-confirmar">
-                {{ elegido.id === 'gratuito' ? 'Activar Free Pass' : 'Iniciar membresía' }}
+              <button type="submit" class="boton-confirmar" [disabled]="guardando()">
+                @if (guardando()) {
+                  Actualizando plan…
+                } @else {
+                  {{ elegido.id === 'gratuito' ? 'Activar Free Pass' : 'Iniciar membresía' }}
+                }
               </button>
 
-              <button type="button" class="boton-secundario" (click)="cancelar()">
+              <button
+                type="button"
+                class="boton-secundario"
+                [disabled]="guardando()"
+                (click)="cancelar()"
+              >
                 Cancelar
               </button>
             </div>

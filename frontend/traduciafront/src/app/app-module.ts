@@ -1,6 +1,7 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
@@ -22,8 +23,11 @@ import { Landingpagecomponent } from './components/landingpagecomponent/landingp
 import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 import { Terminocomponent } from './components/terminocomponent/terminocomponent';
 import { Verificarcorreocomponent } from './components/verificarcorreocomponent/verificarcorreocomponent';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/authinterceptor';
+import { AuditoriaHttpService, AuditoriaService } from './services/auditoriaservice';
+import { PerfilHttpService, PerfilService } from './services/perfilservice';
+import { RecuperacionHttpService, RecuperacionService } from './services/recuperacionservice';
+import { UsuariosAdminHttpService, UsuariosAdminService } from './services/usuariosadminservice';
 
 /**
  * Módulo principal de la aplicación.
@@ -59,8 +63,14 @@ import { authInterceptor } from './interceptors/authinterceptor';
     Verificarcorreocomponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
-  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(), provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([authInterceptor])),],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    { provide: RecuperacionService, useExisting: RecuperacionHttpService },
+    { provide: PerfilService, useExisting: PerfilHttpService },
+    { provide: UsuariosAdminService, useExisting: UsuariosAdminHttpService },
+    { provide: AuditoriaService, useExisting: AuditoriaHttpService },
+  ],
   bootstrap: [App],
 })
 // skipcq: JS-0327

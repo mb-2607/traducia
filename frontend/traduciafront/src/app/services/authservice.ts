@@ -57,7 +57,7 @@ export class AuthService {
   /** Servicio para almacenar en el LocalStorage. */
   private storageService: StorageService = inject(StorageService);
 
-  /** URL base de la API de autenticación. Pendiente de configurar. */
+  /** URL base de la API de autenticación. */
   private readonly URL_BASE = 'http://localhost:8080/auth';
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */
@@ -128,6 +128,20 @@ export class AuthService {
         }),
         map(({ usuario }) => usuario),
       );
+  }
+
+  /**
+   * Sincroniza en memoria y almacenamiento los cambios confirmados del usuario
+   * tras actualizar el perfil o cambiar de plan.
+   *
+   * @param datos Respuesta actualizada del backend.
+   * @returns Usuario adaptado al modelo interno del frontend.
+   */
+  actualizarUsuario(datos: UserResponseDTO): User {
+    const usuario = adaptarUsuario(datos);
+    this.storageService.set(USER_KEY, usuario);
+    this.userSubject.next(usuario);
+    return usuario;
   }
 
   /**
