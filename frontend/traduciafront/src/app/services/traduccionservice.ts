@@ -1,6 +1,4 @@
-
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import type {
@@ -8,10 +6,9 @@ import type {
   SolicitudTraduccion,
   SolicitudTraduccionResponseDTO,
 } from '../models/traduccionmodel';
-import { AuthService } from './authservice';
+import { API_URL_BASE, AuthService } from './authservice';
 
 /**
-
  * Servicio HTTP encargado de ejecutar traducciones y consultar el historial
  * de solicitudes del usuario autenticado.
  */
@@ -26,7 +23,7 @@ export class TraduccionService {
   private readonly authService = inject(AuthService);
 
   /** URL base del controlador de traducciones en el backend. */
-  private readonly URL_BASE = 'http://localhost:8080/traductor';
+  private readonly URL_BASE = `${API_URL_BASE}/traductor`;
 
   /**
    * Construye las cabeceras JSON incluyendo el token Bearer si hay sesión activa.
@@ -52,7 +49,6 @@ export class TraduccionService {
    * @returns Respuesta con los resultados de los proveedores.
    */
   traducir(solicitud: SolicitudTraduccion): Observable<SolicitudTraduccionResponseDTO> {
-
     return this.cliente.post<SolicitudTraduccionResponseDTO>(
       `${this.URL_BASE}/traducir`,
       solicitud,

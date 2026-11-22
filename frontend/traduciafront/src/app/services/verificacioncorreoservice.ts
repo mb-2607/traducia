@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { API_URL_BASE } from './authservice';
 
 /**
  * Servicio para verificar correos electrónicos y solicitar nuevos enlaces de
@@ -19,7 +20,7 @@ export class VerificacionCorreoService {
   private readonly http = inject(HttpClient);
 
   /** URL base de los endpoints de autenticación y verificación de correo. */
-  private readonly urlBase = 'http://localhost:8080/auth';
+  private readonly urlBase = `${API_URL_BASE}/auth`;
 
   /**
    * Verifica la cuenta del usuario a partir del token recibido por enlace.

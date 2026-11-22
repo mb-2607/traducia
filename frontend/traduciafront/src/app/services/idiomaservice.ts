@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Idioma, IdiomaResponseDTO } from '../models/idiomamodel';
+import { API_URL_BASE } from './authservice';
 
 /** Etiquetas de voz por defecto según el código base del idioma. */
 const VOCES_POR_CODIGO: Readonly<Record<string, string>> = {
@@ -26,7 +27,7 @@ export class IdiomaService {
   private readonly http = inject(HttpClient);
 
   /** URL del endpoint que lista los idiomas disponibles. */
-  private readonly url = 'http://localhost:8080/idiomas';
+  private readonly url = `${API_URL_BASE}/idiomas`;
 
   /**
    * Obtiene la lista de idiomas disponibles desde el backend y asigna una

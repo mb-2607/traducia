@@ -16,7 +16,10 @@ const USER_KEY = 'user';
 
 /** Clave bajo la cual se guarda el token JWT en el almacenamiento. */
 const TOKEN_KEY = 'token';
+
+/** URL base del backend de TraducIA. */
 export const API_URL_BASE = 'http://localhost:8080';
+
 /**
  * Convierte los datos del backend al modelo interno del frontend.
  *
@@ -58,7 +61,7 @@ export class AuthService {
   private storageService: StorageService = inject(StorageService);
 
   /** URL base de la API de autenticación. */
-  private readonly URL_BASE = 'http://localhost:8080/auth';
+  private readonly URL_BASE = `${API_URL_BASE}/auth`;
 
   /** Cabeceras HTTP enviadas en las peticiones (JSON de ida y de vuelta). */
   private readonly HEADER: HttpHeaders = new HttpHeaders({
