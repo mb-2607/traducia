@@ -69,6 +69,20 @@ export interface SolicitudTraduccionResponseDTO {
 }
 
 /**
+ * Respuesta paginada devuelta por los endpoints de Spring Data.
+ */
+export interface PageResponse<T> {
+  readonly content: readonly T[];
+  readonly totalElements: number;
+  readonly totalPages: number;
+  readonly size: number;
+  readonly number: number;
+  readonly first: boolean;
+  readonly last: boolean;
+  readonly empty: boolean;
+}
+
+/**
  * Representación visual utilizada actualmente por el traductor.
  *
  * El servicio de integración podrá construir este modelo
