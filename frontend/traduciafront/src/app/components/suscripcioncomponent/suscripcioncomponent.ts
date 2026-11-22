@@ -1,14 +1,19 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
+  DestroyRef,
   ElementRef,
   Injector,
+  OnInit,
   ViewChild,
   afterNextRender,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import type { AbstractControl, ValidatorFn } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PLANES } from '../../models/planmodel';
 import type { Planmodel } from '../../models/planmodel';
 import { SuscripcionService } from '../../services/suscripcionservice';
@@ -116,14 +121,21 @@ function campoInvalido(control: AbstractControl): boolean {
   return control.touched && control.invalid;
 }
 
+/** Obtiene un mensaje legible a partir de un error HTTP al cambiar de plan. */
+function extraerMensajeError(error: unknown): string {
+  if (error instanceof HttpErrorResponse && typeof error.error === 'string' && error.error.trim()) {
+    return error.error;
+  }
+
+  return 'No fue posible actualizar tu plan en este momento. Inténtalo nuevamente.';
+}
+
 /**
  * Gestiona la visualización, selección y confirmación de planes
  * de suscripción dentro de TraducIA.
  *
- * Muestra los planes, administra el formulario y valida sus datos antes
- * de solicitar al servicio la activación simulada del plan seleccionado.
- * Usa señales de Angular para actualizar la interfaz y gestiona el foco
- * durante la selección, cancelación y confirmación.
+ * Consulta los límites y el plan vigente desde el backend, valida el formulario
+ * y solicita al servicio el cambio de plan real de la cuenta autenticada.
  */
 @Component({
   selector: 'app-suscripcioncomponent',
@@ -131,8 +143,8 @@ function campoInvalido(control: AbstractControl): boolean {
   templateUrl: './suscripcioncomponent.html',
   styleUrls: ['./suscripcioncomponent.css'],
 })
-export class Suscripcioncomponent {
-  /** Servicio encargado de consultar y activar el plan de demostración. */
+export class Suscripcioncomponent implements OnInit {
+  /** Servicio encargado de consultar y actualizar el plan del usuario. */
   private readonly suscripcion = inject(SuscripcionService);
 
   /** Constructor utilizado para inicializar el formulario reactivo. */
@@ -140,6 +152,9 @@ export class Suscripcioncomponent {
 
   /** Inyector utilizado para registrar operaciones posteriores al renderizado. */
   private readonly injector = inject(Injector);
+
+  /** Referencia de destrucción para cancelar suscripciones activas. */
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Elemento que recibe el foco después de seleccionar o confirmar un plan. */
   @ViewChild('destinoFoco')
@@ -149,7 +164,7 @@ export class Suscripcioncomponent {
   private botonOrigen: HTMLButtonElement | null = null;
 
   /** Lista de planes disponibles para mostrar en la interfaz. */
-  readonly planes = Object.values(PLANES);
+  readonly planes = signal<Planmodel[]>(Object.values(PLANES));
 
   /** Lista de países disponibles para el formulario de pago. */
   readonly paises = PAISES;
@@ -163,7 +178,10 @@ export class Suscripcioncomponent {
   /** Señal que contiene el plan cuya confirmación se ha completado. */
   readonly planConfirmado = signal<Planmodel | null>(null);
 
-  /** Señal que contiene el mensaje general de validación del formulario. */
+  /** Señal que indica si hay una solicitud de cambio de plan en curso. */
+  readonly guardando = signal(false);
+
+  /** Señal que contiene el mensaje general de validación o error del formulario. */
   readonly mensajeFormulario = signal('');
 
   /** Ejemplo dinámico de fecha de vencimiento correspondiente al siguiente año. */
@@ -209,6 +227,32 @@ export class Suscripcioncomponent {
     confirmar: [false, Validators.requiredTrue],
   });
 
+  /** Sincroniza el catálogo de planes y el plan vigente desde el backend. */
+  ngOnInit(): void {
+    this.suscripcion
+      .listarPlanes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (planes) => {
+          if (planes.length > 0) {
+            this.planes.set(planes);
+          }
+        },
+        error: () => {
+          // Conserva el catálogo local de respaldo si falla la consulta inicial.
+        },
+      });
+
+    this.suscripcion
+      .obtenerPlanActual()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => {
+          // Conserva el plan cargado desde la sesión actual si falla la consulta.
+        },
+      });
+  }
+
   /**
    * Obtiene el nombre del plan que se encuentra actualmente activo.
    *
@@ -228,7 +272,7 @@ export class Suscripcioncomponent {
    * @param boton Botón desde el cual se inició la selección.
    */
   seleccionarPlan(plan: Planmodel, boton: HTMLButtonElement): void {
-    if (plan.id === this.planActivo()) {
+    if (this.guardando() || plan.id === this.planActivo()) {
       return;
     }
 
@@ -247,6 +291,10 @@ export class Suscripcioncomponent {
    * al botón que inició la operación y libera su referencia.
    */
   cancelar(): void {
+    if (this.guardando()) {
+      return;
+    }
+
     this.pago.reset();
     this.mensajeFormulario.set('');
     this.planSeleccionado.set(null);
@@ -255,16 +303,15 @@ export class Suscripcioncomponent {
   }
 
   /**
-   * Valida y confirma la selección de un plan de suscripción.
+   * Valida y confirma la selección de un plan de suscripción contra el backend.
    *
-   * Los planes de pago requieren un formulario válido. Si hay errores,
-   * marca los campos para mostrarlos. Cuando se cumplen las validaciones,
-   * solicita al servicio la activación simulada y muestra la confirmación.
+   * Los planes de pago requieren un formulario válido. Cuando se cumplen las
+   * validaciones, solicita al servicio actualizar el plan del usuario autenticado.
    */
   confirmarSuscripcion(): void {
     const plan = this.planSeleccionado();
 
-    if (!plan || plan.id === this.planActivo()) {
+    if (this.guardando() || !plan || plan.id === this.planActivo()) {
       return;
     }
 
@@ -274,14 +321,28 @@ export class Suscripcioncomponent {
       return;
     }
 
-    this.suscripcion.activarPlanDemo(plan.id);
-
-    this.pago.reset();
+    this.guardando.set(true);
     this.mensajeFormulario.set('');
-    this.planSeleccionado.set(null);
-    this.planConfirmado.set(plan);
-    this.botonOrigen = null;
-    this.enfocarResultado();
+
+    this.suscripcion
+      .cambiarPlan(plan.id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.guardando.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.pago.reset();
+          this.mensajeFormulario.set('');
+          this.planSeleccionado.set(null);
+          this.planConfirmado.set(plan);
+          this.botonOrigen = null;
+          this.enfocarResultado();
+        },
+        error: (error: unknown) => {
+          this.mensajeFormulario.set(extraerMensajeError(error));
+        },
+      });
   }
 
   /**

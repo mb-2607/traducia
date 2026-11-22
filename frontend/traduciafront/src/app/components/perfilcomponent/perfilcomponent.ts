@@ -11,7 +11,16 @@ import {
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { EMPTY, Subject, catchError, finalize, startWith, switchMap, takeUntil } from 'rxjs';
+import {
+  EMPTY,
+  Subject,
+  catchError,
+  distinctUntilChanged,
+  finalize,
+  startWith,
+  switchMap,
+  takeUntil,
+} from 'rxjs';
 import { PLANES } from '../../models/planmodel';
 import type { GuardarPerfil, PerfilUsuario } from '../../models/perfilmodel';
 import type { User } from '../../models/usermodel';
@@ -101,10 +110,10 @@ export class Perfilcomponent implements OnInit {
     return partes.length === 0
       ? '?'
       : partes
-          .slice(0, 2)
-          .map((parte) => parte.charAt(0))
-          .join('')
-          .toLocaleUpperCase('es');
+        .slice(0, 2)
+        .map((parte) => parte.charAt(0))
+        .join('')
+        .toLocaleUpperCase('es');
   });
   protected readonly imagen = computed(() => {
     const vista = this.vistaFoto();
@@ -153,6 +162,7 @@ export class Perfilcomponent implements OnInit {
     this.auth
       .getUserAsObservable()
       .pipe(
+        distinctUntilChanged((anterior, actual) => anterior?.correo === actual?.correo),
         switchMap((usuario) => {
           this.cambioSesion.next();
           this.error.set('');

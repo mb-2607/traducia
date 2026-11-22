@@ -1,5 +1,9 @@
+import type { PlanApi } from './usermodel';
+
+/** Identificadores internos de los planes en el frontend. */
 export type PlanId = 'gratuito' | 'oria' | 'infinitia';
 
+/** Representación visual y funcional de un plan de suscripción. */
 export interface Planmodel {
   readonly id: PlanId;
   readonly nombre: string;
@@ -11,6 +15,19 @@ export interface Planmodel {
   readonly icono: string;
 }
 
+/** Detalle de plan devuelto por `GET /plan` y `GET /plan/actual`. */
+export interface PlanResponseDTO {
+  readonly plan: PlanApi;
+  readonly numeroCaracterPorSolicitud: number;
+  readonly proveedores: readonly string[];
+}
+
+/** Solicitud enviada a `PUT /plan/cambiar`. */
+export interface ChangePlanRequestDTO {
+  readonly plan: PlanApi;
+}
+
+/** Catálogo base de planes con sus datos visuales y precios locales. */
 export const PLANES: Readonly<Record<PlanId, Planmodel>> = {
   gratuito: {
     id: 'gratuito',
