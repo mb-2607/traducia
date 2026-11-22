@@ -68,8 +68,7 @@ public class LoadDatabase {
 	        @Value("${app.user.password}") String userPassword) {
 
 		return args -> {
-			Optional<User> found = userRepo.findByUsername("admin");
-			if (found.isPresent()) {
+			if (userRepo.existsByUsername("admin")||userRepo.existsByEmail("traducia687@gmail.com")) {
 				log.info("El administrador ya existe, omitiendo la creación del administrador...");
 			} else {
 				User adminUser = new User("admin", passwordEncoder.encode(adminPassword), "traducia687@gmail.com",
@@ -77,8 +76,7 @@ public class LoadDatabase {
 				userRepo.save(adminUser);
 				log.info("Precargando usuario administrador");
 			}
-			Optional<User> found2 = userRepo.findByUsername("normaluser");
-			if (found2.isPresent()) {
+			if (userRepo.existsByUsername("normaluser")||userRepo.existsByEmail("manuelbarros2007@gmail.com")) {
 				log.info("El usuario normal ya existe, omitiendo la creación del usuario normal...");
 			} else {
 				User normalUser = new User("normaluser", passwordEncoder.encode(userPassword),
