@@ -83,8 +83,8 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: Userpagecomponent,
-    canActivate: [autenticacionGuard],
-    canActivateChild: [autenticacionGuard],
+   // canActivate: [autenticacionGuard],
+   // canActivateChild: [autenticacionGuard],
     children: [
       {
         path: '',
