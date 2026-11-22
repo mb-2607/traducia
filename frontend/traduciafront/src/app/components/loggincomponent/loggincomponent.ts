@@ -226,7 +226,7 @@ export class Loggincomponent {
       next: (usuario) => {
         this.mensaje.set('');
         const destino = usuario.rol === 'ADMIN' ? ['/admin'] : ['/dashboard/new'];
-        void this.router.navigate(destino);
+        this.router.navigate(destino).catch(() => undefined);
       },
       error: (err: unknown) => {
         if (
