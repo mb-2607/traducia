@@ -16,7 +16,7 @@ const USER_KEY = 'user';
 
 /** Clave bajo la cual se guarda el token JWT en el almacenamiento. */
 const TOKEN_KEY = 'token';
-
+export const API_URL_BASE = 'http://localhost:8080';
 /**
  * Convierte los datos del backend al modelo interno del frontend.
  *
