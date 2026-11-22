@@ -5,7 +5,8 @@ import type { Observable } from 'rxjs';
 import type { GuardarPerfil, PerfilUsuario } from '../models/perfilmodel';
 import type { PlanId } from '../models/planmodel';
 import type { PlanApi, UpdateUserRequestDTO, UserResponseDTO } from '../models/usermodel';
-import { API_URL_BASE, AuthService } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
+import { AuthService } from './authservice';
 
 /** Convierte el identificador de plan del backend al formato interno del frontend. */
 function planApiAPlanId(plan: PlanApi): PlanId {

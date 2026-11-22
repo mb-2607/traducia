@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../api-config';
+import { EXTENSIONES_DOCUMENTO, MAX_ARCHIVO_BYTES } from '../../models/globalsettingsmodel';
 
 /** Selecciona documentos; el backend vuelve a validar formato real y tamaño. */
 @Component({

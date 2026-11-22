@@ -9,7 +9,7 @@ import type {
   UsuarioAdministracion,
   UsuarioAdministracionResponseDTO,
 } from '../models/usuarioadminmodel';
-import { API_URL_BASE } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 
 /**
  * Convierte la respuesta del backend al modelo de presentación de la tabla administrativa.

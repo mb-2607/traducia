@@ -1,6 +1,7 @@
 import type { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { API_URL_BASE, AuthService } from '../services/authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
+import { AuthService } from '../services/authservice';
 
 /**
  * Adjunta automáticamente el token JWT de la sesión a las peticiones HTTP

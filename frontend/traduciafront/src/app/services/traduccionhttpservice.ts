@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { API_BASE_URL } from '../api-config';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 import type {
   SolicitudTraduccion,
   SolicitudTraduccionResponseDTO,
@@ -16,7 +16,7 @@ import { TraduccionService } from './traduccionservice';
 export class TraduccionHttpService extends TraduccionService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly baseUrl = inject(API_BASE_URL).replace(/\/+$/, '');
+  private readonly baseUrl = API_URL_BASE;
 
   /** Traduce el texto revisado con los proveedores del plan autenticado. */
   override traducir(solicitud: SolicitudTraduccion): Observable<SolicitudTraduccionResponseDTO> {

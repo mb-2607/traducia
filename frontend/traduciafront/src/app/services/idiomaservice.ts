@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Idioma, IdiomaResponseDTO } from '../models/idiomamodel';
-import { API_URL_BASE } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 
 /** Etiquetas de voz por defecto según el código base del idioma. */
 const VOCES_POR_CODIGO: Readonly<Record<string, string>> = {

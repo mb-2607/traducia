@@ -10,7 +10,7 @@ import type {
   ResultadoAuditoria,
 } from '../models/auditoriamodel';
 import type { UserResponseDTO } from '../models/usermodel';
-import { API_URL_BASE } from './authservice';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 
 /** Expresión regular para detectar si una fecha ISO ya incluye zona horaria u offset. */
 const TIENE_ZONA_HORARIA = /(?:Z|[+-]\d{2}:\d{2})$/i;

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { API_BASE_URL } from '../api-config';
+import {API_URL_BASE} from '../models/globalsettingsmodel';
 import type { DocumentoExtraidoResponse} from '../models/documentomodel';
 import type { SolicitudTraduccionResponseDTO } from '../models/traduccionmodel';
 import { AuthService } from './authservice';
@@ -11,7 +11,7 @@ import { AuthService } from './authservice';
 export class DocumentoService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly baseUrl = inject(API_BASE_URL).replace(/\/+$/, '');
+  private readonly baseUrl = API_URL_BASE;
 
   /** Obtiene el texto completo para revisarlo antes de traducir. */
   extraer(archivo: File, idiomaOcr = 'es'): Observable<DocumentoExtraidoResponse> {
