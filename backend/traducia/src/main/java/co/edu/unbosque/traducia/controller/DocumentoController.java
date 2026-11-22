@@ -62,9 +62,9 @@ public class DocumentoController {
 	 */
 	@Operation(summary = "Extraer texto de un documento o imagen")
 	@PostMapping(path = "/extraer-documento", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public DocumentoExtraidoResponseDTO extraer(@RequestPart("archivo") MultipartFile archivo,
+	public ResponseEntity<DocumentoExtraidoResponseDTO> extraer(@RequestPart("archivo") MultipartFile archivo,
 			@RequestParam(defaultValue = "es") String idiomaOcr, Authentication authentication) {
-		return documentoService.extraer(archivo, idiomaOcr, authentication.getName());
+		return ResponseEntity.ok(documentoService.extraer(archivo, idiomaOcr, authentication.getName()));
 	}
 
 	/**
