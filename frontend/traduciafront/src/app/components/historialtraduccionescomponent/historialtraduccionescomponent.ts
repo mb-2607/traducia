@@ -34,6 +34,36 @@ const FORMATO_FECHA = new Intl.DateTimeFormat('es-CO', {
 const LONGITUD_MAXIMA_TITULO = 60;
 const TAMANO_PAGINA = 10;
 
+/** Adapta el DTO del backend al modelo visual que usa la lista del historial. */
+function adaptarEntrada(solicitud: SolicitudTraduccionResponseDTO): EntradaHistorial {
+  const textoLimpio = solicitud.textoOriginal.trim();
+  const titulo =
+    textoLimpio.length > LONGITUD_MAXIMA_TITULO
+      ? `${textoLimpio.slice(0, LONGITUD_MAXIMA_TITULO)}...`
+      : textoLimpio;
+
+  const traduccionExitosa = solicitud.listaTraduccion.find(
+    (item) => item.estado === 'EXITOSA' && item.textoTraducido !== null,
+  );
+
+  return {
+    id: String(solicitud.id),
+    titulo,
+    tipo: 'texto',
+    fecha: solicitud.fechaCreacion,
+    origen: solicitud.origen,
+    destino: solicitud.destino,
+    original: solicitud.textoOriginal,
+    resultado: traduccionExitosa?.textoTraducido ?? 'Sin resultado disponible',
+  };
+}
+
+/** Formatea una fecha ISO a formato legible en español de Colombia. */
+function formatearFecha(fechaIso: string): string {
+  const fecha = new Date(fechaIso);
+  return Number.isNaN(fecha.getTime()) ? fechaIso : FORMATO_FECHA.format(fecha);
+}
+
 /**
  * Muestra las traducciones por fecha y permite filtrarlas sin salir
  * del panel de usuario.
@@ -92,7 +122,7 @@ export class Historialtraduccionescomponent implements OnInit {
       .sort((primera, segunda) => Date.parse(segunda.fecha) - Date.parse(primera.fecha))
       .map((traduccion) => ({
         ...traduccion,
-        fechaVisible: this.formatearFecha(traduccion.fecha),
+        fechaVisible: formatearFecha(traduccion.fecha),
       }));
   });
 
@@ -112,7 +142,7 @@ export class Historialtraduccionescomponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
-          this.traducciones.set(respuesta.content.map((item) => this.adaptarEntrada(item)));
+          this.traducciones.set(respuesta.content.map(adaptarEntrada));
           this.paginaActual.set(respuesta.number);
           this.totalPaginas.set(respuesta.totalPages);
           this.totalElementos.set(respuesta.totalElements);
@@ -180,35 +210,5 @@ export class Historialtraduccionescomponent implements OnInit {
     if (valor === 'todos' || valor === 'texto' || valor === 'archivo') {
       this.filtro.set(valor);
     }
-  }
-
-  /** Adapta el DTO del backend al modelo visual que usa la lista del historial. */
-  private adaptarEntrada(solicitud: SolicitudTraduccionResponseDTO): EntradaHistorial {
-    const textoLimpio = solicitud.textoOriginal.trim();
-    const titulo =
-      textoLimpio.length > LONGITUD_MAXIMA_TITULO
-        ? `${textoLimpio.slice(0, LONGITUD_MAXIMA_TITULO)}...`
-        : textoLimpio;
-
-    const traduccionExitosa = solicitud.listaTraduccion.find(
-      (item) => item.estado === 'EXITOSA' && item.textoTraducido !== null,
-    );
-
-    return {
-      id: String(solicitud.id),
-      titulo,
-      tipo: 'texto',
-      fecha: solicitud.fechaCreacion,
-      origen: solicitud.origen,
-      destino: solicitud.destino,
-      original: solicitud.textoOriginal,
-      resultado: traduccionExitosa?.textoTraducido ?? 'Sin resultado disponible',
-    };
-  }
-
-  /** Formatea una fecha ISO a formato legible en español de Colombia. */
-  private formatearFecha(fechaIso: string): string {
-    const fecha = new Date(fechaIso);
-    return Number.isNaN(fecha.getTime()) ? fechaIso : FORMATO_FECHA.format(fecha);
   }
 }
