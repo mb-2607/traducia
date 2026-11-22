@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import type { TranscripcionResponse } from '../models/transcripcionmodel';
 import {API_URL_BASE} from '../models/globalsettingsmodel';
+
 import { AuthService } from './authservice';
 
 /** Envía audio al backend; la clave de Groq permanece en el servidor. */
