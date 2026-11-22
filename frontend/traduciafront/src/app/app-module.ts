@@ -24,10 +24,6 @@ import { Noencontradocomponent } from './components/noencontradocomponent/noenco
 import { Terminocomponent } from './components/terminocomponent/terminocomponent';
 import { Verificarcorreocomponent } from './components/verificarcorreocomponent/verificarcorreocomponent';
 import { authInterceptor } from './interceptors/authinterceptor';
-import { AuditoriaHttpService, AuditoriaService } from './services/auditoriaservice';
-import { PerfilHttpService, PerfilService } from './services/perfilservice';
-import { RecuperacionHttpService, RecuperacionService } from './services/recuperacionservice';
-import { UsuariosAdminHttpService, UsuariosAdminService } from './services/usuariosadminservice';
 
 /**
  * Módulo principal de la aplicación.
@@ -66,10 +62,6 @@ import { UsuariosAdminHttpService, UsuariosAdminService } from './services/usuar
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: RecuperacionService, useExisting: RecuperacionHttpService },
-    { provide: PerfilService, useExisting: PerfilHttpService },
-    { provide: UsuariosAdminService, useExisting: UsuariosAdminHttpService },
-    { provide: AuditoriaService, useExisting: AuditoriaHttpService },
   ],
   bootstrap: [App],
 })

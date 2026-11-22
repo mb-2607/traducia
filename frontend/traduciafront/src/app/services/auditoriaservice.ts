@@ -10,6 +10,7 @@ import type {
   ResultadoAuditoria,
 } from '../models/auditoriamodel';
 import type { UserResponseDTO } from '../models/usermodel';
+import { API_URL_BASE } from './authservice';
 
 /** Expresión regular para detectar si una fecha ISO ya incluye zona horaria u offset. */
 const TIENE_ZONA_HORARIA = /(?:Z|[+-]\d{2}:\d{2})$/i;
@@ -125,42 +126,33 @@ function adaptarRegistro(
 }
 
 /**
- * Contrato de consulta de auditoría.
+ * Servicio HTTP de consulta de auditoría conectado a `/auditoria/obtener`.
  *
- * Cada consulta debe emitir una lista completa, finalizar
- * y propagar los errores que impidan obtener los registros.
+ * Cada consulta emite una lista completa, finaliza y propaga los errores que
+ * impidan obtener los registros. El backend comprueba los permisos y devuelve
+ * los eventos registrados; la pantalla no modifica ni elimina eventos.
  *
- * El backend comprueba los permisos y devuelve los eventos registrados.
- * La pantalla no modifica ni elimina eventos del registro.
- */
-export abstract class AuditoriaService {
-  /**
-   * Obtiene los eventos que puede consultar
-   * el administrador autenticado.
-   *
-   * @returns Lista de eventos disponibles para su consulta.
-   */
-  abstract listar(): Observable<readonly RegistroAuditoria[]>;
-}
-
-/**
- * Implementación HTTP de {@link AuditoriaService} conectada a `/auditoria/obtener`.
+ * Está disponible globalmente (`providedIn: 'root'`).
  */
 @Injectable({
   providedIn: 'root',
 })
-export class AuditoriaHttpService extends AuditoriaService {
+export class AuditoriaService {
   /** Cliente HTTP utilizado para consultar los registros de auditoría. */
   private readonly http = inject(HttpClient);
 
   /** URL del endpoint paginado de auditoría en el backend. */
-  private readonly urlAuditoria = 'http://localhost:8080/auditoria/obtener';
+  private readonly urlAuditoria = `${API_URL_BASE}/auditoria/obtener`;
 
   /** URL del endpoint de usuarios utilizado para enriquecer los datos del actor. */
-  private readonly urlUsuarios = 'http://localhost:8080/user/listar';
+  private readonly urlUsuarios = `${API_URL_BASE}/user/listar`;
 
-  /** Consulta los registros recientes de auditoría y los adapta para la vista. */
-  override listar(): Observable<readonly RegistroAuditoria[]> {
+  /**
+   * Obtiene los eventos que puede consultar el administrador autenticado.
+   *
+   * @returns Lista de eventos disponibles para su consulta.
+   */
+  listar(): Observable<readonly RegistroAuditoria[]> {
     const params = new HttpParams()
       .set('page', '0')
       .set('size', '200')

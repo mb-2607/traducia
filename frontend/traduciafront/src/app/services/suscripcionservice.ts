@@ -10,7 +10,7 @@ import type {
   Planmodel,
 } from '../models/planmodel';
 import type { PlanApi, User, UserResponseDTO } from '../models/usermodel';
-import { AuthService } from './authservice';
+import { API_URL_BASE, AuthService } from './authservice';
 
 /** Mapa de planes del backend al identificador interno del frontend. */
 const PLAN_API_A_ID: Readonly<Record<PlanApi, PlanId>> = {
@@ -64,7 +64,7 @@ export class SuscripcionService {
   private readonly authService = inject(AuthService);
 
   /** URL base del controlador de planes en el backend. */
-  private readonly urlBase = 'http://localhost:8080/plan';
+  private readonly urlBase = `${API_URL_BASE}/plan`;
 
   /** Estado interno del plan activo del usuario autenticado. */
   private readonly estadoPlan = signal<PlanId>(this.authService.getUser()?.plan ?? 'gratuito');

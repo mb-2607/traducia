@@ -9,6 +9,7 @@ import type {
   UsuarioAdministracion,
   UsuarioAdministracionResponseDTO,
 } from '../models/usuarioadminmodel';
+import { API_URL_BASE } from './authservice';
 
 /**
  * Convierte la respuesta del backend al modelo de presentación de la tabla administrativa.
@@ -33,45 +34,29 @@ function adaptarUsuarioAdmin(
 }
 
 /**
- * Contrato de acceso a la administración de usuarios.
+ * Servicio HTTP de administración de usuarios conectado a `/user`.
  *
- * Cada operación debe emitir su respuesta una vez y completar el observable.
+ * Cada operación emite su respuesta una vez y completa el observable.
  * Los errores del servidor se propagan para que la pantalla informe el fallo.
- * El servidor debe comprobar los permisos y las reglas de cada operación.
- */
-export abstract class UsuariosAdminService {
-  /** Obtiene los usuarios visibles para el administrador autenticado. */
-  abstract listar(): Observable<readonly UsuarioAdministracion[]>;
-
-  /**
-   * Ejecuta una solicitud y devuelve el resultado confirmado por el servidor.
-   * Una actualización debe devolver el usuario con sus valores definitivos.
-   *
-   * @param solicitud Operación autorizada y sus datos.
-   */
-  abstract ejecutar(
-    solicitud: SolicitudAdministracion,
-  ): Observable<ResultadoAdministracion>;
-}
-
-/**
- * Implementación HTTP de {@link UsuariosAdminService} conectada a `/user`.
+ * El servidor comprueba los permisos y las reglas de cada operación.
+ *
+ * Está disponible globalmente (`providedIn: 'root'`).
  */
 @Injectable({
   providedIn: 'root',
 })
-export class UsuariosAdminHttpService extends UsuariosAdminService {
+export class UsuariosAdminService {
   /** Cliente HTTP utilizado para comunicarse con el controlador de usuarios. */
   private readonly http = inject(HttpClient);
 
   /** URL base del controlador de usuarios en el backend. */
-  private readonly urlBase = 'http://localhost:8080/user';
+  private readonly urlBase = `${API_URL_BASE}/user`;
 
   /** Caché local de usuarios listados para conservar rol y plan al actualizar. */
   private readonly cacheUsuarios = new Map<number, UsuarioAdministracion>();
 
   /** Consulta el listado completo de usuarios registrados en el backend. */
-  override listar(): Observable<readonly UsuarioAdministracion[]> {
+  listar(): Observable<readonly UsuarioAdministracion[]> {
     return this.http.get<UsuarioAdministracionResponseDTO[]>(`${this.urlBase}/listar`).pipe(
       map((usuarios) => usuarios.map((dto, indice) => adaptarUsuarioAdmin(dto, indice + 1))),
       tap((usuarios) => {
@@ -89,7 +74,7 @@ export class UsuariosAdminHttpService extends UsuariosAdminService {
    * @param solicitud Operación confirmada desde la tabla administrativa.
    * @returns Resultado confirmado por el servidor.
    */
-  override ejecutar(
+  ejecutar(
     solicitud: SolicitudAdministracion,
   ): Observable<ResultadoAdministracion> {
     if (solicitud.accion === 'actualizar') {
